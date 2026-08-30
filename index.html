@@ -46,26 +46,6 @@
     margin-bottom: 4px;
   }
   h1 { font-size: 30px; font-weight: 600; margin: 0; }
-  .total-label {
-    font-family: Arial, sans-serif;
-    font-size: 11px;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    opacity: 0.6;
-    text-align: right;
-  }
-  .total-value {
-    font-family: 'Courier New', monospace;
-    font-size: 26px;
-    font-weight: 700;
-    text-align: right;
-  }
-  .total-sub {
-    font-family: 'Courier New', monospace;
-    font-size: 12px;
-    opacity: 0.55;
-    text-align: right;
-  }
   #empty {
     border: 1.5px dashed var(--line);
     border-radius: 12px;
@@ -290,9 +270,7 @@
       align-items: flex-start;
       gap: 10px;
     }
-    .total-label, .total-value, .total-sub { text-align: left; }
     h1 { font-size: 24px; }
-    .total-value { font-size: 22px; }
     #goals { grid-template-columns: 1fr; gap: 12px; }
     .tx-row { flex-wrap: wrap; }
     .tx-person { flex: 1 1 100%; }
@@ -307,11 +285,6 @@
     <div>
       <div class="eyebrow">Shared ledger &middot; live</div>
       <h1>We Save</h1>
-    </div>
-    <div>
-      <div class="total-label">Total saved</div>
-      <div class="total-value" id="totalValue">RM0</div>
-      <div class="total-sub" id="totalSub"></div>
     </div>
   </div>
 
@@ -448,13 +421,6 @@
   }
 
   function render() {
-    var total = 0;
-    goals.forEach(function (g) { total += g.saved; });
-    document.getElementById('totalValue').textContent = fmt(total);
-    document.getElementById('totalSub').textContent = goals.length > 0
-      ? 'across ' + goals.length + ' account' + (goals.length === 1 ? '' : 's')
-      : '';
-
     var goalsEl = document.getElementById('goals');
     var emptyEl = document.getElementById('empty');
     var addMoreEl = document.getElementById('addMoreBtn');
