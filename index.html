@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>The Savings Ledger</title>
+<style>
+  :root {
+    --ink: #132A20;
+    --paper: #ECEFE3;
+    --brass: #B98B3E;
+    --brass-dark: #8C6A2E;
+    --rust: #A2503A;
+    --line: #C9CBB8;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: #D9DCCC;
+    font-family: Georgia, 'Times New Roman', serif;
+    color: var(--ink);
+    padding: 24px 12px;
+  }
+  .app {
+    max-width: 760px;
+    margin: 0 auto;
+    background: var(--paper);
+    padding: 32px 28px 40px;
+    border-radius: 14px;
+  }
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    border-bottom: 2px solid var(--ink);
+    padding-bottom: 16px;
+    margin-bottom: 24px;
+  }
+  .eyebrow {
+    font-family: Arial, sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    opacity: 0.6;
+    margin-bottom: 4px;
+  }
+  h1 { font-size: 30px; font-weight: 600; margin: 0; }
+  .total-label {
+    font-family: Arial, sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    opacity: 0.6;
+    text-align: right;
+  }
+  .total-value {
+    font-family: 'Courier New', monospace;
+    font-size: 26px;
+    font-weight: 700;
+    text-align: right;
+  }
+  .total-sub {
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    opacity: 0.55;
+    text-align: right;
+  }
+  #empty {
+    border: 1.5px dashed var(--line);
+    border-radius: 12px;
+    padding: 36px 20px;
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  #empty h2 { font-size: 18px; margin: 8px 0 4px; }
+  #empty p { font-family: Arial, sans-serif; font-size: 13.5px; opacity: 0.65; margin: 0 0 16px; }
+  button { font-family: Arial, sans-serif; cursor: pointer; }
+  .btn-primary {
+    background: var(--ink);
+    color: var(--paper);
+    border: none;
+    border-radius: 8px;
+    padding: 9px 18px;
+    font-size: 14px;
+    font-weight: 600;
+  }
+  .btn-dashed {
+    background: none;
+    border: 1.5px dashed var(--line);
+    border-radius: 10px;
+    padding: 10px 16px;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--ink);
+  }
+  #goals {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+  .card {
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 14px 16px 16px;
+    position: relative;
+  }
+  .close-btn {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: none;
+    border: none;
+    opacity: 0.35;
+    font-size: 16px;
+    line-height: 1;
+    padding: 4px;
+  }
+  .card-top { display: flex; gap: 12px; align-items: center; margin-bottom: 8px; }
+  .goal-name { font-weight: 700; font-size: 16.5px; margin-bottom: 2px; word-break: break-word; }
+  .goal-balance { font-family: 'Courier New', monospace; font-size: 15px; font-weight: 700; }
+  .goal-sub { font-size: 11.5px; opacity: 0.55; font-family: Arial, sans-serif; }
+  .deposit-row { display: flex; gap: 6px; margin-bottom: 10px; font-family: Arial, sans-serif; }
+  .deposit-row input {
+    flex: 1;
+    min-width: 0;
+    border: 1px solid var(--line);
+    border-radius: 7px;
+    padding: 6px 8px;
+    font-size: 13px;
+    font-family: 'Courier New', monospace;
+  }
+  .btn-deposit {
+    background: var(--brass);
+    color: #fff;
+    border: none;
+    border-radius: 7px;
+    padding: 6px 12px;
+    font-size: 13px;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+  .history { display: flex; flex-direction: column; gap: 3px; }
+  .month-block { margin-top: 10px; }
+  .month-head {
+    display: flex;
+    justify-content: space-between;
+    font-family: 'Courier New', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--brass-dark);
+    border-top: 1px solid var(--line);
+    padding-top: 8px;
+    margin-bottom: 4px;
+  }
+  .month-foot {
+    display: flex;
+    justify-content: flex-end;
+    font-family: 'Courier New', monospace;
+    font-size: 11.5px;
+    font-weight: 700;
+    margin-top: 4px;
+  }
+  .history-row { display: flex; align-items: baseline; gap: 6px; font-family: 'Courier New', monospace; font-size: 12.5px; }
+  .history-row .left { white-space: nowrap; opacity: 0.75; }
+  .history-row .leader { flex: 1; border-bottom: 1px dotted var(--line); transform: translateY(-3px); }
+  .history-row .right { white-space: nowrap; font-weight: 700; }
+  .del-deposit { background: none; border: none; cursor: pointer; opacity: 0.35; padding: 0; font-size: 13px; line-height: 1; }
+  #new-form {
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 16px 18px;
+    margin-top: 4px;
+    font-family: Arial, sans-serif;
+  }
+  #new-form .form-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+  #new-form h3 { font-family: Georgia, serif; font-size: 16px; margin: 0; }
+  #new-form input {
+    width: 100%;
+    border: 1px solid var(--line);
+    border-radius: 7px;
+    padding: 8px 10px;
+    font-size: 14px;
+    font-family: Arial, sans-serif;
+    margin-bottom: 10px;
+  }
+  .form-error { color: var(--rust); font-size: 12.5px; margin-bottom: 10px; font-family: Arial, sans-serif; }
+  .banner-error {
+    background: #F3E3DE;
+    color: var(--rust);
+    font-size: 13px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    margin-bottom: 16px;
+    font-family: Arial, sans-serif;
+  }
+  .banner-info {
+    background: #E4E9DC;
+    color: var(--ink);
+    font-size: 12.5px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    margin-bottom: 16px;
+    font-family: Arial, sans-serif;
+    opacity: 0.75;
+  }
+  .hidden { display: none; }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div>
+      <div class="eyebrow">Shared ledger &middot; live</div>
+      <h1>The Savings Ledger</h1>
+    </div>
+    <div>
+      <div class="total-label">Total saved</div>
+      <div class="total-value" id="totalValue">$0</div>
+      <div class="total-sub" id="totalSub"></div>
+    </div>
+  </div>
+
+  <div class="banner-info">This ledger is shared — anyone with the link sees the same accounts and changes update everywhere in real time.</div>
+  <div id="storageBanner" class="banner-error hidden">Couldn't reach the database. Changes may not save.</div>
+
+  <div id="loading" style="text-align:center;padding:40px 0;opacity:0.6;font-size:14px;">Opening the ledger…</div>
+
+  <div id="empty" class="hidden">
+    <div style="font-size:26px;">&#127843;</div>
+    <h2>No accounts opened yet</h2>
+    <p>Start one below and begin making deposits.</p>
+    <button class="btn-primary" onclick="showForm()">+ Open an account</button>
+  </div>
+
+  <div id="goals"></div>
+
+  <button id="addMoreBtn" class="btn-dashed hidden" onclick="showForm()">+ Open another account</button>
+
+  <div id="new-form" class="hidden">
+    <div class="form-head">
+      <h3>Open a new account</h3>
+      <button onclick="hideForm()" style="background:none;border:none;opacity:0.5;font-size:16px;">&times;</button>
+    </div>
+    <input id="newName" placeholder="What are you saving for?" onkeydown="if(event.key==='Enter')openAccount()" />
+    <div id="formError" class="form-error hidden"></div>
+    <button class="btn-primary" onclick="openAccount()">Open account</button>
+  </div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+  // ── Fill in with your own project's config (Firebase console → Project settings) ──
+  const firebaseConfig = {
+    apiKey: "YOUR_API_KEY",
+    authDomain: "YOUR_PROJECT.firebaseapp.com",
+    projectId: "YOUR_PROJECT_ID",
+    storageBucket: "YOUR_PROJECT.appspot.com",
+    messagingSenderId: "YOUR_SENDER_ID",
+    appId: "YOUR_APP_ID"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+  const ledgerRef = doc(db, "ledgers", "shared");
+
+  var goals = [];
+  var firstLoad = true;
+
+  function fmt(n) {
+    return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(Math.round(n));
+  }
+
+  function fmtDate(ts) {
+    return new Date(ts).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  }
+
+  function uid() {
+    return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+  }
+
+  // Soft, target-free fill: climbs quickly at first, eases as it grows, never quite maxes out.
+  function softFill(saved) {
+    return 100 * (1 - Math.exp(-saved / 400));
+  }
+
+  var jarClipCounter = 0;
+  function jarSvg(pct) {
+    pct = Math.max(0, Math.min(100, pct));
+    var bodyTop = 30, bodyBottom = 150, bodyHeight = bodyBottom - bodyTop;
+    var liquidTop = bodyBottom - (bodyHeight * pct) / 100;
+    var clipId = 'jarclip-' + (jarClipCounter++);
+    var liquidHtml = pct > 0
+      ? '<rect x="10" y="' + liquidTop + '" width="100" height="120" fill="#7B4B27"/>' +
+        '<rect x="10" y="' + liquidTop + '" width="100" height="2" fill="#5A3419"/>'
+      : '';
+    return '<svg viewBox="0 0 120 165" width="88" height="121" style="flex-shrink:0;overflow:visible">' +
+      '<defs><clipPath id="' + clipId + '"><rect x="10" y="30" width="100" height="120" rx="14"/></clipPath></defs>' +
+      '<rect x="25" y="14" width="70" height="16" rx="5" fill="none" stroke="#132A20" stroke-width="2.5"/>' +
+      '<rect x="18" y="27" width="84" height="6" rx="2" fill="none" stroke="#132A20" stroke-width="2"/>' +
+      '<g clip-path="url(#' + clipId + ')">' + liquidHtml + '</g>' +
+      '<rect x="10" y="30" width="100" height="120" rx="14" fill="none" stroke="#132A20" stroke-width="2.5"/>' +
+    '</svg>';
+  }
+
+  // Groups a goal's deposit history (stored newest-first) into monthly
+  // statements with opening/closing balances, most recent month first.
+  function buildStatements(history) {
+    var ascending = history.map(function (h, idx) { return Object.assign({}, h, { _idx: idx }); }).reverse();
+    var map = {};
+    var order = [];
+    var running = 0;
+    ascending.forEach(function (h) {
+      var d = new Date(h.date);
+      var key = d.getFullYear() + '-' + d.getMonth();
+      if (!map[key]) {
+        map[key] = {
+          key: key,
+          label: d.toLocaleDateString('en-US', { month: 'long', year: 'numeric' }),
+          opening: running,
+          entries: [],
+        };
+        order.push(key);
+      }
+      map[key].entries.push(h);
+      running += h.amount;
+      map[key].closing = running;
+    });
+    return order.slice().reverse().map(function (k) {
+      return Object.assign({}, map[k], { entries: map[k].entries.slice().reverse() });
+    });
+  }
+
+  function escapeHtml(s) {
+    var d = document.createElement('div');
+    d.textContent = s;
+    return d.innerHTML;
+  }
+
+  function render() {
+    var total = 0;
+    goals.forEach(function (g) { total += g.saved; });
+    document.getElementById('totalValue').textContent = fmt(total);
+    document.getElementById('totalSub').textContent = goals.length > 0
+      ? 'across ' + goals.length + ' account' + (goals.length === 1 ? '' : 's')
+      : '';
+
+    var goalsEl = document.getElementById('goals');
+    var emptyEl = document.getElementById('empty');
+    var addMoreEl = document.getElementById('addMoreBtn');
+
+    if (goals.length === 0) {
+      emptyEl.classList.remove('hidden');
+      goalsEl.innerHTML = '';
+      addMoreEl.classList.add('hidden');
+      return;
+    }
+    emptyEl.classList.add('hidden');
+    addMoreEl.classList.remove('hidden');
+
+    goalsEl.innerHTML = goals.map(function (g) {
+      var pct = softFill(g.saved);
+      var subText = g.history.length === 0 ? 'No deposits yet' : (g.history.length + ' deposit' + (g.history.length === 1 ? '' : 's') + ' logged');
+      var historyHtml = '';
+      if (g.history.length) {
+        var statements = buildStatements(g.history);
+        historyHtml = statements.map(function (month) {
+          var rows = month.entries.map(function (h) {
+            return '<div class="history-row"><span class="left">' + fmtDate(h.date) + '</span><span class="leader"></span><span class="right">' + fmt(h.amount) + '</span><button class="del-deposit" onclick="deleteDeposit(\'' + g.id + '\',' + h._idx + ')" aria-label="Delete deposit">&times;</button></div>';
+          }).join('');
+          return '<div class="month-block">' +
+            '<div class="month-head"><span>' + month.label + '</span><span>Opening ' + fmt(month.opening) + '</span></div>' +
+            '<div class="history">' + rows + '</div>' +
+            '<div class="month-foot">Closing ' + fmt(month.closing) + '</div>' +
+          '</div>';
+        }).join('');
+      }
+
+      return '<div class="card">' +
+        '<button class="close-btn" onclick="closeAccount(\'' + g.id + '\')" aria-label="Close account">&times;</button>' +
+        '<div class="card-top">' +
+          jarSvg(pct) +
+          '<div style="min-width:0">' +
+            '<div class="goal-name">' + escapeHtml(g.name) + '</div>' +
+            '<div class="goal-balance">' + fmt(g.saved) + '</div>' +
+            '<div class="goal-sub">' + subText + '</div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="deposit-row">' +
+          '<input type="number" min="0" placeholder="Amount" id="deposit-' + g.id + '" onkeydown="if(event.key===\'Enter\')deposit(\'' + g.id + '\')"/>' +
+          '<button class="btn-deposit" onclick="deposit(\'' + g.id + '\')">Deposit</button>' +
+        '</div>' +
+        historyHtml +
+      '</div>';
+    }).join('');
+  }
+
+  async function persist() {
+    try {
+      await setDoc(ledgerRef, { goals: goals });
+      document.getElementById('storageBanner').classList.add('hidden');
+    } catch (e) {
+      document.getElementById('storageBanner').classList.remove('hidden');
+    }
+  }
+
+  onSnapshot(ledgerRef, function (snap) {
+    goals = (snap.exists() && snap.data().goals) || [];
+    if (firstLoad) {
+      document.getElementById('loading').classList.add('hidden');
+      firstLoad = false;
+    }
+    render();
+  }, function () {
+    document.getElementById('loading').classList.add('hidden');
+    document.getElementById('storageBanner').classList.remove('hidden');
+  });
+
+  function showForm() {
+    document.getElementById('new-form').classList.remove('hidden');
+    document.getElementById('newName').focus();
+  }
+  function hideForm() {
+    document.getElementById('new-form').classList.add('hidden');
+    document.getElementById('formError').classList.add('hidden');
+    document.getElementById('newName').value = '';
+  }
+
+  function openAccount() {
+    var name = document.getElementById('newName').value.trim();
+    var errEl = document.getElementById('formError');
+    if (!name) {
+      errEl.textContent = 'Name the account first.';
+      errEl.classList.remove('hidden');
+      return;
+    }
+    goals.push({ id: uid(), name: name, saved: 0, history: [] });
+    persist();
+    hideForm();
+  }
+
+  function deposit(id) {
+    var input = document.getElementById('deposit-' + id);
+    var amount = parseFloat(input.value);
+    if (!amount || amount <= 0) return;
+    var g = goals.find(function (x) { return x.id === id; });
+    if (!g) return;
+    g.saved += amount;
+    g.history.unshift({ id: uid(), amount: amount, date: Date.now() });
+    persist();
+  }
+
+  function deleteDeposit(goalId, index) {
+    var g = goals.find(function (x) { return x.id === goalId; });
+    if (!g) return;
+    var entry = g.history[index];
+    if (!entry) return;
+    g.saved -= entry.amount;
+    g.history.splice(index, 1);
+    persist();
+  }
+
+  function closeAccount(id) {
+    goals = goals.filter(function (g) { return g.id !== id; });
+    persist();
+  }
+
+  // Inline onclick="" handlers need these on window since this script is a module.
+  window.showForm = showForm;
+  window.hideForm = hideForm;
+  window.openAccount = openAccount;
+  window.deposit = deposit;
+  window.deleteDeposit = deleteDeposit;
+  window.closeAccount = closeAccount;
+</script>
+</body>
+</html>
