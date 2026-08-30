@@ -307,32 +307,44 @@
     '</svg>';
   }
 
-  // Groups a goal's deposit history (stored newest-first) into monthly
-  // statements with opening/closing balances, most recent month first.
+  // Groups a goal's deposit history (stored newest-first) into a continuous
+  // run of monthly statements — from the first deposit's month through the
+  // current month — with opening/closing balances, most recent month first.
+  // Months with no deposits still appear, carrying the balance forward.
   function buildStatements(history) {
+    if (!history.length) return [];
     var ascending = history.map(function (h, idx) { return Object.assign({}, h, { _idx: idx }); }).reverse();
-    var map = {};
-    var order = [];
-    var running = 0;
+    var byMonth = {};
     ascending.forEach(function (h) {
       var d = new Date(h.date);
       var key = d.getFullYear() + '-' + d.getMonth();
-      if (!map[key]) {
-        map[key] = {
-          key: key,
-          label: d.toLocaleDateString('en-US', { month: 'long', year: 'numeric' }),
-          opening: running,
-          entries: [],
-        };
-        order.push(key);
-      }
-      map[key].entries.push(h);
-      running += h.amount;
-      map[key].closing = running;
+      if (!byMonth[key]) byMonth[key] = [];
+      byMonth[key].push(h);
     });
-    return order.slice().reverse().map(function (k) {
-      return Object.assign({}, map[k], { entries: map[k].entries.slice().reverse() });
-    });
+
+    var firstDate = new Date(ascending[0].date);
+    var cursor = new Date(firstDate.getFullYear(), firstDate.getMonth(), 1);
+    var now = new Date();
+    var lastCursor = new Date(now.getFullYear(), now.getMonth(), 1);
+
+    var running = 0;
+    var statements = [];
+    while (cursor.getTime() <= lastCursor.getTime()) {
+      var key = cursor.getFullYear() + '-' + cursor.getMonth();
+      var monthEntries = byMonth[key] || [];
+      var opening = running;
+      monthEntries.forEach(function (h) { running += h.amount; });
+      statements.push({
+        key: key,
+        label: cursor.toLocaleDateString('en-US', { month: 'long', year: 'numeric' }),
+        opening: opening,
+        closing: running,
+        entries: monthEntries.slice().reverse(),
+      });
+      cursor.setMonth(cursor.getMonth() + 1);
+    }
+
+    return statements.reverse();
   }
 
   function escapeHtml(s) {
@@ -369,9 +381,11 @@
       if (g.history.length) {
         var statements = buildStatements(g.history);
         historyHtml = statements.map(function (month) {
-          var rows = month.entries.map(function (h) {
-            return '<div class="history-row"><span class="left">' + fmtDate(h.date) + '</span><span class="leader"></span><span class="right">' + fmt(h.amount) + '</span><button class="del-deposit" onclick="deleteDeposit(\'' + g.id + '\',' + h._idx + ')" aria-label="Delete deposit">&times;</button></div>';
-          }).join('');
+          var rows = month.entries.length
+            ? month.entries.map(function (h) {
+                return '<div class="history-row"><span class="left">' + fmtDate(h.date) + '</span><span class="leader"></span><span class="right">' + fmt(h.amount) + '</span><button class="del-deposit" onclick="deleteDeposit(\'' + g.id + '\',' + h._idx + ')" aria-label="Delete deposit">&times;</button></div>';
+              }).join('')
+            : '<div class="history-row" style="opacity:0.45;font-style:italic;"><span class="left">No deposits this month</span></div>';
           return '<div class="month-block">' +
             '<div class="month-head"><span>' + month.label + '</span><span>Opening ' + fmt(month.opening) + '</span></div>' +
             '<div class="history">' + rows + '</div>' +
