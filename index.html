@@ -500,6 +500,40 @@
         }).join('');
       }
 
+      var nameLower = g.name.trim().toLowerCase();
+      var showGary = nameLower !== 'kiki';
+      var showKiki = nameLower !== 'gary';
+      var garyBlock = showGary
+        ? '<div class="person-block">' +
+            '<span class="person-heading person-gary">Gary</span>' +
+            '<div class="tx-row">' +
+              '<input type="number" min="0" placeholder="Amount" class="tx-amount" id="deposit-amt-Gary-' + g.id + '"/>' +
+              '<input type="text" placeholder="Purpose" class="tx-purpose" id="deposit-purpose-Gary-' + g.id + '" onkeydown="if(event.key===\'Enter\')deposit(\'' + g.id + '\',\'Gary\')"/>' +
+              '<button class="btn-deposit" onclick="deposit(\'' + g.id + '\',\'Gary\')">Deposit</button>' +
+            '</div>' +
+            '<div class="tx-row">' +
+              '<input type="number" min="0" placeholder="Amount" class="tx-amount" id="withdraw-amt-Gary-' + g.id + '"/>' +
+              '<input type="text" placeholder="Purpose" class="tx-purpose" id="withdraw-purpose-Gary-' + g.id + '" onkeydown="if(event.key===\'Enter\')withdraw(\'' + g.id + '\',\'Gary\')"/>' +
+              '<button class="btn-withdraw" onclick="withdraw(\'' + g.id + '\',\'Gary\')">Withdraw</button>' +
+            '</div>' +
+          '</div>'
+        : '';
+      var kikiBlock = showKiki
+        ? '<div class="person-block">' +
+            '<span class="person-heading person-kiki">Kiki</span>' +
+            '<div class="tx-row">' +
+              '<input type="number" min="0" placeholder="Amount" class="tx-amount" id="deposit-amt-Kiki-' + g.id + '"/>' +
+              '<input type="text" placeholder="Purpose" class="tx-purpose" id="deposit-purpose-Kiki-' + g.id + '" onkeydown="if(event.key===\'Enter\')deposit(\'' + g.id + '\',\'Kiki\')"/>' +
+              '<button class="btn-deposit" onclick="deposit(\'' + g.id + '\',\'Kiki\')">Deposit</button>' +
+            '</div>' +
+            '<div class="tx-row">' +
+              '<input type="number" min="0" placeholder="Amount" class="tx-amount" id="withdraw-amt-Kiki-' + g.id + '"/>' +
+              '<input type="text" placeholder="Purpose" class="tx-purpose" id="withdraw-purpose-Kiki-' + g.id + '" onkeydown="if(event.key===\'Enter\')withdraw(\'' + g.id + '\',\'Kiki\')"/>' +
+              '<button class="btn-withdraw" onclick="withdraw(\'' + g.id + '\',\'Kiki\')">Withdraw</button>' +
+            '</div>' +
+          '</div>'
+        : '';
+
       return '<div class="card">' +
         '<button class="close-btn" onclick="closeAccount(\'' + g.id + '\')" aria-label="Close account">&times;</button>' +
         '<div class="card-top">' +
@@ -510,32 +544,8 @@
             '<div class="goal-sub">' + subText + '</div>' +
           '</div>' +
         '</div>' +
-        '<div class="person-block">' +
-          '<span class="person-heading person-gary">Gary</span>' +
-          '<div class="tx-row">' +
-            '<input type="number" min="0" placeholder="Amount" class="tx-amount" id="deposit-amt-Gary-' + g.id + '"/>' +
-            '<input type="text" placeholder="Purpose" class="tx-purpose" id="deposit-purpose-Gary-' + g.id + '" onkeydown="if(event.key===\'Enter\')deposit(\'' + g.id + '\',\'Gary\')"/>' +
-            '<button class="btn-deposit" onclick="deposit(\'' + g.id + '\',\'Gary\')">Deposit</button>' +
-          '</div>' +
-          '<div class="tx-row">' +
-            '<input type="number" min="0" placeholder="Amount" class="tx-amount" id="withdraw-amt-Gary-' + g.id + '"/>' +
-            '<input type="text" placeholder="Purpose" class="tx-purpose" id="withdraw-purpose-Gary-' + g.id + '" onkeydown="if(event.key===\'Enter\')withdraw(\'' + g.id + '\',\'Gary\')"/>' +
-            '<button class="btn-withdraw" onclick="withdraw(\'' + g.id + '\',\'Gary\')">Withdraw</button>' +
-          '</div>' +
-        '</div>' +
-        '<div class="person-block">' +
-          '<span class="person-heading person-kiki">Kiki</span>' +
-          '<div class="tx-row">' +
-            '<input type="number" min="0" placeholder="Amount" class="tx-amount" id="deposit-amt-Kiki-' + g.id + '"/>' +
-            '<input type="text" placeholder="Purpose" class="tx-purpose" id="deposit-purpose-Kiki-' + g.id + '" onkeydown="if(event.key===\'Enter\')deposit(\'' + g.id + '\',\'Kiki\')"/>' +
-            '<button class="btn-deposit" onclick="deposit(\'' + g.id + '\',\'Kiki\')">Deposit</button>' +
-          '</div>' +
-          '<div class="tx-row">' +
-            '<input type="number" min="0" placeholder="Amount" class="tx-amount" id="withdraw-amt-Kiki-' + g.id + '"/>' +
-            '<input type="text" placeholder="Purpose" class="tx-purpose" id="withdraw-purpose-Kiki-' + g.id + '" onkeydown="if(event.key===\'Enter\')withdraw(\'' + g.id + '\',\'Kiki\')"/>' +
-            '<button class="btn-withdraw" onclick="withdraw(\'' + g.id + '\',\'Kiki\')">Withdraw</button>' +
-          '</div>' +
-        '</div>' +
+        garyBlock +
+        kikiBlock +
         historyHtml +
       '</div>';
     }).join('');
