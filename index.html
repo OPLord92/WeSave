@@ -134,6 +134,17 @@
   }
   .tx-row { display: flex; gap: 6px; margin-bottom: 6px; font-family: Arial, sans-serif; }
   .tx-row:nth-of-type(2) { margin-bottom: 10px; }
+  .tx-person {
+    flex: 0 0 78px;
+    min-width: 0;
+    border: 1px solid var(--line);
+    border-radius: 7px;
+    padding: 6px 4px;
+    font-size: 12.5px;
+    font-family: Arial, sans-serif;
+    background: #fff;
+    color: var(--ink);
+  }
   .tx-amount {
     flex: 0 0 78px;
     min-width: 0;
@@ -200,6 +211,16 @@
   .history-row .right { white-space: nowrap; font-weight: 700; }
   .amount-deposit { color: var(--brass-dark); }
   .amount-expense { color: var(--rust); }
+  .person-tag {
+    font-family: Arial, sans-serif;
+    font-size: 10.5px;
+    font-weight: 700;
+    padding: 1px 6px;
+    border-radius: 4px;
+    white-space: nowrap;
+  }
+  .person-gary { background: #DCE8DA; color: #2F5233; }
+  .person-kiki { background: #F1DCE3; color: #8C2F4A; }
   .del-deposit { background: none; border: none; cursor: pointer; opacity: 0.35; padding: 0; font-size: 13px; line-height: 1; }
   #new-form {
     background: #fff;
@@ -261,6 +282,7 @@
     .total-value { font-size: 22px; }
     #goals { grid-template-columns: 1fr; gap: 12px; }
     .tx-row { flex-wrap: wrap; }
+    .tx-person { flex: 1 1 100%; }
     .tx-amount { flex: 1 1 100%; }
     .tx-purpose { flex: 1 1 100%; }
   }
@@ -270,6 +292,7 @@
 <div class="app">
   <div class="header">
     <div>
+      <div class="eyebrow">Shared ledger &middot; live</div>
       <h1>We Save</h1>
     </div>
     <div>
@@ -445,8 +468,10 @@
                 var sign = isExpense ? '-' : '+';
                 var amtClass = isExpense ? 'amount-expense' : 'amount-deposit';
                 var purpose = h.purpose ? escapeHtml(h.purpose) : (isExpense ? 'Withdrawal' : 'Deposit');
+                var personTag = h.person ? '<span class="person-tag person-' + h.person.toLowerCase() + '">' + escapeHtml(h.person) + '</span>' : '';
                 return '<div class="history-row">' +
                   '<span class="left">' + fmtDate(h.date) + '</span>' +
+                  personTag +
                   '<span class="purpose">' + purpose + '</span>' +
                   '<span class="leader"></span>' +
                   '<span class="right ' + amtClass + '">' + sign + fmt(h.amount) + '</span>' +
@@ -473,13 +498,15 @@
           '</div>' +
         '</div>' +
         '<div class="tx-row">' +
+          '<select class="tx-person" id="deposit-person-' + g.id + '"><option value="Gary">Gary</option><option value="Kiki">Kiki</option></select>' +
           '<input type="number" min="0" placeholder="Amount" class="tx-amount" id="deposit-' + g.id + '"/>' +
-          '<input type="text" placeholder="What is it for? (optional)" class="tx-purpose" id="deposit-purpose-' + g.id + '" onkeydown="if(event.key===\'Enter\')deposit(\'' + g.id + '\')"/>' +
+          '<input type="text" placeholder="Purpose" class="tx-purpose" id="deposit-purpose-' + g.id + '" onkeydown="if(event.key===\'Enter\')deposit(\'' + g.id + '\')"/>' +
           '<button class="btn-deposit" onclick="deposit(\'' + g.id + '\')">Deposit</button>' +
         '</div>' +
         '<div class="tx-row">' +
+          '<select class="tx-person" id="withdraw-person-' + g.id + '"><option value="Gary">Gary</option><option value="Kiki">Kiki</option></select>' +
           '<input type="number" min="0" placeholder="Amount" class="tx-amount" id="withdraw-' + g.id + '"/>' +
-          '<input type="text" placeholder="What is it for?" class="tx-purpose" id="withdraw-purpose-' + g.id + '" onkeydown="if(event.key===\'Enter\')withdraw(\'' + g.id + '\')"/>' +
+          '<input type="text" placeholder="Purpose" class="tx-purpose" id="withdraw-purpose-' + g.id + '" onkeydown="if(event.key===\'Enter\')withdraw(\'' + g.id + '\')"/>' +
           '<button class="btn-withdraw" onclick="withdraw(\'' + g.id + '\')">Withdraw</button>' +
         '</div>' +
         historyHtml +
@@ -534,24 +561,26 @@
   function deposit(id) {
     var input = document.getElementById('deposit-' + id);
     var purposeInput = document.getElementById('deposit-purpose-' + id);
+    var personInput = document.getElementById('deposit-person-' + id);
     var amount = parseFloat(input.value);
     if (!amount || amount <= 0) return;
     var g = goals.find(function (x) { return x.id === id; });
     if (!g) return;
     g.saved += amount;
-    g.history.unshift({ id: uid(), type: 'deposit', amount: amount, purpose: (purposeInput.value || '').trim(), date: Date.now() });
+    g.history.unshift({ id: uid(), type: 'deposit', amount: amount, person: personInput.value, purpose: (purposeInput.value || '').trim(), date: Date.now() });
     persist();
   }
 
   function withdraw(id) {
     var input = document.getElementById('withdraw-' + id);
     var purposeInput = document.getElementById('withdraw-purpose-' + id);
+    var personInput = document.getElementById('withdraw-person-' + id);
     var amount = parseFloat(input.value);
     if (!amount || amount <= 0) return;
     var g = goals.find(function (x) { return x.id === id; });
     if (!g) return;
     g.saved -= amount;
-    g.history.unshift({ id: uid(), type: 'expense', amount: amount, purpose: (purposeInput.value || '').trim(), date: Date.now() });
+    g.history.unshift({ id: uid(), type: 'expense', amount: amount, person: personInput.value, purpose: (purposeInput.value || '').trim(), date: Date.now() });
     persist();
   }
 
