@@ -262,6 +262,32 @@
   .logout-link:hover{color:var(--clay-deep);}
   .hidden{display:none!important;}
 
+  .update-status{
+    background:var(--paper-raised);
+    border:1px solid var(--line);
+    border-radius:4px;
+    padding:0.5rem 0.75rem;
+    font-size:0.8rem;
+    color:var(--ink-soft);
+    margin-bottom:1.25rem;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:0.75rem;
+  }
+  .update-status button{
+    background:var(--mustard);
+    color:#fff;
+    border:none;
+    border-radius:4px;
+    padding:0.35rem 0.75rem;
+    font-size:0.78rem;
+    font-weight:600;
+    cursor:pointer;
+    white-space:nowrap;
+  }
+  .update-status button:hover{background:var(--mustard-deep);}
+
   .oauth-divider{
     display:flex;
     align-items:center;
@@ -336,9 +362,11 @@
     <h1>We Save</h1>
     <div class="today">
       <span id="todayLabel"></span>
+      <button type="button" class="logout-link" id="checkUpdateBtn">Check for updates</button>
       <button type="button" class="logout-link" id="logoutBtn">Log out</button>
     </div>
   </div>
+  <div id="updateStatus" class="update-status hidden"></div>
 
   <div class="balance-block">
     <div class="balance-main">
@@ -498,6 +526,51 @@ document.getElementById('signupBtn').addEventListener('click', ()=>{
 document.getElementById('logoutBtn').addEventListener('click', ()=>{
   auth.signOut();
 });
+
+// ---- App update check ----
+const updateStatusEl = document.getElementById('updateStatus');
+
+function showUpdateStatus(html, showButton){
+  updateStatusEl.classList.remove('hidden');
+  updateStatusEl.innerHTML = showButton
+    ? `<span>${html}</span><button type="button" id="installUpdateBtn">Restart & install</button>`
+    : `<span>${html}</span>`;
+  if(showButton){
+    document.getElementById('installUpdateBtn').addEventListener('click', ()=>{
+      if(window.electronAPI) window.electronAPI.installUpdateNow();
+    });
+  }
+}
+
+document.getElementById('checkUpdateBtn').addEventListener('click', ()=>{
+  if(!window.electronAPI){
+    showUpdateStatus('Updates are only available in the installed app.', false);
+    return;
+  }
+  showUpdateStatus('Checking for updates...', false);
+  window.electronAPI.checkForUpdates();
+});
+
+if(window.electronAPI){
+  window.electronAPI.onUpdateStatus(({status, detail})=>{
+    if(status === 'checking'){
+      showUpdateStatus('Checking for updates...', false);
+    } else if(status === 'available'){
+      showUpdateStatus(`Update v${detail} found — downloading...`, false);
+    } else if(status === 'not-available'){
+      showUpdateStatus('You are on the latest version.', false);
+      setTimeout(()=> updateStatusEl.classList.add('hidden'), 3000);
+    } else if(status === 'downloading'){
+      showUpdateStatus(`Downloading update... ${detail}%`, false);
+    } else if(status === 'downloaded'){
+      showUpdateStatus('Update downloaded and ready.', true);
+    } else if(status === 'dev-mode'){
+      showUpdateStatus('Updates only work in the installed app, not in dev mode.', false);
+    } else if(status === 'error'){
+      showUpdateStatus(`Update check failed: ${detail}`, false);
+    }
+  });
+}
 
 document.getElementById('googleBtn').addEventListener('click', ()=>{
   setAuthBusy('Opening Google sign-in...');
