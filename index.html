@@ -430,7 +430,7 @@ const firebaseConfig = {
   projectId: "wesave-ee5fd",
   storageBucket: "wesave-ee5fd.firebasestorage.app",
   messagingSenderId: "797814401717",
-  appId: "1:797814401717:web:df3c03fa40148a6d086cfc"
+  appId: "1:797814401717:web:df3c03fa40148a6d086cfc" 
 };
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
@@ -449,7 +449,9 @@ function fmt(n){
 }
 
 document.getElementById('todayLabel').textContent = new Date().toLocaleDateString(undefined,{month:'long',day:'numeric',year:'numeric'});
-document.getElementById('dateInput').value = new Date().toISOString().slice(0,10);
+const todayStr = new Date().toISOString().slice(0,10);
+document.getElementById('dateInput').value = todayStr;
+document.getElementById('dateInput').max = todayStr;
 
 document.querySelectorAll('.type-toggle button').forEach(btn=>{
   btn.addEventListener('click', ()=>{
@@ -638,7 +640,8 @@ document.getElementById('entryForm').addEventListener('submit', (e)=>{
   const amount = parseFloat(document.getElementById('amtInput').value);
   const category = document.getElementById('catInput').value;
   const person = document.getElementById('personInput').value;
-  const date = document.getElementById('dateInput').value || new Date().toISOString().slice(0,10);
+  const date = document.getElementById('dateInput').value || todayStr;
+  if(date > todayStr){ alert('Date cannot be in the future.'); return; }
   if(!desc || !amount || amount<=0) return;
   transactions.push({ id: Date.now(), desc, amount, category, person, type: currentType, date });
   saveTransactions();
