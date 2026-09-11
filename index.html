@@ -145,19 +145,6 @@
   }
   .add-btn:hover{background:var(--moss-deep);}
 
-  input.field-error, select.field-error{
-    border-color:var(--clay-deep)!important;
-    outline:2px solid var(--clay-deep);
-    outline-offset:1px;
-  }
-  .form-error-msg{
-    grid-column:1/-1;
-    color:var(--clay-deep);
-    font-size:0.78rem;
-    margin-top:-0.3rem;
-  }
-  .form-error-msg.hidden{display:none;}
-
   .ledger{border-top:2px solid var(--ink);}
   .row{
     display:grid;
@@ -275,32 +262,6 @@
   .logout-link:hover{color:var(--clay-deep);}
   .hidden{display:none!important;}
 
-  .update-status{
-    background:var(--paper-raised);
-    border:1px solid var(--line);
-    border-radius:4px;
-    padding:0.5rem 0.75rem;
-    font-size:0.8rem;
-    color:var(--ink-soft);
-    margin-bottom:1.25rem;
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    gap:0.75rem;
-  }
-  .update-status button{
-    background:var(--mustard);
-    color:#fff;
-    border:none;
-    border-radius:4px;
-    padding:0.35rem 0.75rem;
-    font-size:0.78rem;
-    font-weight:600;
-    cursor:pointer;
-    white-space:nowrap;
-  }
-  .update-status button:hover{background:var(--mustard-deep);}
-
   .oauth-divider{
     display:flex;
     align-items:center;
@@ -378,7 +339,6 @@
       <button type="button" class="logout-link" id="logoutBtn">Log out</button>
     </div>
   </div>
-  <div id="updateStatus" class="update-status hidden"></div>
 
   <div class="balance-block">
     <div class="balance-main">
@@ -392,7 +352,7 @@
   </div>
 
   <div class="panel">
-    <form class="entry" id="entryForm" novalidate>
+    <form class="entry" id="entryForm">
       <div class="type-toggle full">
         <button type="button" class="active expense" data-type="expense">Expense</button>
         <button type="button" class="income" data-type="income">Income</button>
@@ -429,7 +389,6 @@
         <label>Date</label>
         <input type="date" id="dateInput">
       </div>
-      <div class="form-error-msg hidden" id="formErrorMsg">Please fill out all required fields.</div>
       <button type="submit" class="add-btn">Add to ledger</button>
     </form>
   </div>
@@ -539,7 +498,6 @@ document.getElementById('signupBtn').addEventListener('click', ()=>{
 document.getElementById('logoutBtn').addEventListener('click', ()=>{
   auth.signOut();
 });
-
 
 document.getElementById('googleBtn').addEventListener('click', ()=>{
   setAuthBusy('Opening Google sign-in...');
@@ -678,36 +636,17 @@ function escapeHtml(str){
 
 document.getElementById('entryForm').addEventListener('submit', (e)=>{
   e.preventDefault();
-  const descEl = document.getElementById('descInput');
-  const amtEl = document.getElementById('amtInput');
-  const errorEl = document.getElementById('formErrorMsg');
-
-  const desc = descEl.value.trim();
-  const amount = parseFloat(amtEl.value);
+  const desc = document.getElementById('descInput').value.trim();
+  const amount = parseFloat(document.getElementById('amtInput').value);
   const category = document.getElementById('catInput').value;
   const person = document.getElementById('personInput').value;
   const date = document.getElementById('dateInput').value || todayStr;
-
-  descEl.classList.remove('field-error');
-  amtEl.classList.remove('field-error');
-  errorEl.classList.add('hidden');
-
-  let message = '';
-  if(!desc) { descEl.classList.add('field-error'); message = 'Please fill out all required fields.'; }
-  if(!amount || amount<=0) { amtEl.classList.add('field-error'); message = 'Please fill out all required fields.'; }
-  if(date > todayStr) { message = 'Date cannot be in the future.'; }
-
-  if(message){
-    errorEl.textContent = message;
-    errorEl.classList.remove('hidden');
-    (!desc ? descEl : amtEl).focus();
-    return;
-  }
-
+  if(date > todayStr){ alert('Date cannot be in the future.'); return; }
+  if(!desc || !amount || amount<=0) return;
   transactions.push({ id: Date.now(), desc, amount, category, person, type: currentType, date });
   saveTransactions();
-  descEl.value='';
-  amtEl.value='';
+  document.getElementById('descInput').value='';
+  document.getElementById('amtInput').value='';
   render();
 });
 
