@@ -145,6 +145,19 @@
   }
   .add-btn:hover{background:var(--moss-deep);}
 
+  input.field-error, select.field-error{
+    border-color:var(--clay-deep)!important;
+    outline:2px solid var(--clay-deep);
+    outline-offset:1px;
+  }
+  .form-error-msg{
+    grid-column:1/-1;
+    color:var(--clay-deep);
+    font-size:0.78rem;
+    margin-top:-0.3rem;
+  }
+  .form-error-msg.hidden{display:none;}
+
   .ledger{border-top:2px solid var(--ink);}
   .row{
     display:grid;
@@ -352,7 +365,7 @@
   </div>
 
   <div class="panel">
-    <form class="entry" id="entryForm">
+    <form class="entry" id="entryForm" novalidate>
       <div class="type-toggle full">
         <button type="button" class="active expense" data-type="expense">Expense</button>
         <button type="button" class="income" data-type="income">Income</button>
@@ -389,6 +402,7 @@
         <label>Date</label>
         <input type="date" id="dateInput">
       </div>
+      <div class="form-error-msg hidden" id="formErrorMsg">Please fill out all required fields.</div>
       <button type="submit" class="add-btn">Add to ledger</button>
     </form>
   </div>
@@ -636,17 +650,36 @@ function escapeHtml(str){
 
 document.getElementById('entryForm').addEventListener('submit', (e)=>{
   e.preventDefault();
-  const desc = document.getElementById('descInput').value.trim();
-  const amount = parseFloat(document.getElementById('amtInput').value);
+  const descEl = document.getElementById('descInput');
+  const amtEl = document.getElementById('amtInput');
+  const errorEl = document.getElementById('formErrorMsg');
+
+  const desc = descEl.value.trim();
+  const amount = parseFloat(amtEl.value);
   const category = document.getElementById('catInput').value;
   const person = document.getElementById('personInput').value;
   const date = document.getElementById('dateInput').value || todayStr;
-  if(date > todayStr){ alert('Date cannot be in the future.'); return; }
-  if(!desc || !amount || amount<=0) return;
+
+  descEl.classList.remove('field-error');
+  amtEl.classList.remove('field-error');
+  errorEl.classList.add('hidden');
+
+  let message = '';
+  if(!desc) { descEl.classList.add('field-error'); message = 'Please fill out all required fields.'; }
+  if(!amount || amount<=0) { amtEl.classList.add('field-error'); message = 'Please fill out all required fields.'; }
+  if(date > todayStr) { message = 'Date cannot be in the future.'; }
+
+  if(message){
+    errorEl.textContent = message;
+    errorEl.classList.remove('hidden');
+    (!desc ? descEl : amtEl).focus();
+    return;
+  }
+
   transactions.push({ id: Date.now(), desc, amount, category, person, type: currentType, date });
   saveTransactions();
-  document.getElementById('descInput').value='';
-  document.getElementById('amtInput').value='';
+  descEl.value='';
+  amtEl.value='';
   render();
 });
 
