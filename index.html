@@ -2,8 +2,17 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Ledger — money management</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>We Save</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1E2A22">
+<link rel="icon" href="icons/favicon-32.png">
+
+<!-- iOS doesn't read the web manifest, so it needs its own tags -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="We Save">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -231,6 +240,17 @@
     text-align:center;
   }
   #authScreen label{margin-top:0.6rem;}
+  .remember-row{margin-top:0.6rem;}
+  .remember-label{
+    display:flex;
+    align-items:center;
+    gap:0.45rem;
+    font-size:0.8rem;
+    color:var(--ink-soft);
+    cursor:pointer;
+    user-select:none;
+  }
+  .remember-label input{width:auto;margin:0;cursor:pointer;}
   #authScreen .auth-actions{
     display:flex;
     gap:0.6rem;
@@ -323,6 +343,9 @@
   <input type="email" id="authEmail" placeholder="you@example.com" autocomplete="username">
   <label>Password</label>
   <input type="password" id="authPassword" placeholder="At least 6 characters" autocomplete="current-password">
+  <div class="remember-row">
+    <label class="remember-label"><input type="checkbox" id="rememberMe" checked> Keep me signed in</label>
+  </div>
   <div class="auth-actions">
     <button type="button" id="loginBtn">Login</button>
     <button type="button" id="signupBtn">Create account</button>
@@ -444,7 +467,7 @@ const firebaseConfig = {
   projectId: "wesave-ee5fd",
   storageBucket: "wesave-ee5fd.firebasestorage.app",
   messagingSenderId: "797814401717",
-  appId: "1:797814401717:web:df3c03fa40148a6d086cfc" 
+  appId: "1:797814401717:web:df3c03fa40148a6d086cfc"
 };
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
@@ -490,12 +513,19 @@ function setAuthError(err){
   authError.textContent = err;
 }
 
+function applyPersistence(){
+  const remember = document.getElementById('rememberMe').checked;
+  const mode = remember ? firebase.auth.Auth.Persistence.LOCAL : firebase.auth.Auth.Persistence.SESSION;
+  return auth.setPersistence(mode);
+}
+
 document.getElementById('loginBtn').addEventListener('click', ()=>{
   const email = document.getElementById('authEmail').value.trim();
   const password = document.getElementById('authPassword').value;
   if(!email || !password){ setAuthError('Enter both email and password.'); return; }
   setAuthBusy('Logging in...');
-  auth.signInWithEmailAndPassword(email, password)
+  applyPersistence()
+    .then(()=> auth.signInWithEmailAndPassword(email, password))
     .catch(err => setAuthError(err.message));
 });
 
@@ -505,7 +535,8 @@ document.getElementById('signupBtn').addEventListener('click', ()=>{
   if(!email || !password){ setAuthError('Enter both email and password.'); return; }
   if(password.length < 6){ setAuthError('Password needs at least 6 characters.'); return; }
   setAuthBusy('Creating account...');
-  auth.createUserWithEmailAndPassword(email, password)
+  applyPersistence()
+    .then(()=> auth.createUserWithEmailAndPassword(email, password))
     .catch(err => setAuthError(err.message));
 });
 
@@ -513,16 +544,36 @@ document.getElementById('logoutBtn').addEventListener('click', ()=>{
   auth.signOut();
 });
 
+// Popups are unreliable on mobile browsers (privacy-focused browsers like
+// Brave, and mobile Safari/Chrome in general, often block the popup's
+// postMessage handshake back to this page). Use a full-page redirect on
+// mobile instead, and keep the popup on desktop where it works fine.
+function isMobileBrowser(){
+  return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+}
+
+function startOAuthSignIn(provider, label){
+  setAuthBusy(`Opening ${label} sign-in...`);
+  applyPersistence().then(()=>{
+    if(isMobileBrowser()){
+      auth.signInWithRedirect(provider);
+    } else {
+      auth.signInWithPopup(provider).catch(err => setAuthError(err.message));
+    }
+  });
+}
+
 document.getElementById('googleBtn').addEventListener('click', ()=>{
-  setAuthBusy('Opening Google sign-in...');
-  auth.signInWithPopup(new firebase.auth.GoogleAuthProvider())
-    .catch(err => setAuthError(err.message));
+  startOAuthSignIn(new firebase.auth.GoogleAuthProvider(), 'Google');
 });
 
 document.getElementById('facebookBtn').addEventListener('click', ()=>{
-  setAuthBusy('Opening Facebook sign-in...');
-  auth.signInWithPopup(new firebase.auth.FacebookAuthProvider())
-    .catch(err => setAuthError(err.message));
+  startOAuthSignIn(new firebase.auth.FacebookAuthProvider(), 'Facebook');
+});
+
+// Catch any error from the mobile redirect flow once the page reloads.
+auth.getRedirectResult().catch(err => {
+  if(err && err.code) setAuthError(err.message);
 });
 
 auth.onAuthStateChanged(user=>{
@@ -692,6 +743,12 @@ document.getElementById('setBudgetBtn').addEventListener('click', ()=>{
   document.getElementById('budgetAmt').value='';
   render();
 });
+
+if('serviceWorker' in navigator){
+  window.addEventListener('load', ()=>{
+    navigator.serviceWorker.register('sw.js').catch(err=>console.error('SW registration failed', err));
+  });
+}
 </script>
 </body>
 </html>
