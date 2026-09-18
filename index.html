@@ -552,15 +552,24 @@ function applyPersistence(){
   const remember = document.getElementById('rememberMe').checked;
   const email = document.getElementById('authEmail').value.trim();
 
-  if(remember && email) localStorage.setItem('wesaveRememberedEmail', email);
-  else localStorage.removeItem('wesaveRememberedEmail');
+  if(remember && email) {
+    localStorage.setItem('wesaveRememberedEmail', email);
+    // Save the password only when Keep me signed in is checked.
+    // Note: localStorage is not encrypted.
+    localStorage.setItem('wesaveRememberedPassword', document.getElementById('authPassword').value);
+  } else {
+    localStorage.removeItem('wesaveRememberedEmail');
+    localStorage.removeItem('wesaveRememberedPassword');
+  }
 
   return auth.setPersistence(firebase.auth.Auth.Persistence.SESSION);
 }
 
 function loadRememberedEmail(){
   const email = localStorage.getItem('wesaveRememberedEmail');
+  const password = localStorage.getItem('wesaveRememberedPassword');
   document.getElementById('authEmail').value = email || '';
+  document.getElementById('authPassword').value = password || '';
   document.getElementById('rememberMe').checked = !!email;
 }
 loadRememberedEmail();
@@ -568,6 +577,8 @@ loadRememberedEmail();
 document.getElementById('rememberMe').addEventListener('change', ()=>{
   if(!document.getElementById('rememberMe').checked){
     localStorage.removeItem('wesaveRememberedEmail');
+    localStorage.removeItem('wesaveRememberedPassword');
+    document.getElementById('authPassword').value = '';
   }
 });
 
