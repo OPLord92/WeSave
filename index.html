@@ -578,6 +578,8 @@ document.getElementById('rememberMe').addEventListener('change', ()=>{
   if(!document.getElementById('rememberMe').checked){
     localStorage.removeItem('wesaveRememberedEmail');
     localStorage.removeItem('wesaveRememberedPassword');
+    // Clear both fields immediately when Keep me signed in is unticked.
+    document.getElementById('authEmail').value = '';
     document.getElementById('authPassword').value = '';
   }
 });
