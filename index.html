@@ -250,7 +250,17 @@
   }
   .password-toggle:hover{color:var(--ink);}
   .password-toggle svg{width:17px;height:17px;display:block;}
-  .remember-row{margin-top:0.6rem;}
+  .password-toggle .icon-eye-closed{display:none;}
+  .password-toggle.showing .icon-eye-open{display:none;}
+  .password-toggle.showing .icon-eye-closed{display:block;}
+  .auth-options-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:0.5rem;
+    margin-top:0.6rem;
+  }
   .remember-label{
     display:flex;
     align-items:center;
@@ -276,8 +286,7 @@
     cursor:pointer;
     flex:0 0 13px;
   }
-  .forgot-row{text-align:right;margin-top:0.55rem;}
-  .forgot-link{color:var(--ink-soft);font-size:0.78rem;text-decoration:underline;cursor:pointer;}
+  .forgot-link{color:var(--ink-soft);font-size:0.78rem;text-decoration:underline;cursor:pointer;white-space:nowrap;}
   .forgot-link:hover{color:var(--clay-deep);}
   #authScreen .auth-actions{
     display:flex;
@@ -377,16 +386,19 @@
   <div class="password-wrap">
     <input type="password" id="authPassword" placeholder="" autocomplete="current-password">
     <button type="button" class="password-toggle" id="passwordToggle" aria-label="Show password" title="Show password">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <svg class="icon-eye-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12z"></path>
         <circle cx="12" cy="12" r="2.5"></circle>
       </svg>
+      <svg class="icon-eye-closed" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12z"></path>
+        <circle cx="12" cy="12" r="2.5"></circle>
+        <line x1="2.5" y1="2.5" x2="21.5" y2="21.5"></line>
+      </svg>
     </button>
   </div>
-  <div class="remember-row">
+  <div class="auth-options-row">
     <div class="remember-label"><input type="checkbox" id="rememberMe" checked> <span>Keep me signed in</span></div>
-  </div>
-  <div class="forgot-row">
     <a class="forgot-link" href="#" id="forgotLink">Forgot Password?</a>
   </div>
   <div class="auth-actions">
@@ -531,6 +543,7 @@ const passwordToggle = document.getElementById('passwordToggle');
 passwordToggle.addEventListener('click', () => {
   const showing = passwordInput.type === 'text';
   passwordInput.type = showing ? 'password' : 'text';
+  passwordToggle.classList.toggle('showing', !showing);
   passwordToggle.setAttribute('aria-label', showing ? 'Show password' : 'Hide password');
   passwordToggle.setAttribute('title', showing ? 'Show password' : 'Hide password');
 });
