@@ -685,6 +685,18 @@ function isMobileBrowser(){
   return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 }
 
+// Clear the temporary OAuth message as soon as the browser/app becomes active again.
+// This makes Cancel / Log Out return to a clean login screen immediately.
+function clearOAuthBusyOnReturn(){
+  if(document.visibilityState === 'visible' &&
+     authStatus.textContent.startsWith('Opening ')){
+    setAuthBusy('');
+  }
+}
+document.addEventListener('visibilitychange', clearOAuthBusyOnReturn);
+window.addEventListener('focus', clearOAuthBusyOnReturn);
+window.addEventListener('pageshow', clearOAuthBusyOnReturn);
+
 function startOAuthSignIn(provider, label){
   setAuthBusy(`Opening ${label} sign-in...`);
   applyPersistence().then(()=>{
