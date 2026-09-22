@@ -707,6 +707,72 @@ body:has(#authScreen:not(.hidden)){
 }
 </style>
 
+
+<style>
+/* ===== Login page sizing/background matched to Car Loan Manager ===== */
+
+/* One solid background only — no split band / no gradient */
+body:not(.dark){
+  background:#F3F3F3 !important;
+  background-image:none !important;
+}
+body.dark{
+  background:#1D1D1D !important;
+  background-image:none !important;
+}
+
+/* Make the login screen use the whole viewport like Car Loan Manager */
+body:has(#authScreen:not(.hidden)){
+  min-height:100vh;
+  min-height:100dvh;
+  overflow:hidden;
+}
+body:has(#authScreen:not(.hidden)) #authScreen{
+  position:absolute;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%);
+  width:100%;
+  max-width:400px;
+  max-height:none;
+  margin:0;
+  padding:28px 30px;
+  overflow:visible;
+}
+
+/* Restore Car Loan Manager-like spacing instead of the extra compressed layout */
+#authScreen .top-controls{margin:-10px -6px 8px 0}
+#authScreen>.wesave-logo{
+  width:44px;
+  height:44px;
+  margin:0 auto 14px;
+}
+#authScreen>.wesave-logo svg{width:24px;height:24px}
+#authScreen h1{margin-top:0;margin-bottom:16px}
+#authScreen label{margin-top:10px;margin-bottom:5px}
+#authScreen input{padding-top:9px;padding-bottom:9px}
+#authScreen .auth-options{margin-top:10px}
+#authScreen .oauth-divider{margin:16px 0}
+#authScreen .oauth-btn{min-height:42px;padding-top:9px;padding-bottom:9px}
+#authScreen #authError,#authScreen #authStatus{margin-top:6px}
+
+/* On genuinely short screens, shrink only enough to keep everything visible */
+@media (max-height:680px){
+  body:has(#authScreen:not(.hidden)) #authScreen{
+    padding:16px 24px;
+    max-width:390px;
+  }
+  #authScreen>.wesave-logo{width:36px;height:36px;margin-bottom:7px}
+  #authScreen>.wesave-logo svg{width:20px;height:20px}
+  #authScreen h1{margin-bottom:8px}
+  #authScreen label{margin-top:5px;margin-bottom:2px}
+  #authScreen input{padding-top:6px;padding-bottom:6px}
+  #authScreen .auth-options{margin-top:5px}
+  #authScreen .oauth-divider{margin:8px 0}
+  #authScreen .oauth-btn{min-height:35px;padding-top:6px;padding-bottom:6px}
+}
+</style>
+
 </head>
 <body>
 
