@@ -420,6 +420,28 @@
   #facebookBtn{background:#1877F2;border-color:#1877F2;color:#fff;}
   #facebookBtn:hover{background:#1461C9;}
 </style>
+
+<style>
+/* Login / Reset screens: same color treatment as Car Loan Manager */
+body:not(.dark) #authScreen,body:not(.dark) #forgotScreen{background:rgba(255,255,255,.75);border:1px solid rgba(0,0,0,.07);box-shadow:0 20px 60px rgba(0,0,0,.12);color:#1B1B1B}
+body:not(.dark) #authScreen input,body:not(.dark) #forgotScreen input{background:rgba(255,255,255,.9);border-color:rgba(0,0,0,.14);color:#1B1B1B}
+body:not(.dark) #authScreen label,body:not(.dark) #forgotScreen label,body:not(.dark) #authStatus{color:#5D5D5D}
+body:not(.dark) #signupBtn,body:not(.dark) #backToLoginBtn{background:rgba(0,0,0,.035);border-color:rgba(0,0,0,.10)!important;color:#1B1B1B}
+body:not(.dark) .oauth-btn:not(#facebookBtn){background:rgba(255,255,255,.9);border-color:rgba(0,0,0,.14);color:#1B1B1B}
+body:not(.dark) .top-controls .language-toggle,body:not(.dark) .top-controls .theme-toggle{background:rgba(0,0,0,.035);border-color:rgba(0,0,0,.10);color:#1B1B1B}
+
+body.dark #authScreen,body.dark #forgotScreen{background:rgba(45,45,45,.65);border:1px solid rgba(255,255,255,.09);box-shadow:0 20px 60px rgba(0,0,0,.30);color:#F3F3F3}
+body.dark #authScreen input,body.dark #forgotScreen input{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.16);color:#F3F3F3}
+body.dark #authScreen label,body.dark #forgotScreen label,body.dark #authStatus{color:#B8B8B8}
+body.dark #loginBtn,body.dark #resetBtn{background:#3AA0F0;color:#fff}
+body.dark #loginBtn:hover,body.dark #resetBtn:hover{background:#5CB3F5}
+body.dark #signupBtn,body.dark #backToLoginBtn{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.14)!important;color:#F3F3F3}
+body.dark .oauth-btn:not(#facebookBtn){background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.16);color:#F3F3F3}
+body.dark .top-controls .language-toggle,body.dark .top-controls .theme-toggle{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.14);color:#F3F3F3}
+body.dark .forgot-link{color:#60A5FA}
+body.dark #authScreen input:focus,body.dark #forgotScreen input:focus{outline-color:#3AA0F0}
+</style>
+
 </head>
 <body>
 
