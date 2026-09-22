@@ -608,6 +608,20 @@ body:not(.dark) select optgroup{
 }
 </style>
 
+
+<style>
+/* Dark dropdown: use one blue highlight only.
+   Removes the separate light-blue hover/focus-looking selection color. */
+body.dark select option:hover,
+body.dark select option:focus,
+body.dark select option:active,
+body.dark select option:checked{
+  background:#0877C9 !important;
+  background-color:#0877C9 !important;
+  color:#FFFFFF !important;
+}
+</style>
+
 </head>
 <body>
 
