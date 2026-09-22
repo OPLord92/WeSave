@@ -576,6 +576,38 @@ body.dark .main-controls .theme-toggle{
 }
 </style>
 
+
+<style>
+/* Fix native select/dropdown option colors in Dark Mode */
+body.dark select{
+  color-scheme: dark;
+  background:#2B2B2B;
+  color:#F3F3F3;
+  border-color:rgba(255,255,255,.16);
+}
+body.dark select option,
+body.dark select optgroup{
+  background:#2B2B2B;
+  color:#F3F3F3;
+}
+body.dark select option:checked{
+  background:#0067C0;
+  color:#FFFFFF;
+}
+
+/* Keep Light Mode dropdown normal */
+body:not(.dark) select{
+  color-scheme: light;
+  background:#FFFFFF;
+  color:#1B1B1B;
+}
+body:not(.dark) select option,
+body:not(.dark) select optgroup{
+  background:#FFFFFF;
+  color:#1B1B1B;
+}
+</style>
+
 </head>
 <body>
 
