@@ -630,6 +630,83 @@ body:not(.dark) select optgroup{
 .main-brand h1{margin:0}
 </style>
 
+
+<style>
+/* Login screen: compact, centered and fitted to one viewport like Car Loan Manager */
+body:has(#authScreen:not(.hidden)){
+  overflow:hidden;
+}
+#authScreen{
+  max-height:calc(100dvh - 24px);
+  overflow:hidden;
+  margin:12px auto;
+  padding:20px 24px;
+}
+#authScreen .top-controls{
+  margin:-6px -6px 4px 0;
+}
+#authScreen>.wesave-logo{
+  width:40px;
+  height:40px;
+  margin:0 auto 8px;
+}
+#authScreen>.wesave-logo svg{
+  width:22px;
+  height:22px;
+}
+#authScreen h1{
+  margin-top:0;
+  margin-bottom:12px;
+}
+#authScreen label{
+  margin-top:8px;
+  margin-bottom:4px;
+}
+#authScreen input{
+  padding-top:8px;
+  padding-bottom:8px;
+}
+#authScreen .auth-options{
+  margin-top:8px;
+}
+#authScreen .auth-actions{
+  margin-top:10px;
+}
+#authScreen .oauth-divider{
+  margin:10px 0;
+}
+#authScreen .oauth-btn{
+  min-height:38px;
+  padding-top:8px;
+  padding-bottom:8px;
+}
+#authScreen #authError,
+#authScreen #authStatus{
+  margin-top:6px;
+}
+
+/* Extra compression for shorter laptop/mobile-height screens */
+@media (max-height:720px){
+  #authScreen{
+    padding:14px 22px;
+    margin:6px auto;
+    max-height:calc(100dvh - 12px);
+  }
+  #authScreen .top-controls{margin-bottom:2px}
+  #authScreen>.wesave-logo{
+    width:34px;height:34px;margin-bottom:5px;
+  }
+  #authScreen>.wesave-logo svg{width:19px;height:19px}
+  #authScreen h1{font-size:1.55rem;margin-bottom:7px}
+  #authScreen label{margin-top:5px;margin-bottom:2px}
+  #authScreen input{padding-top:6px;padding-bottom:6px}
+  #authScreen .auth-options{margin-top:5px}
+  #authScreen .oauth-divider{margin:7px 0}
+  #authScreen .oauth-btn{min-height:34px;padding-top:6px;padding-bottom:6px}
+  #authScreen #authError,#authScreen #authStatus{margin-top:3px}
+}
+</style>
+
 </head>
 <body>
 
