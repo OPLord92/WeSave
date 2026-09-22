@@ -622,6 +622,43 @@ body.dark select option:checked{
 }
 </style>
 
+
+<style>
+select.customized-native{display:none!important}
+.custom-select{position:relative;width:100%;font-size:1rem}
+.custom-select-button{
+  width:100%;min-height:42px;padding:9px 38px 9px 14px;text-align:left;
+  border:1px solid var(--line);border-radius:7px;background:var(--paper-raised);
+  color:var(--ink);font:inherit;position:relative
+}
+.custom-select-button:after{
+  content:"";position:absolute;right:13px;top:50%;width:7px;height:7px;
+  border-right:2px solid currentColor;border-bottom:2px solid currentColor;
+  transform:translateY(-70%) rotate(45deg)
+}
+.custom-select.open .custom-select-button{border-color:#1689D8;outline:1px solid #1689D8}
+.custom-select-menu{
+  display:none;position:absolute;left:0;right:0;top:calc(100% + 1px);z-index:10000;
+  border:1px solid var(--line);border-radius:0;background:var(--paper-raised);
+  overflow:hidden;box-shadow:0 8px 20px rgba(0,0,0,.18)
+}
+.custom-select.open .custom-select-menu{display:block}
+.custom-select-option{padding:7px 14px;cursor:pointer;background:transparent;color:var(--ink)}
+.custom-select-option:hover,
+.custom-select-option.active{background:#0877C9;color:#fff}
+body.dark .custom-select-button,body.dark .custom-select-menu{
+  background:#2B2B2B;color:#F3F3F3;border-color:rgba(255,255,255,.22)
+}
+body.dark .custom-select-option{background:#2B2B2B;color:#F3F3F3}
+body.dark .custom-select-option:hover,
+body.dark .custom-select-option.active{background:#0877C9;color:#fff}
+body:not(.dark) .custom-select-button,body:not(.dark) .custom-select-menu{
+  background:#fff;color:#1B1B1B
+}
+body:not(.dark) .custom-select-option:hover,
+body:not(.dark) .custom-select-option.active{background:#0877C9;color:#fff}
+</style>
+
 </head>
 <body>
 
@@ -1219,6 +1256,54 @@ if('serviceWorker' in navigator){
   });
 }
 </script>
+
+<script>
+(function(){
+  function makeCustomSelect(sel){
+    if(!sel || sel.dataset.customReady) return;
+    sel.dataset.customReady="1";
+    sel.classList.add("customized-native");
+
+    const wrap=document.createElement("div");
+    wrap.className="custom-select";
+    const btn=document.createElement("button");
+    btn.type="button"; btn.className="custom-select-button";
+    const menu=document.createElement("div");
+    menu.className="custom-select-menu";
+
+    function refresh(){
+      btn.textContent=sel.options[sel.selectedIndex]?.text || "";
+      menu.innerHTML="";
+      [...sel.options].forEach((opt,i)=>{
+        const item=document.createElement("div");
+        item.className="custom-select-option"+(i===sel.selectedIndex?" active":"");
+        item.textContent=opt.text;
+        item.addEventListener("click",()=>{
+          sel.selectedIndex=i;
+          sel.dispatchEvent(new Event("change",{bubbles:true}));
+          refresh();
+          wrap.classList.remove("open");
+        });
+        menu.appendChild(item);
+      });
+    }
+
+    btn.addEventListener("click",(e)=>{
+      e.stopPropagation();
+      document.querySelectorAll(".custom-select.open").forEach(x=>{if(x!==wrap)x.classList.remove("open")});
+      wrap.classList.toggle("open");
+    });
+    wrap.append(btn,menu);
+    sel.insertAdjacentElement("afterend",wrap);
+    refresh();
+    sel.addEventListener("change",refresh);
+  }
+
+  ["catInput","personInput","budgetCat"].forEach(id=>makeCustomSelect(document.getElementById(id)));
+  document.addEventListener("click",()=>document.querySelectorAll(".custom-select.open").forEach(x=>x.classList.remove("open")));
+})();
+</script>
+
 </body>
 </html>
 
