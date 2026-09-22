@@ -603,6 +603,19 @@ function setAuthError(err){
   authError.textContent = err;
 }
 
+// Closing/cancelling a Google or Facebook sign-in is a normal user action.
+// Do not show Firebase's technical popup-cancel error on the login screen.
+function handleOAuthError(err){
+  const code = err && err.code ? err.code : '';
+  if(code === 'auth/popup-closed-by-user' ||
+     code === 'auth/cancelled-popup-request' ||
+     code === 'auth/user-cancelled'){
+    setAuthBusy('');
+    return;
+  }
+  setAuthError(err && err.message ? err.message : 'Sign-in could not be completed.');
+}
+
 function applyPersistence(){
   const remember = document.getElementById('rememberMe').checked;
   const email = document.getElementById('authEmail').value.trim();
@@ -678,7 +691,7 @@ function startOAuthSignIn(provider, label){
     if(isMobileBrowser()){
       auth.signInWithRedirect(provider);
     } else {
-      auth.signInWithPopup(provider).catch(err => setAuthError(err.message));
+      auth.signInWithPopup(provider).catch(handleOAuthError);
     }
   });
 }
@@ -692,9 +705,7 @@ document.getElementById('facebookBtn').addEventListener('click', ()=>{
 });
 
 // Catch any error from the mobile redirect flow once the page reloads.
-auth.getRedirectResult().catch(err => {
-  if(err && err.code) setAuthError(err.message);
-});
+auth.getRedirectResult().catch(handleOAuthError);
 
 auth.setPersistence(firebase.auth.Auth.Persistence.SESSION)
   .then(()=>auth.signOut())
