@@ -704,11 +704,18 @@ document.getElementById('facebookBtn').addEventListener('click', ()=>{
   startOAuthSignIn(new firebase.auth.FacebookAuthProvider(), 'Facebook');
 });
 
-// Catch any error from the mobile redirect flow once the page reloads.
-auth.getRedirectResult().catch(handleOAuthError);
+// Handle the mobile redirect result. A cancelled/closed Facebook or Google
+// flow returns to the login screen quietly; a successful result is handled
+// by onAuthStateChanged below.
+auth.getRedirectResult()
+  .then(result => {
+    if(!result || !result.user) setAuthBusy('');
+  })
+  .catch(handleOAuthError);
 
+// Keep Firebase's existing session on page reload.
+// Do NOT sign the user out automatically during startup.
 auth.setPersistence(firebase.auth.Auth.Persistence.SESSION)
-  .then(()=>auth.signOut())
   .catch(err=>console.warn('Auth initialization warning:', err));
 
 auth.onAuthStateChanged(user=>{
