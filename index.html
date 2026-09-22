@@ -608,6 +608,28 @@ body:not(.dark) select optgroup{
 }
 </style>
 
+
+<style>
+.wesave-logo{
+  width:44px;height:44px;border-radius:11px;
+  background:linear-gradient(135deg,#0067C0,#2B88D8);
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;
+}
+.wesave-logo svg{width:25px;height:25px}
+#authScreen>.wesave-logo{
+  margin:0 auto 14px;
+}
+.main-brand{
+  display:flex;align-items:center;gap:10px;
+}
+.main-brand .wesave-logo{
+  width:32px;height:32px;border-radius:8px;
+}
+.main-brand .wesave-logo svg{width:19px;height:19px}
+.main-brand h1{margin:0}
+</style>
+
 </head>
 <body>
 
@@ -619,6 +641,12 @@ body:not(.dark) select optgroup{
       <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
     </button>
   </div>
+<div class="wesave-logo" aria-hidden="true">
+  <svg viewBox="0 0 24 24" fill="none">
+    <path d="M4 9.5h16v9.5H4zM7 9.5V7.8C7 5.7 8.7 4 10.8 4h2.4C15.3 4 17 5.7 17 7.8v1.7M8 14h8" stroke="white" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="8" cy="14" r="1.15" fill="white"/><circle cx="16" cy="14" r="1.15" fill="white"/>
+  </svg>
+</div>
   <h1 data-i18n="appTitle">We Save</h1>
   <label data-i18n="email">Email</label>
   <input type="email" id="authEmail" placeholder="" autocomplete="username">
@@ -674,7 +702,12 @@ body:not(.dark) select optgroup{
 <div class="wrap hidden" id="appScreen">
 
   <div class="masthead">
-    <h1>We Save</h1>
+    <div class="main-brand"><div class="wesave-logo" aria-hidden="true">
+  <svg viewBox="0 0 24 24" fill="none">
+    <path d="M4 9.5h16v9.5H4zM7 9.5V7.8C7 5.7 8.7 4 10.8 4h2.4C15.3 4 17 5.7 17 7.8v1.7M8 14h8" stroke="white" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="8" cy="14" r="1.15" fill="white"/><circle cx="16" cy="14" r="1.15" fill="white"/>
+  </svg>
+</div><h1>We Save</h1></div>
     <div class="today">
       <span id="todayLabel"></span>
       <button type="button" class="logout-link" id="logoutBtn" data-i18n="logout">Log out</button>
