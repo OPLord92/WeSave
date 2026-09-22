@@ -773,6 +773,33 @@ body:has(#authScreen:not(.hidden)) #authScreen{
 }
 </style>
 
+
+<style>
+/* Header position: date under We Save; logout beside EN/CN + theme */
+.main-brand{align-items:center}
+.brand-text{display:flex;flex-direction:column;justify-content:center;line-height:1.15}
+.brand-text h1{margin:0}
+.brand-text #todayLabel{
+  margin-top:4px;
+  font-size:12px;
+  font-family:'Inter',sans-serif;
+  font-weight:400;
+  color:#5D5D5D;
+  white-space:nowrap;
+}
+body.dark .brand-text #todayLabel{color:#B8B8B8}
+.main-controls{
+  margin-left:auto;
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+.main-controls .logout-link{
+  margin:0 4px 0 0;
+  white-space:nowrap;
+}
+</style>
+
 </head>
 <body>
 
@@ -850,12 +877,9 @@ body:has(#authScreen:not(.hidden)) #authScreen{
     <path d="M4 9.5h16v9.5H4zM7 9.5V7.8C7 5.7 8.7 4 10.8 4h2.4C15.3 4 17 5.7 17 7.8v1.7M8 14h8" stroke="white" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
     <circle cx="8" cy="14" r="1.15" fill="white"/><circle cx="16" cy="14" r="1.15" fill="white"/>
   </svg>
-</div><h1>We Save</h1></div>
-    <div class="today">
-      <span id="todayLabel"></span>
-      <button type="button" class="logout-link" id="logoutBtn" data-i18n="logout">Log out</button>
-    </div>
+</div><div class="brand-text"><h1>We Save</h1><span id="todayLabel"></span></div></div>
     <div class="main-controls">
+      <button type="button" class="logout-link" id="logoutBtn" data-i18n="logout">Log out</button>
       <button class="language-toggle" id="mainLanguageBtn" type="button">CN</button>
       <button class="theme-toggle" id="mainThemeToggleBtn" type="button" title="Switch to dark mode">
         <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
