@@ -1,1332 +1,1432 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>车贷管家</title>
-<style>
-  :root{
-    --bg: #F3F3F3;
-    --card: rgba(255,255,255,0.75);
-    --border: rgba(0,0,0,0.07);
-    --text-primary: #1B1B1B;
-    --text-secondary: #5D5D5D;
-    --accent: #0067C0;
-    --accent-hover: #005A9E;
-    --accent-soft: rgba(0,103,192,0.10);
-    --success: #107C10;
-    --danger: #C42B1C;
-    --radius-card: 10px;
-    --radius-ctrl: 6px;
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>We Save</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1E2A22">
+<link rel="icon" href="icons/favicon-32.png">
 
-    --surface-window: rgba(255,255,255,0.55);
-    --surface-window-border: rgba(255,255,255,0.6);
-    --surface-strong: rgba(255,255,255,0.45);
-    --input-bg: rgba(255,255,255,0.9);
-    --input-border: rgba(0,0,0,0.14);
-    --ghost-bg: rgba(0,0,0,0.035);
-    --ghost-border: rgba(0,0,0,0.10);
-    --ghost-hover: rgba(0,0,0,0.06);
-    --modal-bg: #FAFAFA;
-    --chip-bg: rgba(0,0,0,0.04);
-    --ring-track: rgba(0,0,0,0.07);
-  }
-  body.dark{
-    --bg: #1D1D1D;
-    --card: rgba(45,45,45,0.65);
-    --border: rgba(255,255,255,0.09);
-    --text-primary: #F3F3F3;
-    --text-secondary: #B8B8B8;
-    --accent: #3AA0F0;
-    --accent-hover: #5CB3F5;
-    --accent-soft: rgba(58,160,240,0.18);
-    --success: #6CCB5F;
-    --danger: #FF99A4;
-
-    --surface-window: rgba(32,32,32,0.65);
-    --surface-window-border: rgba(255,255,255,0.08);
-    --surface-strong: rgba(32,32,32,0.55);
-    --input-bg: rgba(255,255,255,0.06);
-    --input-border: rgba(255,255,255,0.16);
-    --ghost-bg: rgba(255,255,255,0.06);
-    --ghost-border: rgba(255,255,255,0.14);
-    --ghost-hover: rgba(255,255,255,0.10);
-    --modal-bg: #2B2B2B;
-    --chip-bg: rgba(255,255,255,0.08);
-    --ring-track: rgba(255,255,255,0.10);
-  }
-  *{ box-sizing: border-box; }
-  html,body{
-    margin:0; padding:0; height:100%;
-    background:
-      radial-gradient(1200px 600px at 15% -10%, rgba(0,103,192,0.10), transparent 60%),
-      radial-gradient(900px 500px at 100% 0%, rgba(0,103,192,0.06), transparent 55%),
-      var(--bg);
-    font-family: "Segoe UI Variable Text","Segoe UI",system-ui,-apple-system,sans-serif;
-    color: var(--text-primary);
-    -webkit-font-smoothing: antialiased;
-    overflow: hidden;
-    transition: background-color .2s ease, color .2s ease;
-  }
-  .app-window{
-    height: 100vh;
-    display:flex; flex-direction:column;
-  }
-  .titlebar{
-    display:flex; align-items:center; gap:10px;
-    padding: calc(14px + env(safe-area-inset-top)) 20px 14px;
-    border-bottom: 1px solid var(--border);
-    background: var(--surface-strong);
-    flex-shrink:0;
-  }
-  .titlebar .icon{
-    width:28px; height:28px; border-radius:7px;
-    background: linear-gradient(135deg, #0067C0, #2B88D8);
-    display:flex; align-items:center; justify-content:center;
-    flex-shrink:0;
-  }
-  .titlebar .icon svg{ width:16px; height:16px; }
-  .titlebar h1{
-    font-family:"Segoe UI Variable Display","Segoe UI",system-ui,sans-serif;
-    font-size: 15px; font-weight:600; margin:0; letter-spacing:.1px;
-  }
-  .titlebar .plate-chip{
-    margin-left:auto;
-    font-size:13px; color:var(--text-secondary);
-    background: var(--chip-bg);
-    border:1px solid var(--border);
-    padding: 4px 10px;
-    border-radius: 6px;
-  }
-  .theme-toggle{
-    width: 30px; height: 30px;
-    border-radius: 7px;
-    border: 1px solid var(--border);
-    background: var(--ghost-bg);
-    display:flex; align-items:center; justify-content:center;
-    cursor:pointer; flex-shrink:0;
-    color: var(--text-secondary);
-    padding:0;
-  }
-  .theme-toggle:hover{ background: var(--ghost-hover); }
-  .theme-toggle svg{ width:16px; height:16px; }
-  .theme-toggle .icon-sun{ display:none; }
-  body.dark .theme-toggle .icon-moon{ display:none; }
-  body.dark .theme-toggle .icon-sun{ display:block; }
-
-  body:not(.authed) .app-window{ display:none; }
-  body.authed .auth-screen{ display:none; }
-
-  .auth-screen{
-    position: fixed; inset: 0;
-    display:flex; align-items:center; justify-content:center;
-    padding: max(24px, env(safe-area-inset-top)) 24px max(24px, env(safe-area-inset-bottom));
-  }
-  .auth-card{
-    width: 100%; max-width: 340px;
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-card);
-    padding: 28px 24px;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.12);
-  }
-  .auth-logo{
-    width:44px; height:44px; border-radius:11px;
-    background: linear-gradient(135deg, #0067C0, #2B88D8);
-    display:flex; align-items:center; justify-content:center;
-    margin: 0 auto 14px;
-  }
-  .auth-logo svg{ width:24px; height:24px; }
-  .auth-title{
-    font-family:"Segoe UI Variable Display","Segoe UI",system-ui,sans-serif;
-    font-size: 18px; font-weight:700; text-align:center; margin: 0 0 4px;
-  }
-  .auth-sub{
-    text-align:center; font-size:12.5px; color: var(--text-secondary);
-    margin: 0 0 20px;
-  }
-  .btn-google{
-    width:100%;
-    display:flex; align-items:center; justify-content:center; gap:10px;
-    background: var(--input-bg);
-    border: 1px solid var(--input-border);
-    color: var(--text-primary);
-    padding: 9px 16px;
-    font-size: 13.5px; font-weight:600;
-  }
-  .btn-google:hover{ background: var(--ghost-hover); }
-  .auth-divider{
-    display:flex; align-items:center; text-align:center;
-    color: var(--text-secondary); font-size:12px;
-    margin: 16px 0;
-  }
-  .auth-divider::before, .auth-divider::after{
-    content:""; flex:1; height:1px; background: var(--border);
-  }
-  .auth-divider span{ padding: 0 10px; }
-  .auth-options{
-    display:flex; align-items:center; justify-content:space-between; gap:12px;
-    margin-top:10px; font-size:12.5px;
-  }
-  .keep-signed-in{ display:flex; align-items:center; gap:7px; color:var(--text-secondary); user-select:none; }
-  .keep-signed-in input{ width:15px; height:15px; margin:0; cursor:pointer; accent-color:#0067C0; }
-  .forgot-password{ color:#0067C0; text-decoration:none; font-weight:600; cursor:pointer; white-space:nowrap; }
-  .forgot-password:hover{ text-decoration:underline; }
-  body.dark .forgot-password{ color:#60a5fa; }
-  .password-wrap{ position:relative; }
-  .password-wrap input{ padding-right:44px; }
-  .password-eye{
-    position:absolute; right:5px; top:50%; transform:translateY(-50%);
-    width:34px; height:32px; padding:0; border:0; background:transparent;
-    display:flex; align-items:center; justify-content:center;
-    color:var(--text-secondary); cursor:pointer; border-radius:5px;
-  }
-  .password-eye:hover{ background:var(--ghost-hover); }
-  .password-eye:active{ transform:translateY(-50%); }
-  .password-eye, .password-eye svg{ transition:none !important; animation:none !important; }
-  .password-eye svg{ width:20px; height:20px; pointer-events:none; }
-  .language-toggle{
-    min-width:48px; height:30px; padding:0 9px; border-radius:7px;
-    border:1px solid var(--border); background:var(--ghost-bg); color:var(--text-primary);
-    font-size:12px; font-weight:700; cursor:pointer;
-  }
-  .language-toggle:hover{ background:var(--ghost-hover); }
-  .auth-language-row{ display:flex; justify-content:flex-end; align-items:center; gap:8px; margin:-10px -6px 8px 0; }
-  .auth-error{
-    margin-top: 14px; font-size:12.5px; color: var(--danger);
-    min-height: 1px;
-    white-space: pre-wrap; word-break: break-all;
-  }
-
-  .content{ padding: 22px 24px calc(28px + env(safe-area-inset-bottom)); overflow-y:auto; flex:1; -webkit-overflow-scrolling: touch; }
-
-  .card{
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-card);
-    padding: 20px;
-    margin-bottom: 16px;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.03);
-  }
-  .card h2{
-    font-family:"Segoe UI Variable Display","Segoe UI",system-ui,sans-serif;
-    font-size: 13px; font-weight:600; color: var(--text-secondary);
-    margin: 0 0 14px 0;
-  }
-
-  .field{ margin-bottom:12px; }
-  .field:last-child{ margin-bottom:0; }
-  .field label{
-    display:block; font-size:12.5px; color: var(--text-secondary); margin-bottom:5px;
-  }
-  .field input{
-    width:100%;
-    font-family: inherit; font-size: 14px;
-    padding: 8px 11px;
-    border-radius: var(--radius-ctrl);
-    border: 1px solid var(--input-border);
-    background: var(--input-bg);
-    color: var(--text-primary);
-    outline: none;
-    transition: border-color .12s ease, box-shadow .12s ease;
-  }
-  .field input:focus{
-    border-color: var(--accent);
-    box-shadow: 0 0 0 3px var(--accent-soft);
-  }
-  .row2{ display:grid; grid-template-columns: 1fr 1fr; gap:12px; }
-
-  button{
-    font-family: inherit; font-size: 13.5px; font-weight:600;
-    padding: 8px 16px;
-    border-radius: var(--radius-ctrl);
-    border: 1px solid transparent;
-    cursor:pointer;
-    transition: background .12s ease, transform .05s ease;
-  }
-  button:active{ transform: scale(0.98); }
-  .btn-accent{ background: var(--accent); color:#fff; }
-  .btn-accent:hover{ background: var(--accent-hover); }
-  .btn-ghost{
-    background: var(--ghost-bg);
-    color: var(--text-primary);
-    border-color: var(--ghost-border);
-  }
-  .btn-ghost:hover{ background: var(--ghost-hover); }
-  .btn-danger-text{
-    background: transparent; color: var(--danger);
-    padding: 5px 9px; font-weight:500; font-size:12.5px;
-  }
-  .btn-danger-text:hover{ background: rgba(196,43,28,0.08); }
-  .btn-edit-text{
-    background: transparent; color: var(--accent);
-    padding: 5px 9px; font-weight:500; font-size:12.5px;
-  }
-  .btn-edit-text:hover{ background: var(--accent-soft); }
-
-  .actions{ display:flex; gap:10px; margin-top:14px; }
-
-  .overview-top{ display:flex; align-items:center; gap:22px; }
-  .ring-wrap{ position:relative; width:112px; height:112px; flex-shrink:0; }
-  .ring-wrap svg{ transform: rotate(-90deg); width:112px; height:112px; }
-  .ring-track{ fill:none; stroke: var(--ring-track); stroke-width:10; }
-  .ring-progress{ fill:none; stroke: var(--accent); stroke-width:10; stroke-linecap: round; transition: stroke-dashoffset .4s ease; }
-  .ring-label{
-    position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center;
-  }
-  .ring-label .pct{ font-size:20px; font-weight:700; }
-  .ring-label .pct-sub{ font-size:10.5px; color:var(--text-secondary); }
-
-  .stats{ flex:1; display:grid; grid-template-columns: 1fr 1fr; gap: 10px 18px; }
-  .stat .k{ font-size:11.5px; color: var(--text-secondary); margin-bottom:2px; }
-  .stat .v{ font-size:17px; font-weight:700; }
-  .stat.remaining .v{ color: var(--accent); }
-  .stat.paid .v{ color: var(--success); }
-  .stat.payoff{
-    padding-top: 10px;
-    margin-top: 2px;
-    border-top: 1px dashed var(--border);
-  }
-  .stat.payoff .v{ color: var(--accent); font-size: 18px; }
-
-  .empty-state{
-    text-align:center; padding: 30px 10px; color: var(--text-secondary); font-size:13.5px;
-  }
-
-  .history-item{
-    display:flex; align-items:center; gap:12px;
-    padding: 11px 4px;
-    border-bottom: 1px solid var(--border);
-  }
-  .history-item:last-child{ border-bottom:none; }
-  .history-item .dot{
-    width:8px; height:8px; border-radius:50%; background: var(--success); flex-shrink:0;
-  }
-  .history-item .info{ flex:1; min-width:0; }
-  .history-item .date{ font-size:13px; font-weight:600; }
-  .history-item .note{ font-size:12px; color: var(--text-secondary); margin-top:1px; }
-  .history-item .amt{ font-size:14px; font-weight:700; color: var(--success); white-space:nowrap; }
-
-  .settings-toggle{
-    display:flex; align-items:center; justify-content:space-between;
-    cursor:pointer; user-select:none;
-  }
-  .settings-toggle .chev{ transition: transform .15s ease; color: var(--text-secondary); }
-  .settings-toggle.open .chev{ transform: rotate(180deg); }
-  .settings-body{ display:none; margin-top:14px; }
-  .settings-body.open{ display:block; }
-
-  .toast{
-    position: fixed; bottom: 24px; left:50%; transform: translateX(-50%) translateY(20px);
-    background: #1B1B1B; color:#fff; font-size:13px;
-    padding: 10px 18px; border-radius: 8px;
-    opacity:0; pointer-events:none;
-    transition: opacity .18s ease, transform .18s ease;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.25);
-    z-index: 999;
-  }
-  .toast.show{ opacity:1; transform: translateX(-50%) translateY(0); }
-
-  .modal-overlay{
-    position: fixed; inset: 0;
-    background: rgba(0,0,0,0.35);
-    display: none;
-    align-items: center; justify-content: center;
-    z-index: 1000;
-  }
-  .modal-overlay.show{ display: flex; }
-  .modal-box{
-    width: 320px;
-    background: var(--modal-bg);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 20px;
-    box-shadow: 0 24px 60px rgba(0,0,0,0.25);
-  }
-  .modal-title{
-    font-family:"Segoe UI Variable Display","Segoe UI",system-ui,sans-serif;
-    font-size: 15px; font-weight:700; margin-bottom: 8px;
-  }
-  .modal-message{
-    font-size: 13.5px; color: var(--text-secondary); line-height:1.5; margin-bottom: 18px;
-  }
-  .modal-actions{
-    display:flex; justify-content:flex-end; gap:10px;
-  }
-
-  .info-box{
-    padding: 12px 14px;
-    border-radius: 8px;
-    background: var(--accent-soft);
-    border: 1px solid var(--border);
-    font-size: 13px;
-    color: var(--text-secondary);
-    line-height: 1.6;
-  }
-  .info-box.ok{ color: var(--success); }
-  .info-box.warn{ color: var(--danger); }
-</style>
+<!-- iOS doesn't read the web manifest, so it needs its own tags -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="We Save">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-<style id="wesave-login-interface">
-.auth-screen{min-height:100vh;display:flex;align-items:flex-start;justify-content:center;padding:4rem 1.5rem;background:radial-gradient(1100px 600px at 15% -10%,rgba(0,103,192,.10),transparent 60%),radial-gradient(850px 480px at 100% 0%,rgba(0,103,192,.06),transparent 55%),#F3F7FB;font-family:'Inter',sans-serif}
-.auth-card{width:100%;max-width:340px;margin:0 auto;padding:1.75rem;background:#fff;border:1px solid #D5E2EE;border-radius:6px;box-shadow:0 8px 30px rgba(0,103,192,.06)}
-.auth-language-row{display:flex;justify-content:flex-end;align-items:center;gap:8px;margin:-10px -6px 10px 0}
-.auth-card .language-toggle,.auth-card .theme-toggle{height:30px;border-radius:7px;border:1px solid #D5E2EE;background:transparent;color:#1B1B1B;cursor:pointer;font-family:'Inter',sans-serif;font-weight:600}
-.auth-card .language-toggle{min-width:48px;padding:0 9px;font-size:12px}.auth-card .theme-toggle{width:30px;padding:0;display:flex;align-items:center;justify-content:center}.auth-card .theme-toggle svg{width:16px;height:16px}
-.auth-card .auth-logo,.auth-card .auth-sub{display:none}
-.auth-card .auth-title{font-family:'Source Serif 4',serif;font-size:1.4rem;font-weight:600;margin:0 0 1.25rem;text-align:center;color:#1B1B1B}
-.auth-card .field{margin-bottom:.6rem}.auth-card .field label{display:block;margin:0 0 .25rem;font-size:.7rem;color:#5D5D5D;font-weight:400}
-.auth-card input[type=email],.auth-card input[type=password],.auth-card input[type=text]{width:100%;font-family:'Inter',sans-serif;font-size:.9rem;padding:.45rem .5rem;border:1px solid #D5E2EE;border-radius:4px;background:#fff;color:#1B1B1B;box-shadow:none}
-.auth-card input:focus{outline:2px solid #0067C0;outline-offset:1px}.auth-card .password-wrapper{position:relative}.auth-card .password-wrapper input{padding-right:2.2rem}
-.auth-card .password-eye{position:absolute;right:.45rem;top:50%;transform:translateY(-50%);width:1.4rem;height:1.4rem;padding:0;border:0;background:transparent;color:#5D5D5D;display:flex;align-items:center;justify-content:center;cursor:pointer}.auth-card .password-eye svg{width:17px;height:17px}
-.auth-card .auth-options{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.5rem;margin-top:.6rem}
-.auth-card .keep-signed-in{display:flex;align-items:center;gap:.45rem;margin:0;font-size:.8rem;color:#5D5D5D;cursor:default;user-select:none}.auth-card .keep-signed-in input{width:13px;height:13px;margin:0;padding:0;appearance:auto;-webkit-appearance:auto;border:0;outline:0;box-shadow:none;background:transparent;border-radius:0;cursor:pointer;flex:0 0 13px}
-.auth-card .forgot-password{color:#5D5D5D;font-size:.78rem;text-decoration:underline;cursor:pointer;white-space:nowrap}.auth-card .forgot-password:hover{color:#A4262C}
-.auth-card .actions{display:flex!important;gap:.6rem!important;margin-top:1.1rem!important}.auth-card .actions button{flex:1!important;border-radius:4px!important;padding:.55rem!important;font-family:'Inter',sans-serif!important;font-size:.85rem!important;font-weight:600!important;cursor:pointer!important;box-shadow:none!important}
-.auth-card #emailLoginBtn{background:#0067C0!important;color:#fff!important;border:0!important}.auth-card #emailLoginBtn:hover{background:#005A9E!important}.auth-card #emailRegisterBtn{background:transparent!important;color:#1B1B1B!important;border:1px solid #D5E2EE!important}
-.auth-card .divider{display:flex;align-items:center;gap:.6rem;margin:1.25rem 0 .9rem;color:#5D5D5D;font-size:.7rem;text-transform:uppercase;letter-spacing:.06em}.auth-card .divider:before,.auth-card .divider:after{content:"";flex:1;height:1px;background:#D5E2EE}
-.auth-card .social-btn{width:100%;display:flex;align-items:center;justify-content:center;gap:.6rem;margin:0 0 .55rem;padding:.55rem;background:#fff;border:1px solid #D5E2EE;border-radius:4px;box-shadow:none;font-family:'Inter',sans-serif;font-size:.85rem;font-weight:500;color:#1B1B1B;cursor:pointer}.auth-card .social-btn:hover{border-color:#1B1B1B}.auth-card .social-btn svg{width:18px;height:18px;flex-shrink:0}.auth-card #facebookSignInBtn{background:#1877F2;color:#fff;border-color:#1877F2}.auth-card #facebookSignInBtn:hover{background:#1461C9}
-.auth-card .auth-error{color:#A4262C;font-size:.8rem;margin-top:.75rem;min-height:1.1em;text-align:center}
-body.dark .auth-screen{background:#1D211E}body.dark .auth-card{background:#292D29;border-color:#4B504B;box-shadow:none}body.dark .auth-card .auth-title{color:#F2F0E6}body.dark .auth-card .field label,body.dark .auth-card .keep-signed-in,body.dark .auth-card .forgot-password,body.dark .auth-card .divider{color:#B9B7AD}body.dark .auth-card .language-toggle,body.dark .auth-card .theme-toggle{border-color:#4B504B;color:#F2F0E6}
-body.dark .auth-card input[type=email],body.dark .auth-card input[type=password],body.dark .auth-card input[type=text]{background:#222622;color:#F2F0E6;border-color:#4B504B}body.dark .auth-card #emailLoginBtn{background:#F2F0E6!important;color:#1D211E!important}body.dark .auth-card #emailRegisterBtn{color:#F2F0E6!important;border-color:#4B504B!important}body.dark .auth-card .divider:before,body.dark .auth-card .divider:after{background:#4B504B}body.dark .auth-card .social-btn{background:#222622;color:#F2F0E6;border-color:#4B504B}body.dark .auth-card #facebookSignInBtn{background:#1877F2;color:#fff;border-color:#1877F2}
-@media(max-width:480px){.auth-screen{padding:2rem 1rem}.auth-card{padding:1.4rem}}
-</style>
-
-<style id="car-loan-login-logo">
-.auth-card .auth-logo{
-  width:56px;
-  height:56px;
-  margin:4px auto 14px;
-  border-radius:12px;
-  background:#2B88D8;
-  display:flex !important;
-  align-items:center;
-  justify-content:center;
-  box-shadow:0 6px 18px rgba(0,103,192,.18);
-}
-.auth-card .auth-logo svg{
-  width:32px;
-  height:32px;
-  display:block;
-}
-body.dark .auth-card .auth-logo{
-  background:#2B88D8;
-  box-shadow:none;
-}
-</style>
-
-
-<style id="exact-user-file-colors">
-:root{
-    --bg: #F3F3F3;
-    --card: rgba(255,255,255,0.75);
-    --border: rgba(0,0,0,0.07);
-    --text-primary: #1B1B1B;
-    --text-secondary: #5D5D5D;
-    --accent: #0067C0;
-    --accent-hover: #005A9E;
-    --accent-soft: rgba(0,103,192,0.10);
-    --success: #107C10;
-    --danger: #C42B1C;
-    --radius-card: 10px;
-    --radius-ctrl: 6px;
-
-    --surface-window: rgba(255,255,255,0.55);
-    --surface-window-border: rgba(255,255,255,0.6);
-    --surface-strong: rgba(255,255,255,0.45);
-    --input-bg: rgba(255,255,255,0.9);
-    --input-border: rgba(0,0,0,0.14);
-    --ghost-bg: rgba(0,0,0,0.035);
-    --ghost-border: rgba(0,0,0,0.10);
-    --ghost-hover: rgba(0,0,0,0.06);
-    --modal-bg: #FAFAFA;
-    --chip-bg: rgba(0,0,0,0.04);
-    --ring-track: rgba(0,0,0,0.07);
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<style>
+  :root{
+    --ink:#1B1B1B;
+    --ink-soft:#5D5D5D;
+    --paper:#F3F7FB;
+    --paper-raised:#FFFFFF;
+    --line:#D5E2EE;
+    --line-soft:#E5EDF5;
+    --mustard:#0067C0;
+    --mustard-deep:#005A9E;
+    --moss:#2B88D8;
+    --moss-deep:#0067C0;
+    --clay:#C42B1C;
+    --clay-deep:#A4262C;
+    --radius:6px;
   }
+  body.dark{
+    --ink:#F2F0E6;
+    --ink-soft:#B9B7AD;
+    --paper:#1D211E;
+    --paper-raised:#292D29;
+    --line:#4B504B;
+    --line-soft:#3B403B;
+    --mustard:#D9A34F;
+    --mustard-deep:#F0B95F;
+    --moss:#4B9B78;
+    --moss-deep:#72C29D;
+    --clay:#D06B51;
+    --clay-deep:#F08A70;
+  }
+  body.dark{
+    background:#1D211E;
+  }
+  body.dark input, body.dark select{background:#222622;color:var(--ink);}
+  body.dark .oauth-btn{background:#222622;color:var(--ink);}
+  body.dark #facebookBtn{background:#1877F2;color:#fff;}
+  body.dark #signupBtn{color:var(--ink);}
+  body.dark .secondary-btn{color:var(--ink);}
+  body.dark .balance-main .amount{color:var(--ink);}
+
+  .top-controls{
+    display:flex;justify-content:flex-end;align-items:center;gap:8px;
+    margin:-10px -6px 10px 0;
+  }
+  .main-controls{display:flex;align-items:center;gap:8px;margin-left:auto;}
+  .language-toggle,.theme-toggle{
+    height:30px;border-radius:7px;border:1px solid var(--line);
+    background:transparent;color:var(--ink);cursor:pointer;font-family:'Inter',sans-serif;
+    font-weight:600;
+  }
+  .language-toggle{min-width:48px;padding:0 9px;font-size:12px;}
+  .theme-toggle{width:30px;padding:0;display:flex;align-items:center;justify-content:center;}
+  .theme-toggle svg{width:16px;height:16px;}
+  .theme-toggle .icon-sun{display:none;}
+  body.dark .theme-toggle .icon-moon{display:none;}
+  body.dark .theme-toggle .icon-sun{display:block;}
+  .language-toggle:hover,.theme-toggle:hover{background:var(--line-soft);}
+
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:
+      radial-gradient(1100px 600px at 15% -10%, rgba(0,103,192,0.10), transparent 60%),
+      radial-gradient(850px 480px at 100% 0%, rgba(0,103,192,0.06), transparent 55%),
+      var(--paper);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+    padding:2.5rem 1.5rem 4rem;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:640px;margin:0 auto;}
+  .masthead{
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    border-bottom:2px solid var(--ink);
+    padding-bottom:0.75rem;
+    margin-bottom:1.75rem;
+  }
+  .masthead h1{
+    font-family:'Source Serif 4',serif;
+    font-weight:600;
+    font-size:1.5rem;
+    margin:0;
+    letter-spacing:0.01em;
+  }
+  .masthead .today{
+    font-size:0.8rem;
+    color:var(--ink-soft);
+  }
+  .balance-block{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-end;
+    margin-bottom:2rem;
+    flex-wrap:wrap;
+    gap:1rem;
+  }
+  .balance-main .label{
+    font-size:0.75rem;
+    text-transform:uppercase;
+    letter-spacing:0.08em;
+    color:var(--ink-soft);
+    margin-bottom:0.15rem;
+  }
+  .balance-main .amount{
+    font-family:'Source Serif 4',serif;
+    font-size:2.75rem;
+    font-weight:600;
+    font-variant-numeric:tabular-nums;
+    line-height:1;
+  }
+  .mini-stats{display:flex;gap:1.75rem;}
+  .mini-stats div .label{font-size:0.7rem;text-transform:uppercase;letter-spacing:0.06em;color:var(--ink-soft);}
+  .mini-stats div .val{font-family:'Source Serif 4',serif;font-size:1.15rem;font-weight:500;font-variant-numeric:tabular-nums;}
+  .mini-stats .in .val{color:var(--moss-deep);}
+  .mini-stats .out .val{color:var(--clay-deep);}
+
+  .panel{margin-bottom:2.25rem;}
+  .panel-title{
+    font-size:0.8rem;
+    text-transform:uppercase;
+    letter-spacing:0.08em;
+    color:var(--ink-soft);
+    margin-bottom:0.75rem;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+  }
+
+  form.entry{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:0.6rem 0.75rem;
+    background:var(--paper-raised);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:1rem;
+  }
+  form.entry .full{grid-column:1/-1;}
+  .type-toggle{display:flex;gap:0;grid-column:1/-1;border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;}
+  .type-toggle button{
+    flex:1;
+    padding:0.5rem;
+    border:none;
+    background:transparent;
+    font-family:'Inter',sans-serif;
+    font-size:0.85rem;
+    font-weight:500;
+    color:var(--ink-soft);
+    cursor:pointer;
+  }
+  .type-toggle button.active.income{background:var(--moss);color:#fff;}
+  .type-toggle button.active.expense{background:var(--clay);color:#fff;}
+
+  label{font-size:0.7rem;color:var(--ink-soft);display:block;margin-bottom:0.25rem;}
+  input,select{
+    width:100%;
+    font-family:'Inter',sans-serif;
+    font-size:0.9rem;
+    padding:0.45rem 0.5rem;
+    border:1px solid var(--line);
+    border-radius:4px;
+    background:#fff;
+    color:var(--ink);
+  }
+  input:focus,select:focus{outline:2px solid var(--mustard);outline-offset:1px;}
+  .add-btn{
+    grid-column:1/-1;
+    background:var(--ink);
+    color:var(--paper);
+    border:none;
+    border-radius:4px;
+    padding:0.6rem;
+    font-size:0.85rem;
+    font-weight:600;
+    cursor:pointer;
+    letter-spacing:0.02em;
+  }
+  .add-btn:hover{background:var(--moss-deep);}
+
+  input.field-error, select.field-error{
+    border-color:var(--clay-deep)!important;
+    outline:2px solid var(--clay-deep);
+    outline-offset:1px;
+  }
+  .form-error-msg{
+    grid-column:1/-1;
+    color:var(--clay-deep);
+    font-size:0.78rem;
+    margin-top:-0.3rem;
+  }
+  .form-error-msg.hidden{display:none;}
+
+  .ledger{border-top:2px solid var(--ink);}
+  .row{
+    display:grid;
+    grid-template-columns:52px 1fr auto 24px;
+    gap:0.75rem;
+    align-items:center;
+    padding:0.65rem 0.15rem;
+    border-bottom:1px solid var(--line-soft);
+    font-size:0.88rem;
+  }
+  .row .date{color:var(--ink-soft);font-size:0.75rem;}
+  .row .desc{font-weight:500;}
+  .row .cat{color:var(--ink-soft);font-size:0.75rem;display:block;}
+  .row .amt{font-variant-numeric:tabular-nums;font-weight:500;text-align:right;}
+  .row .amt.income{color:var(--moss-deep);}
+  .row .amt.expense{color:var(--clay-deep);}
+  .row .del{
+    background:none;border:none;color:var(--ink-soft);cursor:pointer;font-size:1rem;
+    line-height:1;padding:0;
+  }
+  .row .del:hover{color:var(--clay-deep);}
+  .empty-row{padding:1.25rem 0;color:var(--ink-soft);font-size:0.85rem;text-align:center;}
+
+  .budgets{display:flex;flex-direction:column;gap:0.9rem;}
+  .budget-item{}
+  .budget-head{display:flex;justify-content:space-between;align-items:center;font-size:0.83rem;margin-bottom:0.3rem;}
+  .budget-head .cat-name{font-weight:500;}
+  .budget-head .right{display:flex;align-items:center;gap:0.5rem;}
+  .budget-head .fig{font-variant-numeric:tabular-nums;color:var(--ink-soft);}
+  .budget-head .icon-btn{
+    background:none;border:none;cursor:pointer;color:var(--ink-soft);
+    font-size:0.78rem;padding:0;line-height:1;
+  }
+  .budget-head .icon-btn:hover{color:var(--ink);}
+  .budget-head .icon-btn.del-budget:hover{color:var(--clay-deep);}
+  .bar-track{height:7px;border-radius:4px;background:var(--paper-raised);border:1px solid var(--line);overflow:hidden;}
+  .bar-fill{height:100%;background:var(--moss);}
+  .bar-fill.over{background:var(--clay);}
+  .budget-set{
+    display:flex;
+    gap:0.5rem;
+    margin-top:1rem;
+  }
+  .budget-set select{flex:1.2;}
+  .budget-set input{flex:0.8;}
+  .budget-set button{
+    background:var(--mustard);
+    color:#fff;
+    border:none;
+    border-radius:4px;
+    padding:0 0.9rem;
+    font-size:0.85rem;
+    font-weight:600;
+    cursor:pointer;
+  }
+  .budget-set button:hover{background:var(--mustard-deep);}
+
+  #authScreen{
+    max-width:340px;
+    margin:4rem auto;
+    padding:1.75rem;
+    background:var(--paper-raised);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+  }
+  #authScreen h1{
+    font-family:'Source Serif 4',serif;
+    font-size:1.4rem;
+    font-weight:600;
+    margin:0 0 1.25rem;
+    text-align:center;
+  }
+  #authScreen label{margin-top:0.6rem;}
+  .password-wrap{position:relative;}
+  .password-wrap input{padding-right:2.2rem;}
+  .password-toggle{
+    position:absolute;right:0.45rem;top:50%;transform:translateY(-50%);
+    width:1.4rem;height:1.4rem;padding:0;border:none;background:transparent;
+    color:var(--ink-soft);display:flex;align-items:center;justify-content:center;
+    cursor:pointer;
+  }
+  .password-toggle:hover{color:var(--ink);}
+  .password-toggle svg{width:17px;height:17px;display:block;}
+  .password-toggle .icon-eye-closed{display:none;}
+  .password-toggle.showing .icon-eye-open{display:none;}
+  .password-toggle.showing .icon-eye-closed{display:block;}
+  .auth-options-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:0.5rem;
+    margin-top:0.6rem;
+  }
+  .remember-label{
+    display:flex;
+    align-items:center;
+    gap:0.45rem;
+    font-size:0.8rem;
+    color:var(--ink-soft);
+    cursor:default;
+    user-select:none;
+  }
+  .remember-label input{
+    width:13px;
+    height:13px;
+    margin:0;
+    padding:0;
+    appearance:auto;
+    -webkit-appearance:auto;
+    border:none;
+    outline:none;
+    box-shadow:none;
+    background:transparent;
+    border-radius:0;
+    box-sizing:border-box;
+    cursor:pointer;
+    flex:0 0 13px;
+  }
+  .forgot-link{color:var(--ink-soft);font-size:0.78rem;text-decoration:underline;cursor:pointer;white-space:nowrap;}
+  .forgot-link:hover{color:var(--clay-deep);}
+  #authScreen .auth-actions{
+    display:flex;
+    gap:0.6rem;
+    margin-top:1.1rem;
+  }
+  #authScreen .auth-actions button{
+    flex:1;
+    border:none;
+    border-radius:4px;
+    padding:0.55rem;
+    font-size:0.85rem;
+    font-weight:600;
+    cursor:pointer;
+  }
+  #loginBtn{background:var(--ink);color:var(--paper);}
+  #loginBtn:hover{background:var(--moss-deep);}
+  #signupBtn{background:transparent;color:var(--ink);border:1px solid var(--line)!important;}
+  #signupBtn:hover{border-color:var(--ink)!important;}
+  #authError{
+    color:var(--clay-deep);
+    font-size:0.8rem;
+    margin-top:0.75rem;
+    min-height:1.1em;
+    text-align:center;
+  }
+  #authStatus{
+    font-size:0.8rem;
+    color:var(--ink-soft);
+    text-align:center;
+    margin-top:0.75rem;
+  }
+  .logout-link{
+    background:none;
+    border:none;
+    color:var(--ink-soft);
+    font-size:0.75rem;
+    cursor:pointer;
+    text-decoration:underline;
+    padding:0;
+    margin-left:0.75rem;
+  }
+  .logout-link:hover{color:var(--clay-deep);}
+  .hidden{display:none!important;}
+  #forgotScreen{max-width:340px;margin:4rem auto;padding:1.75rem;background:var(--paper-raised);border:1px solid var(--line);border-radius:var(--radius);}
+  #forgotScreen h1{font-family:'Source Serif 4',serif;font-size:1.4rem;text-align:center;margin:0 0 1.25rem;}
+  .secondary-btn{width:100%;margin-top:.65rem;padding:.55rem;border:1px solid var(--line);background:transparent;border-radius:4px;cursor:pointer;font-weight:600;color:var(--ink);}
+  .secondary-btn:hover{border-color:var(--ink);}
+
+  .oauth-divider{
+    display:flex;
+    align-items:center;
+    gap:0.6rem;
+    margin:1.25rem 0 0.9rem;
+    color:var(--ink-soft);
+    font-size:0.7rem;
+    text-transform:uppercase;
+    letter-spacing:0.06em;
+  }
+  .oauth-divider::before,
+  .oauth-divider::after{
+    content:'';
+    flex:1;
+    height:1px;
+    background:var(--line);
+  }
+  .oauth-buttons{display:flex;flex-direction:column;gap:0.55rem;}
+  .oauth-btn{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:0.6rem;
+    width:100%;
+    background:#fff;
+    border:1px solid var(--line);
+    border-radius:4px;
+    padding:0.55rem;
+    font-family:'Inter',sans-serif;
+    font-size:0.85rem;
+    font-weight:500;
+    color:var(--ink);
+    cursor:pointer;
+  }
+  .oauth-btn:hover{border-color:var(--ink);}
+  .oauth-btn svg{width:18px;height:18px;flex-shrink:0;}
+  #facebookBtn{background:#1877F2;border-color:#1877F2;color:#fff;}
+  #facebookBtn:hover{background:#1461C9;}
+</style>
+
+<style>
+/* Login / Reset screens: same color treatment as Car Loan Manager */
+body:not(.dark) #authScreen,body:not(.dark) #forgotScreen{background:rgba(255,255,255,.75);border:1px solid rgba(0,0,0,.07);box-shadow:0 20px 60px rgba(0,0,0,.12);color:#1B1B1B}
+body:not(.dark) #authScreen input,body:not(.dark) #forgotScreen input{background:rgba(255,255,255,.9);border-color:rgba(0,0,0,.14);color:#1B1B1B}
+body:not(.dark) #authScreen label,body:not(.dark) #forgotScreen label,body:not(.dark) #authStatus{color:#5D5D5D}
+body:not(.dark) #signupBtn,body:not(.dark) #backToLoginBtn{background:rgba(0,0,0,.035);border-color:rgba(0,0,0,.10)!important;color:#1B1B1B}
+body:not(.dark) .oauth-btn:not(#facebookBtn){background:rgba(255,255,255,.9);border-color:rgba(0,0,0,.14);color:#1B1B1B}
+body:not(.dark) .top-controls .language-toggle,body:not(.dark) .top-controls .theme-toggle{background:rgba(0,0,0,.035);border-color:rgba(0,0,0,.10);color:#1B1B1B}
+
+body.dark #authScreen,body.dark #forgotScreen{background:rgba(45,45,45,.65);border:1px solid rgba(255,255,255,.09);box-shadow:0 20px 60px rgba(0,0,0,.30);color:#F3F3F3}
+body.dark #authScreen input,body.dark #forgotScreen input{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.16);color:#F3F3F3}
+body.dark #authScreen label,body.dark #forgotScreen label,body.dark #authStatus{color:#B8B8B8}
+body.dark #loginBtn,body.dark #resetBtn{background:#3AA0F0;color:#fff}
+body.dark #loginBtn:hover,body.dark #resetBtn:hover{background:#5CB3F5}
+body.dark #signupBtn,body.dark #backToLoginBtn{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.14)!important;color:#F3F3F3}
+body.dark .oauth-btn:not(#facebookBtn){background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.16);color:#F3F3F3}
+body.dark .top-controls .language-toggle,body.dark .top-controls .theme-toggle{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.14);color:#F3F3F3}
+body.dark .forgot-link{color:#60A5FA}
+body.dark #authScreen input:focus,body.dark #forgotScreen input:focus{outline-color:#3AA0F0}
+</style>
+
+
+<style>
+/* ===== Main page follows the same Car Loan Manager palette as login ===== */
+
+/* LIGHT */
+body:not(.dark) .wrap{
+  color:#1B1B1B;
+}
+body:not(.dark) .masthead{
+  border-bottom-color:rgba(0,0,0,.07);
+}
+body:not(.dark) .masthead .today,
+body:not(.dark) .panel-title,
+body:not(.dark) label,
+body:not(.dark) .row .date,
+body:not(.dark) .row .cat,
+body:not(.dark) .budget-head .fig,
+body:not(.dark) .empty-row{
+  color:#5D5D5D;
+}
+body:not(.dark) form.entry{
+  background:rgba(255,255,255,.75);
+  border-color:rgba(0,0,0,.07);
+  box-shadow:0 1px 2px rgba(0,0,0,.03);
+}
+body:not(.dark) input,
+body:not(.dark) select{
+  background:rgba(255,255,255,.90);
+  border-color:rgba(0,0,0,.14);
+  color:#1B1B1B;
+}
+body:not(.dark) input:focus,
+body:not(.dark) select:focus{
+  outline-color:#0067C0;
+}
+body:not(.dark) .type-toggle{
+  border-color:rgba(0,0,0,.10);
+}
+body:not(.dark) .type-toggle button{
+  color:#5D5D5D;
+}
+body:not(.dark) .type-toggle button.active.income,
+body:not(.dark) .type-toggle button.active.expense{
+  background:#0067C0;
+  color:#fff;
+}
+body:not(.dark) .ledger{
+  border-top-color:rgba(0,0,0,.14);
+}
+body:not(.dark) .row{
+  border-bottom-color:rgba(0,0,0,.07);
+}
+body:not(.dark) .row .amt.income{color:#107C10;}
+body:not(.dark) .row .amt.expense{color:#C42B1C;}
+body:not(.dark) .bar-track{
+  background:rgba(0,0,0,.04);
+  border-color:rgba(0,0,0,.07);
+}
+body:not(.dark) .bar-fill{background:#0067C0;}
+body:not(.dark) .bar-fill.over{background:#C42B1C;}
+body:not(.dark) .logout-link{color:#5D5D5D;}
+body:not(.dark) .logout-link:hover{color:#0067C0;}
+body:not(.dark) .main-controls .language-toggle,
+body:not(.dark) .main-controls .theme-toggle{
+  background:rgba(0,0,0,.035);
+  border-color:rgba(0,0,0,.10);
+  color:#1B1B1B;
+}
+
+/* DARK */
 body.dark{
-    --bg: #1D1D1D;
-    --card: rgba(45,45,45,0.65);
-    --border: rgba(255,255,255,0.09);
-    --text-primary: #F3F3F3;
-    --text-secondary: #B8B8B8;
-    --accent: #3AA0F0;
-    --accent-hover: #5CB3F5;
-    --accent-soft: rgba(58,160,240,0.18);
-    --success: #6CCB5F;
-    --danger: #FF99A4;
-
-    --surface-window: rgba(32,32,32,0.65);
-    --surface-window-border: rgba(255,255,255,0.08);
-    --surface-strong: rgba(32,32,32,0.55);
-    --input-bg: rgba(255,255,255,0.06);
-    --input-border: rgba(255,255,255,0.16);
-    --ghost-bg: rgba(255,255,255,0.06);
-    --ghost-border: rgba(255,255,255,0.14);
-    --ghost-hover: rgba(255,255,255,0.10);
-    --modal-bg: #2B2B2B;
-    --chip-bg: rgba(255,255,255,0.08);
-    --ring-track: rgba(255,255,255,0.10);
-  }
-
-html,body,.auth-screen{
   background:
-    radial-gradient(1200px 600px at 15% -10%, rgba(0,103,192,0.10), transparent 60%),
-    radial-gradient(900px 500px at 100% 0%, rgba(0,103,192,0.06), transparent 55%),
-    var(--bg) !important;
-  color:var(--text-primary) !important;
+    radial-gradient(1200px 600px at 15% -10%, rgba(58,160,240,.10), transparent 60%),
+    radial-gradient(900px 500px at 100% 0%, rgba(58,160,240,.06), transparent 55%),
+    #1D1D1D;
 }
-.auth-card{
-  background:var(--card) !important;
-  border:1px solid var(--border) !important;
-  color:var(--text-primary) !important;
-  box-shadow:0 20px 60px rgba(0,0,0,0.12) !important;
+body.dark .wrap{color:#F3F3F3;}
+body.dark .masthead{border-bottom-color:rgba(255,255,255,.09);}
+body.dark .masthead .today,
+body.dark .panel-title,
+body.dark label,
+body.dark .row .date,
+body.dark .row .cat,
+body.dark .budget-head .fig,
+body.dark .empty-row{
+  color:#B8B8B8;
 }
-.auth-card .auth-title{color:var(--text-primary) !important;}
-.auth-card .auth-sub,.auth-card .field label,.auth-card .keep-signed-in,.auth-card .divider{
-  color:var(--text-secondary) !important;
+body.dark form.entry{
+  background:rgba(45,45,45,.65);
+  border-color:rgba(255,255,255,.09);
+  box-shadow:0 1px 2px rgba(0,0,0,.20);
 }
-.auth-card .language-toggle,.auth-card .theme-toggle{
-  background:var(--ghost-bg) !important;
-  border-color:var(--border) !important;
-  color:var(--text-primary) !important;
+body.dark input,
+body.dark select{
+  background:rgba(255,255,255,.06);
+  border-color:rgba(255,255,255,.16);
+  color:#F3F3F3;
 }
-.auth-card .language-toggle:hover,.auth-card .theme-toggle:hover{background:var(--ghost-hover) !important;}
-.auth-card input[type=email],.auth-card input[type=password],.auth-card input[type=text]{
-  background:var(--input-bg) !important;
-  border-color:var(--input-border) !important;
-  color:var(--text-primary) !important;
+body.dark input:focus,
+body.dark select:focus{outline-color:#3AA0F0;}
+body.dark .type-toggle{border-color:rgba(255,255,255,.14);}
+body.dark .type-toggle button{color:#B8B8B8;}
+body.dark .type-toggle button.active.income,
+body.dark .type-toggle button.active.expense{
+  background:#3AA0F0;
+  color:#fff;
 }
-.auth-card input:focus{
-  border-color:var(--accent) !important;
-  outline:none !important;
-  box-shadow:0 0 0 3px var(--accent-soft) !important;
+body.dark .add-btn,
+body.dark .budget-set button{
+  background:#3AA0F0;
+  color:#fff;
 }
-.auth-card .password-eye{color:var(--text-secondary) !important;}
-.auth-card .forgot-password{color:var(--accent) !important;}
-.auth-card #emailLoginBtn{
-  background:var(--accent) !important;
-  color:#fff !important;
-  border-color:transparent !important;
+body.dark .add-btn:hover,
+body.dark .budget-set button:hover{background:#5CB3F5;}
+body.dark .ledger{border-top-color:rgba(255,255,255,.16);}
+body.dark .row{border-bottom-color:rgba(255,255,255,.09);}
+body.dark .row .amt.income{color:#6CCB5F;}
+body.dark .row .amt.expense{color:#FF99A4;}
+body.dark .bar-track{
+  background:rgba(255,255,255,.08);
+  border-color:rgba(255,255,255,.09);
 }
-.auth-card #emailLoginBtn:hover{background:var(--accent-hover) !important;}
-.auth-card #emailRegisterBtn{
-  background:var(--ghost-bg) !important;
-  color:var(--text-primary) !important;
-  border-color:var(--ghost-border) !important;
+body.dark .bar-fill{background:#3AA0F0;}
+body.dark .bar-fill.over{background:#FF99A4;}
+body.dark .logout-link{color:#B8B8B8;}
+body.dark .logout-link:hover{color:#3AA0F0;}
+body.dark .main-controls .language-toggle,
+body.dark .main-controls .theme-toggle{
+  background:rgba(255,255,255,.06);
+  border-color:rgba(255,255,255,.14);
+  color:#F3F3F3;
 }
-.auth-card #emailRegisterBtn:hover{background:var(--ghost-hover) !important;}
-.auth-card .divider::before,.auth-card .divider::after{background:var(--border) !important;}
-.auth-card .social-btn,.auth-card .btn-google{
-  background:var(--input-bg) !important;
-  color:var(--text-primary) !important;
-  border-color:var(--input-border) !important;
-}
-.auth-card .social-btn:hover,.auth-card .btn-google:hover{background:var(--ghost-hover) !important;}
-.auth-card .auth-error{color:var(--danger) !important;}
-.auth-card .auth-logo{
-  background:linear-gradient(135deg,#0067C0,#2B88D8) !important;
-}
-body.dark .auth-card .auth-logo svg path{stroke:white !important;}
-body.dark .auth-card .auth-logo svg circle{fill:white !important;}
 </style>
 
-<style id="wesave-dark">
-body.dark,body.dark .auth-screen{background:#1D1D1D!important;background-image:none!important;color:#F3F3F3!important}
-body.dark .auth-card{background:rgba(45,45,45,.65)!important;border-color:rgba(255,255,255,.09)!important;box-shadow:0 20px 60px rgba(0,0,0,.25)!important}
-body.dark .auth-card .auth-title{color:#F3F3F3!important}
-body.dark .auth-card .auth-sub,body.dark .auth-card .field label,body.dark .auth-card .keep-signed-in,body.dark .auth-card .divider{color:#B8B8B8!important}
-body.dark .auth-card .forgot-password{color:#60A5FA!important}
-body.dark .auth-card .language-toggle,body.dark .auth-card .theme-toggle{background:rgba(255,255,255,.06)!important;border-color:rgba(255,255,255,.14)!important;color:#F3F3F3!important}
-body.dark .auth-card input[type=email],body.dark .auth-card input[type=password],body.dark .auth-card input[type=text]{background:rgba(255,255,255,.06)!important;border-color:rgba(255,255,255,.16)!important;color:#F3F3F3!important}
-body.dark .auth-card input:focus{border-color:#3AA0F0!important;box-shadow:0 0 0 3px rgba(58,160,240,.18)!important;outline:none!important}
-body.dark .auth-card .password-eye{color:#B8B8B8!important}
-body.dark .auth-card #emailLoginBtn{background:#3AA0F0!important;color:#fff!important;border-color:#3AA0F0!important}
-body.dark .auth-card #emailLoginBtn:hover{background:#5CB3F5!important}
-body.dark .auth-card #emailRegisterBtn,body.dark .auth-card .social-btn,body.dark .auth-card .btn-google{background:rgba(255,255,255,.06)!important;color:#F3F3F3!important;border-color:rgba(255,255,255,.14)!important}
-body.dark .auth-card #emailRegisterBtn:hover,body.dark .auth-card .social-btn:hover,body.dark .auth-card .btn-google:hover{background:rgba(255,255,255,.10)!important}
-body.dark .auth-card .divider:before,body.dark .auth-card .divider:after{background:rgba(255,255,255,.09)!important}
-body.dark .auth-card #facebookSignInBtn{background:#1877F2!important;color:#fff!important;border-color:#1877F2!important}
-body.dark .auth-card .auth-error{color:#FF99A4!important}
-body.dark .auth-card .auth-logo{background:linear-gradient(135deg,#0067C0,#2B88D8)!important;box-shadow:none!important}
-body.dark .auth-card .auth-logo svg path{stroke:#fff!important}body.dark .auth-card .auth-logo svg circle{fill:#fff!important}
-</style></head>
+
+<style>
+/* Fix native select/dropdown option colors in Dark Mode */
+body.dark select{
+  color-scheme: dark;
+  background:#2B2B2B;
+  color:#F3F3F3;
+  border-color:rgba(255,255,255,.16);
+}
+body.dark select option,
+body.dark select optgroup{
+  background:#2B2B2B;
+  color:#F3F3F3;
+}
+body.dark select option:checked{
+  background:#0067C0;
+  color:#FFFFFF;
+}
+
+/* Keep Light Mode dropdown normal */
+body:not(.dark) select{
+  color-scheme: light;
+  background:#FFFFFF;
+  color:#1B1B1B;
+}
+body:not(.dark) select option,
+body:not(.dark) select optgroup{
+  background:#FFFFFF;
+  color:#1B1B1B;
+}
+</style>
+
+
+<style>
+.wesave-logo{
+  width:44px;height:44px;border-radius:11px;
+  background:linear-gradient(135deg,#0067C0,#2B88D8);
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;
+}
+.wesave-logo svg{width:25px;height:25px}
+#authScreen>.wesave-logo{
+  margin:0 auto 14px;
+}
+.main-brand{
+  display:flex;align-items:center;gap:10px;
+}
+.main-brand .wesave-logo{
+  width:32px;height:32px;border-radius:8px;
+}
+.main-brand .wesave-logo svg{width:19px;height:19px}
+.main-brand h1{margin:0}
+</style>
+
+
+<style>
+/* Login screen: compact, centered and fitted to one viewport like Car Loan Manager */
+body:has(#authScreen:not(.hidden)){
+  overflow:hidden;
+}
+#authScreen{
+  max-height:calc(100dvh - 24px);
+  overflow:hidden;
+  margin:12px auto;
+  padding:20px 24px;
+}
+#authScreen .top-controls{
+  margin:-6px -6px 4px 0;
+}
+#authScreen>.wesave-logo{
+  width:40px;
+  height:40px;
+  margin:0 auto 8px;
+}
+#authScreen>.wesave-logo svg{
+  width:22px;
+  height:22px;
+}
+#authScreen h1{
+  margin-top:0;
+  margin-bottom:12px;
+}
+#authScreen label{
+  margin-top:8px;
+  margin-bottom:4px;
+}
+#authScreen input{
+  padding-top:8px;
+  padding-bottom:8px;
+}
+#authScreen .auth-options{
+  margin-top:8px;
+}
+#authScreen .auth-actions{
+  margin-top:10px;
+}
+#authScreen .oauth-divider{
+  margin:10px 0;
+}
+#authScreen .oauth-btn{
+  min-height:38px;
+  padding-top:8px;
+  padding-bottom:8px;
+}
+#authScreen #authError,
+#authScreen #authStatus{
+  margin-top:6px;
+}
+
+/* Extra compression for shorter laptop/mobile-height screens */
+@media (max-height:720px){
+  #authScreen{
+    padding:14px 22px;
+    margin:6px auto;
+    max-height:calc(100dvh - 12px);
+  }
+  #authScreen .top-controls{margin-bottom:2px}
+  #authScreen>.wesave-logo{
+    width:34px;height:34px;margin-bottom:5px;
+  }
+  #authScreen>.wesave-logo svg{width:19px;height:19px}
+  #authScreen h1{font-size:1.55rem;margin-bottom:7px}
+  #authScreen label{margin-top:5px;margin-bottom:2px}
+  #authScreen input{padding-top:6px;padding-bottom:6px}
+  #authScreen .auth-options{margin-top:5px}
+  #authScreen .oauth-divider{margin:7px 0}
+  #authScreen .oauth-btn{min-height:34px;padding-top:6px;padding-bottom:6px}
+  #authScreen #authError,#authScreen #authStatus{margin-top:3px}
+}
+</style>
+
+
+<style>
+/* ===== Login page sizing/background matched to Car Loan Manager ===== */
+
+/* One solid background only — no split band / no gradient */
+body:not(.dark){
+  background:#F3F3F3 !important;
+  background-image:none !important;
+}
+body.dark{
+  background:#1D1D1D !important;
+  background-image:none !important;
+}
+
+/* Make the login screen use the whole viewport like Car Loan Manager */
+body:has(#authScreen:not(.hidden)){
+  min-height:100vh;
+  min-height:100dvh;
+  overflow:hidden;
+}
+body:has(#authScreen:not(.hidden)) #authScreen{
+  position:absolute;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%);
+  width:100%;
+  max-width:400px;
+  max-height:none;
+  margin:0;
+  padding:28px 30px;
+  overflow:visible;
+}
+
+/* Restore Car Loan Manager-like spacing instead of the extra compressed layout */
+#authScreen .top-controls{margin:-10px -6px 8px 0}
+#authScreen>.wesave-logo{
+  width:44px;
+  height:44px;
+  margin:0 auto 14px;
+}
+#authScreen>.wesave-logo svg{width:24px;height:24px}
+#authScreen h1{margin-top:0;margin-bottom:16px}
+#authScreen label{margin-top:10px;margin-bottom:5px}
+#authScreen input{padding-top:9px;padding-bottom:9px}
+#authScreen .auth-options{margin-top:10px}
+#authScreen .oauth-divider{margin:16px 0}
+#authScreen .oauth-btn{min-height:42px;padding-top:9px;padding-bottom:9px}
+#authScreen #authError,#authScreen #authStatus{margin-top:6px}
+
+/* On genuinely short screens, shrink only enough to keep everything visible */
+@media (max-height:680px){
+  body:has(#authScreen:not(.hidden)) #authScreen{
+    padding:16px 24px;
+    max-width:390px;
+  }
+  #authScreen>.wesave-logo{width:36px;height:36px;margin-bottom:7px}
+  #authScreen>.wesave-logo svg{width:20px;height:20px}
+  #authScreen h1{margin-bottom:8px}
+  #authScreen label{margin-top:5px;margin-bottom:2px}
+  #authScreen input{padding-top:6px;padding-bottom:6px}
+  #authScreen .auth-options{margin-top:5px}
+  #authScreen .oauth-divider{margin:8px 0}
+  #authScreen .oauth-btn{min-height:35px;padding-top:6px;padding-bottom:6px}
+}
+</style>
+
+
+<style>
+/* Header position: date under We Save; logout beside EN/CN + theme */
+.main-brand{align-items:center}
+.brand-text{display:flex;flex-direction:column;justify-content:center;line-height:1.15}
+.brand-text h1{margin:0}
+.brand-text #todayLabel{
+  margin-top:4px;
+  font-size:12px;
+  font-family:'Inter',sans-serif;
+  font-weight:400;
+  color:#5D5D5D;
+  white-space:nowrap;
+}
+body.dark .brand-text #todayLabel{color:#B8B8B8}
+.main-controls{
+  margin-left:auto;
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+.main-controls .logout-link{
+  margin:0 4px 0 0;
+  white-space:nowrap;
+}
+</style>
+
+</head>
 <body>
 
-<div class="auth-screen" id="authScreen">
-  <div class="auth-card">
-    <div class="auth-language-row">
-      <button class="language-toggle" id="authLanguageBtn" type="button">EN</button>
-      <button class="theme-toggle" id="authThemeToggleBtn" type="button" title="切换暗色模式">
-        <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+<div id="authScreen">
+  <div class="top-controls">
+    <button class="language-toggle" id="authLanguageBtn" type="button">CN</button>
+    <button class="theme-toggle" id="authThemeToggleBtn" type="button" title="Switch to dark mode">
+      <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+    </button>
+  </div>
+<div class="wesave-logo" aria-hidden="true">
+  <svg viewBox="0 0 24 24" fill="none">
+    <path d="M4 9.5h16v9.5H4zM7 9.5V7.8C7 5.7 8.7 4 10.8 4h2.4C15.3 4 17 5.7 17 7.8v1.7M8 14h8" stroke="white" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="8" cy="14" r="1.15" fill="white"/><circle cx="16" cy="14" r="1.15" fill="white"/>
+  </svg>
+</div>
+  <h1 data-i18n="appTitle">We Save</h1>
+  <label data-i18n="email">Email</label>
+  <input type="email" id="authEmail" placeholder="" autocomplete="username">
+  <label data-i18n="password">Password</label>
+  <div class="password-wrap">
+    <input type="password" id="authPassword" placeholder="" autocomplete="current-password">
+    <button type="button" class="password-toggle" id="passwordToggle" aria-label="Show password" title="Show password">
+      <svg class="icon-eye-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12z"></path>
+        <circle cx="12" cy="12" r="2.5"></circle>
+      </svg>
+      <svg class="icon-eye-closed" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12z"></path>
+        <circle cx="12" cy="12" r="2.5"></circle>
+        <line x1="2.5" y1="2.5" x2="21.5" y2="21.5"></line>
+      </svg>
+    </button>
+  </div>
+  <div class="auth-options-row">
+    <div class="remember-label"><input type="checkbox" id="rememberMe" checked> <span data-i18n="keepSigned">Keep me signed in</span></div>
+    <a class="forgot-link" href="#" id="forgotLink" data-i18n="forgot">Forgot Password?</a>
+  </div>
+  <div class="auth-actions">
+    <button type="button" id="loginBtn" data-i18n="login">Login</button>
+    <button type="button" id="signupBtn" data-i18n="createAccount">Create account</button>
+  </div>
+  <div id="authError"></div>
+  <div id="authStatus"></div>
+
+  <div class="oauth-divider" data-i18n="orContinue">or continue with</div>
+  <div class="oauth-buttons">
+    <button type="button" class="oauth-btn" id="googleBtn">
+      <svg viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.6 6.5 29.6 4.5 24 4.5 12.7 4.5 3.5 13.7 3.5 25S12.7 45.5 24 45.5 44.5 36.3 44.5 25c0-1.5-.2-3-.4-4.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.6 15.9 18.9 13 24 13c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.6 6.5 29.6 4.5 24 4.5c-7.7 0-14.4 4.3-17.7 10.2z"/><path fill="#4CAF50" d="M24 45.5c5.5 0 10.4-1.9 14.3-5.1l-6.6-5.6C29.6 36.7 26.9 37.5 24 37.5c-5.3 0-9.7-3.3-11.3-8l-6.6 5.1C9.5 40.9 16.2 45.5 24 45.5z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.3 4.3-4.2 5.7l6.6 5.6C41.7 36.4 44.5 31.2 44.5 25c0-1.5-.2-3-.4-4.5z"/></svg>
+      <span data-i18n="google">Sign in with Google</span>
+    </button>
+    <button type="button" class="oauth-btn" id="facebookBtn">
+      <svg viewBox="0 0 24 24" fill="#fff"><path d="M22 12c0-5.5-4.5-10-10-10S2 6.5 2 12c0 5 3.7 9.1 8.4 9.9v-7H7.9V12h2.5V9.8c0-2.5 1.5-3.9 3.8-3.9 1.1 0 2.2.2 2.2.2v2.5h-1.2c-1.2 0-1.6.8-1.6 1.6V12h2.8l-.4 2.9h-2.4v7C18.3 21.1 22 17 22 12z"/></svg>
+      <span data-i18n="facebook">Continue with Facebook</span>
+    </button>
+  </div>
+</div>
+
+<div id="forgotScreen" class="hidden">
+  <h1 data-i18n="resetPassword">Reset Password</h1>
+  <label data-i18n="email">Email</label>
+  <input type="email" id="resetEmail" placeholder="Enter your account email" autocomplete="email">
+  <button type="button" class="add-btn" id="resetBtn" style="width:100%;margin-top:1rem;" data-i18n="sendReset">Send Reset Email</button>
+  <button type="button" class="secondary-btn" id="backToLoginBtn" data-i18n="backLogin">Back to Login</button>
+  <div id="resetError"></div>
+  <div id="resetStatus"></div>
+</div>
+
+<div class="wrap hidden" id="appScreen">
+
+  <div class="masthead">
+    <div class="main-brand"><div class="wesave-logo" aria-hidden="true">
+  <svg viewBox="0 0 24 24" fill="none">
+    <path d="M4 9.5h16v9.5H4zM7 9.5V7.8C7 5.7 8.7 4 10.8 4h2.4C15.3 4 17 5.7 17 7.8v1.7M8 14h8" stroke="white" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="8" cy="14" r="1.15" fill="white"/><circle cx="16" cy="14" r="1.15" fill="white"/>
+  </svg>
+</div><div class="brand-text"><h1>We Save</h1><span id="todayLabel"></span></div></div>
+    <div class="main-controls">
+      <button type="button" class="logout-link" id="logoutBtn" data-i18n="logout">Log out</button>
+      <button class="language-toggle" id="mainLanguageBtn" type="button">CN</button>
+      <button class="theme-toggle" id="mainThemeToggleBtn" type="button" title="Switch to dark mode">
+        <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
       </button>
     </div>
-    <div class="auth-logo">
-      <svg viewBox="0 0 24 24" fill="none"><path d="M4 16h16M4 16l1.5-5.5A2 2 0 0 1 7.4 9h9.2a2 2 0 0 1 1.9 1.5L20 16M4 16v3a1 1 0 0 0 1 1h1a1 1 0 0 0 1-1v-1h10v1a1 1 0 0 0 1 1h1a1 1 0 0 0 1-1v-3" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="7.5" cy="16.2" r="1.3" fill="white"/><circle cx="16.5" cy="16.2" r="1.3" fill="white"/></svg>
-    </div>
-    <h1 class="auth-title" data-i18n="appTitle">车贷管家</h1>
-    <p class="auth-sub" data-i18n="authSub">登录后，手机和电脑的数据会自动同步</p>
-
-    <button class="btn-google" id="googleSignInBtn">
-      <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.9c1.7-1.57 2.7-3.87 2.7-6.62z"/><path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.9-2.26c-.8.54-1.84.86-3.06.86-2.35 0-4.34-1.59-5.05-3.72H.98v2.33A9 9 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.95 10.7A5.4 5.4 0 0 1 3.67 9c0-.59.1-1.17.28-1.7V4.97H.98A9 9 0 0 0 0 9c0 1.45.35 2.83.98 4.03l2.97-2.33z"/><path fill="#EA4335" d="M9 3.58c1.32 0 2.51.46 3.44 1.35l2.58-2.58C13.46.89 11.43 0 9 0A9 9 0 0 0 .98 4.97l2.97 2.33C4.66 5.17 6.65 3.58 9 3.58z"/></svg>
-      <span data-i18n="googleLogin">使用 Google 登录</span>
-    </button>
-
-    <div class="auth-divider"><span data-i18n="or">或</span></div>
-
-    <div class="field">
-      <label for="authEmail" data-i18n="email">邮箱</label>
-      <input id="authEmail" type="email" placeholder="">
-    </div>
-    <div class="field">
-      <label for="authPassword" data-i18n="password">密码</label>
-      <div class="password-wrap">
-        <input id="authPassword" type="password" placeholder="">
-        <button class="password-eye" id="passwordEyeBtn" type="button" aria-label="Show password" title="Show password">
-          <svg id="eyeNormal" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>
-          <svg id="eyeSlash" style="display:none" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/><path d="M4 4l16 16"/></svg>
-        </button>
-      </div>
-    </div>
-
-    <div class="auth-options">
-      <label class="keep-signed-in" for="keepSignedIn">
-        <input id="keepSignedIn" type="checkbox">
-        <span data-i18n="keepSigned">Keep Me Signed In</span>
-      </label>
-      <a class="forgot-password" id="forgotPasswordLink" href="#" data-i18n="forgotPassword">Forgot Password?</a>
-    </div>
-
-    <div class="actions" style="margin-top:14px;">
-      <button class="btn-accent" id="emailLoginBtn" style="flex:1;" data-i18n="login">登录</button>
-      <button class="btn-ghost" id="emailRegisterBtn" style="flex:1;" data-i18n="register">注册新账号</button>
-    </div>
-
-    <div id="authError" class="auth-error"></div>
   </div>
+
+  <div class="balance-block">
+    <div class="balance-main">
+      <div class="label" data-i18n="balance">Balance</div>
+      <div class="amount" id="balanceAmt">RM0.00</div>
+    </div>
+    <div class="mini-stats">
+      <div class="in"><div class="label" data-i18n="inMonth">In this month</div><div class="val" id="monthIn">RM0.00</div></div>
+      <div class="out"><div class="label" data-i18n="outMonth">Out this month</div><div class="val" id="monthOut">RM0.00</div></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <form class="entry" id="entryForm" novalidate>
+      <div class="type-toggle full">
+        <button type="button" class="active expense" data-type="expense">Expense</button>
+        <button type="button" class="income" data-type="income">Income</button>
+      </div>
+      <div class="full">
+        <label data-i18n="description">Description</label>
+        <input type="text" id="descInput" placeholder="Groceries, salary, rent..." required>
+      </div>
+      <div>
+        <label data-i18n="amount">Amount</label>
+        <input type="number" id="amtInput" placeholder="0.00" step="0.01" min="0.01" required>
+      </div>
+      <div>
+        <label data-i18n="category">Category</label>
+        <select id="catInput">
+          <option>Food</option>
+          <option>Transport</option>
+          <option>Housing</option>
+          <option>Utilities</option>
+          <option>Entertainment</option>
+          <option>Health</option>
+          <option>Income</option>
+          <option>Other</option>
+        </select>
+      </div>
+      <div>
+        <label data-i18n="who">Who</label>
+        <select id="personInput">
+          <option>Gary</option>
+          <option>Kiki</option>
+        </select>
+      </div>
+      <div>
+        <label data-i18n="date">Date</label>
+        <input type="date" id="dateInput">
+      </div>
+      <div class="form-error-msg hidden" id="formErrorMsg">Please fill out all required fields.</div>
+      <button type="submit" class="add-btn" data-i18n="addLedger">Add to ledger</button>
+    </form>
+  </div>
+
+  <div class="panel">
+    <div class="panel-title">
+      <span data-i18n="categoryBudgets">Category budgets — this month</span>
+    </div>
+    <div class="budgets" id="budgetsList"></div>
+    <div class="budget-set">
+      <select id="budgetCat">
+        <option>Food</option>
+        <option>Transport</option>
+        <option>Housing</option>
+        <option>Utilities</option>
+        <option>Entertainment</option>
+        <option>Health</option>
+        <option>Other</option>
+      </select>
+      <input type="number" id="budgetAmt" placeholder="Budget RM" step="1" min="0">
+      <button type="button" id="setBudgetBtn" data-i18n="set">Set</button>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-title" data-i18n="transactions">Transactions</div>
+    <div class="ledger" id="ledgerList"></div>
+  </div>
+
 </div>
 
-<div class="app-window">
-  <div class="titlebar">
-    <div class="icon">
-      <svg viewBox="0 0 24 24" fill="none"><path d="M4 16h16M4 16l1.5-5.5A2 2 0 0 1 7.4 9h9.2a2 2 0 0 1 1.9 1.5L20 16M4 16v3a1 1 0 0 0 1 1h1a1 1 0 0 0 1-1v-1h10v1a1 1 0 0 0 1 1h1a1 1 0 0 0 1-1v-3" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="7.5" cy="16.2" r="1.3" fill="white"/><circle cx="16.5" cy="16.2" r="1.3" fill="white"/></svg>
-    </div>
-    <h1 data-i18n="appTitle">车贷管家</h1>
-    <div class="plate-chip" id="plateChip">未设置车牌</div>
-    <button class="language-toggle" id="mainLanguageBtn" type="button">EN</button>
-    <button class="theme-toggle" id="themeToggleBtn" title="切换暗色模式">
-      <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-      <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
-    </button>
-  </div>
-
-  <div class="content">
-
-    <div class="card">
-      <h2 data-i18n="loanOverview">贷款总览</h2>
-      <div class="overview-top">
-        <div class="ring-wrap">
-          <svg viewBox="0 0 112 112">
-            <circle class="ring-track" cx="56" cy="56" r="46"></circle>
-            <circle class="ring-progress" id="ring" cx="56" cy="56" r="46"
-              stroke-dasharray="289" stroke-dashoffset="289"></circle>
-          </svg>
-          <div class="ring-label">
-            <div class="pct" id="pctText">0%</div>
-            <div class="pct-sub" data-i18n="paidOffLabel">已还清</div>
-          </div>
-        </div>
-        <div class="stats">
-          <div class="stat">
-            <div class="k" data-i18n="totalLoan">贷款总额</div>
-            <div class="v" id="totalText">RM 0</div>
-          </div>
-          <div class="stat paid">
-            <div class="k" data-i18n="amountPaid">已还金额</div>
-            <div class="v" id="paidText">RM 0</div>
-          </div>
-          <div class="stat remaining">
-            <div class="k" data-i18n="remainingBalance">剩余欠款</div>
-            <div class="v" id="remainText">RM 0</div>
-          </div>
-          <div class="stat">
-            <div class="k" data-i18n="paymentCount">还款次数</div>
-            <div class="v" id="countText">0</div>
-          </div>
-          <div class="stat payoff" style="grid-column: 1 / -1;">
-            <div class="k" data-i18n="estimatedRemaining">按目前还款速度，预计还剩</div>
-            <div class="v" id="payoffText">--</div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="settings-toggle" id="settingsToggle">
-        <h2 style="margin:0;" data-i18n="vehicleLoanSettings">车辆与贷款设置</h2>
-        <svg class="chev" width="16" height="16" viewBox="0 0 24 24" fill="none">
-          <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-      </div>
-      <div class="settings-body" id="settingsBody">
-        <div class="row2">
-          <div class="field">
-            <label for="plateInput" data-i18n="plateNumber">车牌号码</label>
-            <input id="plateInput" type="text" placeholder="例如 WXX 1234" data-i18n-placeholder="plateExample">
-          </div>
-          <div class="field">
-            <label for="totalInput" data-i18n="totalLoanRM">车贷总额 (RM)</label>
-            <input id="totalInput" type="number" min="0" step="0.01" placeholder="例如 80000" data-i18n-placeholder="amountExample80k">
-          </div>
-        </div>
-        <div class="actions">
-          <button class="btn-accent" id="saveSettingsBtn" data-i18n="saveSettings">保存设置</button>
-          <button class="btn-ghost" id="clearSettingsBtn" data-i18n="clearPlate">清除车牌信息</button>
-        </div>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="settings-toggle" id="accountToggle">
-        <h2 style="margin:0;" data-i18n="account">账号</h2>
-        <svg class="chev" width="16" height="16" viewBox="0 0 24 24" fill="none">
-          <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-      </div>
-      <div class="settings-body" id="accountBody">
-        <div id="accountEmailText" class="info-box" style="margin-bottom:14px;">未登录</div>
-        <div class="actions">
-          <button class="btn-ghost" id="logoutBtn" data-i18n="logout">退出登录</button>
-        </div>
-      </div>
-    </div>
-
-    <div class="card">
-      <h2 id="payCardTitle" data-i18n="recordPayment">记录一笔还款</h2>
-      <div class="row2">
-        <div class="field">
-          <label for="payAmount" data-i18n="paymentAmount">还款金额 (RM)</label>
-          <input id="payAmount" type="number" min="0" step="0.01" placeholder="例如 1200" data-i18n-placeholder="amountExample1200">
-        </div>
-        <div class="field">
-          <label for="payDate" data-i18n="date">日期</label>
-          <input id="payDate" type="date">
-        </div>
-      </div>
-      <div class="field">
-        <label for="payNote" data-i18n="noteOptional">备注（可选）</label>
-        <input id="payNote" type="text" placeholder="例如 每月供款" data-i18n-placeholder="monthlyPaymentExample">
-      </div>
-      <div class="actions">
-        <button class="btn-accent" id="addPayBtn" data-i18n="addPayment">添加还款记录</button>
-        <button class="btn-ghost" id="cancelEditBtn" style="display:none;" data-i18n="cancelEdit">取消编辑</button>
-      </div>
-    </div>
-
-    <div class="card">
-      <h2 data-i18n="paymentHistory">还款记录</h2>
-      <div id="historyList">
-        <div class="empty-state" data-i18n="noPayments">还没有还款记录，添加第一笔吧。</div>
-      </div>
-    </div>
-
-  </div>
-</div>
-
-<div class="modal-overlay" id="confirmOverlay">
-  <div class="modal-box">
-    <div class="modal-title" id="confirmTitle">确认操作</div>
-    <div class="modal-message" id="confirmMessage"></div>
-    <div class="modal-actions">
-      <button class="btn-ghost" id="confirmCancelBtn" data-i18n="cancel">取消</button>
-      <button class="btn-accent" id="confirmOkBtn" data-i18n="confirm">确认</button>
-    </div>
-  </div>
-</div>
-
-<div class="toast" id="toast"></div>
-
-<script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore-compat.js"></script>
 <script>
-// ==================================================================
-// 把下面这几行换成你自己 Firebase 项目的配置
-// （Firebase 控制台 → 项目设置 → 常规 → 你的应用 → SDK 设置和配置）
-// ==================================================================
+// ---- Firebase setup ----
+// Paste the config object Firebase gave you when you registered the web app.
 const firebaseConfig = {
-  apiKey: "AIzaSyCMmGXhYMxtUpAPCJH0pfvlmCDyxvDYnqE",
-  authDomain: "oplord-35fc0.firebaseapp.com",
-  projectId: "oplord-35fc0",
-  storageBucket: "oplord-35fc0.firebasestorage.app",
-  messagingSenderId: "558480615816",
-  appId: "1:558480615816:web:e3283f7fdc1adce8e6b23d"
+  apiKey: "AIzaSyBbhKX9m67hPecVUAVRhcBAPJjxPDM8Zio",
+  authDomain: "wesave-ee5fd.firebaseapp.com",
+  databaseURL: "https://wesave-ee5fd-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "wesave-ee5fd",
+  storageBucket: "wesave-ee5fd.firebasestorage.app",
+  messagingSenderId: "797814401717",
+  appId: "1:797814401717:web:df3c03fa40148a6d086cfc"
 };
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
+const THEME_KEY = 'wesaveTheme';
+const LANGUAGE_KEY = 'wesaveLanguage';
+let currentLanguage = localStorage.getItem(LANGUAGE_KEY) || 'en';
+let currentTheme = localStorage.getItem(THEME_KEY) || ((window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light');
 
-const THEME_KEY = "carLoanTheme";
-let state = { plate: "", totalLoan: 0, payments: [], theme: localStorage.getItem(THEME_KEY) || null };
-
-const $ = (id) => document.getElementById(id);
-
-// ================== EN / CN Language ==================
-const LANGUAGE_KEY = "carLoanLanguage";
-let currentLanguage = localStorage.getItem(LANGUAGE_KEY) || "cn";
 const I18N = {
-  cn: {
-    appTitle:"车贷管家", authSub:"登录后，手机和电脑的数据会自动同步", googleLogin:"使用 Google 登录", or:"或", email:"邮箱", password:"密码",
-    keepSigned:"保持登录资料", forgotPassword:"忘记密码？", login:"登录", register:"注册新账号", loanOverview:"贷款总览", paidOffLabel:"已还清",
-    totalLoan:"贷款总额", amountPaid:"已还金额", remainingBalance:"剩余欠款", paymentCount:"还款次数", estimatedRemaining:"按目前还款速度，预计还剩",
-    vehicleLoanSettings:"车辆与贷款设置", plateNumber:"车牌号码", plateExample:"例如 WXX 1234", totalLoanRM:"车贷总额 (RM)", amountExample80k:"例如 80000",
-    saveSettings:"保存设置", clearPlate:"清除车牌信息", account:"账号", logout:"退出登录", recordPayment:"记录一笔还款", paymentAmount:"还款金额 (RM)",
-    amountExample1200:"例如 1200", date:"日期", noteOptional:"备注（可选）", monthlyPaymentExample:"例如 每月供款", addPayment:"添加还款记录", cancelEdit:"取消编辑",
-    paymentHistory:"还款记录", noPayments:"还没有还款记录，添加第一笔吧。", cancel:"取消", confirm:"确认", unsetPlate:"未设置车牌", loggedIn:"已登录", notLoggedIn:"未登录",
-    edit:"修改", delete:"删除", fullyPaid:"🎉 已还清", noPaymentYet:"还没有还款记录", insufficientRate:"还款速度不足以还清", year:"年", month:"个月",
-    avgMonthlyTitle:"按平均每月还 {amount} 计算", confirmAction:"确认操作", showPassword:"显示密码", hidePassword:"隐藏密码",
-    invalidEmail:"邮箱格式不对", userNotFound:"这个邮箱还没有注册", wrongPassword:"密码不对", invalidCredential:"邮箱或密码不对", emailInUse:"这个邮箱已经注册过了，直接登录就好",
-    weakPassword:"密码至少要 6 位", networkFailed:"网络连接失败，请检查网络", loginCancelled:"登录已取消", tooMany:"尝试次数太多，请稍后再试", missingEmail:"请输入邮箱", userDisabled:"这个账号已被停用",
-    loginFailed:"登录失败，请重试", enterEmailReset:"请先输入邮箱，然后再点击忘记密码？", resetSent:"密码重置邮件已发送到 {email}，请检查邮箱。", enterEmailPass:"请输入邮箱和密码",
-    noGoogleToken:"没有拿到 Google 登录令牌", logoutConfirm:"确定要退出登录吗？", logoutTitle:"退出登录", cloudFail:"云端同步失败 {hint}，请检查 Firestore 设置或网络", saveFail:"保存失败 {hint}，请检查 Firestore 设置或网络",
-    deleted:"已删除该记录", editPayment:"修改还款记录", saveChanges:"保存修改", enterPlate:"请输入车牌号码", invalidTotal:"请输入有效的贷款总额", settingsSaved:"设置已保存",
-    noSavedPlate:"目前没有已保存的车牌信息", clearConfirm:"确定要清除车牌号码和贷款总额吗？还款记录不会被删除。", clearPlateTitle:"清除车牌信息", plateCleared:"车牌信息已清除",
-    invalidPayment:"请输入有效的还款金额", futureDate:"日期不能选择未来的日子", paymentUpdated:"还款记录已更新", paymentAdded:"已添加还款记录"
+  en:{
+    appTitle:'We Save',email:'Email',password:'Password',keepSigned:'Keep me signed in',forgot:'Forgot Password?',login:'Login',createAccount:'Create account',
+    orContinue:'or continue with',google:'Sign in with Google',facebook:'Continue with Facebook',resetPassword:'Reset Password',sendReset:'Send Reset Email',
+    backLogin:'Back to Login',logout:'Log out',balance:'Balance',inMonth:'In this month',outMonth:'Out this month',description:'Description',amount:'Amount',
+    category:'Category',who:'Who',date:'Date',addLedger:'Add to ledger',categoryBudgets:'Category budgets — this month',set:'Set',transactions:'Transactions'
   },
-  en: {
-    appTitle:"Car Loan Manager", authSub:"Sign in to sync your data across your phone and computer", googleLogin:"Continue with Google", or:"OR", email:"Email", password:"Password",
-    keepSigned:"Keep Me Signed In", forgotPassword:"Forgot Password?", login:"Sign In", register:"Create Account", loanOverview:"Loan Overview", paidOffLabel:"Paid",
-    totalLoan:"Total Loan", amountPaid:"Amount Paid", remainingBalance:"Remaining Balance", paymentCount:"Payments", estimatedRemaining:"Estimated time remaining at current payment rate",
-    vehicleLoanSettings:"Vehicle & Loan Settings", plateNumber:"Plate Number", plateExample:"e.g. WXX 1234", totalLoanRM:"Total Loan (RM)", amountExample80k:"e.g. 80000",
-    saveSettings:"Save Settings", clearPlate:"Clear Vehicle Info", account:"Account", logout:"Sign Out", recordPayment:"Record a Payment", paymentAmount:"Payment Amount (RM)",
-    amountExample1200:"e.g. 1200", date:"Date", noteOptional:"Note (optional)", monthlyPaymentExample:"e.g. Monthly installment", addPayment:"Add Payment", cancelEdit:"Cancel Edit",
-    paymentHistory:"Payment History", noPayments:"No payment records yet. Add your first payment.", cancel:"Cancel", confirm:"Confirm", unsetPlate:"Plate not set", loggedIn:"Signed in", notLoggedIn:"Not signed in",
-    edit:"Edit", delete:"Delete", fullyPaid:"🎉 Fully paid", noPaymentYet:"No payment records yet", insufficientRate:"Payment rate is insufficient", year:"year", month:"month",
-    avgMonthlyTitle:"Based on an average monthly payment of {amount}", confirmAction:"Confirm Action", showPassword:"Show password", hidePassword:"Hide password",
-    invalidEmail:"Invalid email address", userNotFound:"No account is registered with this email", wrongPassword:"Incorrect password", invalidCredential:"Incorrect email or password", emailInUse:"This email is already registered. Please sign in.",
-    weakPassword:"Password must be at least 6 characters", networkFailed:"Network connection failed. Please check your connection.", loginCancelled:"Sign-in was cancelled", tooMany:"Too many attempts. Please try again later.", missingEmail:"Please enter your email", userDisabled:"This account has been disabled",
-    loginFailed:"Sign-in failed. Please try again.", enterEmailReset:"Enter your email first, then tap Forgot Password?", resetSent:"Password reset email sent to {email}. Please check your inbox.", enterEmailPass:"Please enter your email and password",
-    noGoogleToken:"Google sign-in token was not received", logoutConfirm:"Are you sure you want to sign out?", logoutTitle:"Sign Out", cloudFail:"Cloud sync failed {hint}. Check Firestore settings or your network.", saveFail:"Save failed {hint}. Check Firestore settings or your network.",
-    deleted:"Payment record deleted", editPayment:"Edit Payment", saveChanges:"Save Changes", enterPlate:"Please enter the plate number", invalidTotal:"Please enter a valid total loan amount", settingsSaved:"Settings saved",
-    noSavedPlate:"There is no saved vehicle information", clearConfirm:"Clear the plate number and total loan amount? Payment records will not be deleted.", clearPlateTitle:"Clear Vehicle Info", plateCleared:"Vehicle information cleared",
-    invalidPayment:"Please enter a valid payment amount", futureDate:"The date cannot be in the future", paymentUpdated:"Payment record updated", paymentAdded:"Payment record added"
+  cn:{
+    appTitle:'We Save',email:'邮箱',password:'密码',keepSigned:'保持登录资料',forgot:'忘记密码？',login:'登录',createAccount:'创建账号',
+    orContinue:'或使用以下方式继续',google:'使用 Google 登录',facebook:'使用 Facebook 登录',resetPassword:'重置密码',sendReset:'发送重置邮件',
+    backLogin:'返回登录',logout:'退出登录',balance:'余额',inMonth:'本月收入',outMonth:'本月支出',description:'说明',amount:'金额',
+    category:'类别',who:'人员',date:'日期',addLedger:'添加记录',categoryBudgets:'本月分类预算',set:'设置',transactions:'交易记录'
   }
 };
-function tr(key, vars={}){
-  let text = (I18N[currentLanguage] && I18N[currentLanguage][key]) || I18N.cn[key] || key;
-  Object.entries(vars).forEach(([k,v]) => { text = text.replaceAll(`{${k}}`, v); });
-  return text;
-}
+function tr(k){ return (I18N[currentLanguage] && I18N[currentLanguage][k]) || k; }
 function applyLanguage(lang){
-  currentLanguage = lang === "en" ? "en" : "cn";
-  localStorage.setItem(LANGUAGE_KEY, currentLanguage);
-  document.documentElement.lang = currentLanguage === "en" ? "en" : "zh-CN";
-  document.title = tr("appTitle");
-  document.querySelectorAll("[data-i18n]").forEach(el => { el.textContent = tr(el.dataset.i18n); });
-  document.querySelectorAll("[data-i18n-placeholder]").forEach(el => { el.placeholder = tr(el.dataset.i18nPlaceholder); });
-  const nextLabel = currentLanguage === "cn" ? "EN" : "CN";
-  $("authLanguageBtn").textContent = nextLabel;
-  $("mainLanguageBtn").textContent = nextLabel;
-  const visible = $("authPassword").type === "text";
-  $("passwordEyeBtn").setAttribute("aria-label", tr(visible ? "hidePassword" : "showPassword"));
-  $("passwordEyeBtn").title = tr(visible ? "hidePassword" : "showPassword");
-  applyTheme(state.theme || "light");
-  if(auth.currentUser) $("accountEmailText").textContent = auth.currentUser.email ? `${tr("loggedIn")}: ${auth.currentUser.email}` : tr("loggedIn");
-  render();
+  currentLanguage = lang === 'cn' ? 'cn' : 'en';
+  localStorage.setItem(LANGUAGE_KEY,currentLanguage);
+  document.documentElement.lang = currentLanguage === 'cn' ? 'zh-CN' : 'en';
+  document.querySelectorAll('[data-i18n]').forEach(el=>el.textContent=tr(el.dataset.i18n));
+  document.title=tr('appTitle');
+  const next=currentLanguage==='en'?'CN':'EN';
+  document.getElementById('authLanguageBtn').textContent=next;
+  document.getElementById('mainLanguageBtn').textContent=next;
+  updateThemeTitles();
 }
+function updateThemeTitles(){
+  const title=currentTheme==='dark'
+    ? (currentLanguage==='cn'?'切换到亮色模式':'Switch to light mode')
+    : (currentLanguage==='cn'?'切换到暗色模式':'Switch to dark mode');
+  document.getElementById('authThemeToggleBtn').title=title;
+  document.getElementById('mainThemeToggleBtn').title=title;
+}
+function applyTheme(theme){
+  currentTheme=theme==='dark'?'dark':'light';
+  document.body.classList.toggle('dark',currentTheme==='dark');
+  localStorage.setItem(THEME_KEY,currentTheme);
+  updateThemeTitles();
+}
+function toggleTheme(){ applyTheme(currentTheme==='dark'?'light':'dark'); }
+document.getElementById('authLanguageBtn').addEventListener('click',()=>applyLanguage(currentLanguage==='en'?'cn':'en'));
+document.getElementById('mainLanguageBtn').addEventListener('click',()=>applyLanguage(currentLanguage==='en'?'cn':'en'));
+document.getElementById('authThemeToggleBtn').addEventListener('click',toggleTheme);
+document.getElementById('mainThemeToggleBtn').addEventListener('click',toggleTheme);
+applyTheme(currentTheme);
+applyLanguage(currentLanguage);
+
+
+const passwordInput = document.getElementById('authPassword');
+const passwordToggle = document.getElementById('passwordToggle');
+passwordToggle.addEventListener('click', () => {
+  const showing = passwordInput.type === 'text';
+  passwordInput.type = showing ? 'password' : 'text';
+  passwordToggle.classList.toggle('showing', !showing);
+  passwordToggle.setAttribute('aria-label', showing ? 'Show password' : 'Hide password');
+  passwordToggle.setAttribute('title', showing ? 'Show password' : 'Hide password');
+});
+
+let transactions = [];
+let budgets = {};
+let currentType = 'expense';
+let unsubscribeSnapshot = null;
+let currentDocRef = null;
+let suppressNextSave = false;
 
 function fmt(n){
-  return "RM " + Number(n||0).toLocaleString('en-MY', {minimumFractionDigits:2, maximumFractionDigits:2});
+  const sign = n < 0 ? '-' : '';
+  return sign + 'RM' + Math.abs(n).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
 }
 
-function todayStr(){
-  const d = new Date();
-  return d.toISOString().slice(0,10);
+document.getElementById('todayLabel').textContent = new Date().toLocaleDateString(undefined,{month:'long',day:'numeric',year:'numeric'});
+const todayStr = new Date().toISOString().slice(0,10);
+document.getElementById('dateInput').value = todayStr;
+document.getElementById('dateInput').max = todayStr;
+
+document.querySelectorAll('.type-toggle button').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.type-toggle button').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    currentType = btn.dataset.type;
+  });
+});
+
+// ---- Auth screen wiring ----
+const authScreen = document.getElementById('authScreen');
+const appScreen = document.getElementById('appScreen');
+const authError = document.getElementById('authError');
+const authStatus = document.getElementById('authStatus');
+const forgotScreen = document.getElementById('forgotScreen');
+const resetEmail = document.getElementById('resetEmail');
+const resetError = document.getElementById('resetError');
+const resetStatus = document.getElementById('resetStatus');
+
+function showLogin(){ authScreen.classList.remove('hidden'); forgotScreen.classList.add('hidden'); resetError.textContent=''; resetStatus.textContent=''; }
+function showForgot(){ authScreen.classList.add('hidden'); appScreen.classList.add('hidden'); forgotScreen.classList.remove('hidden'); resetEmail.value=document.getElementById('authEmail').value.trim(); resetEmail.focus(); }
+document.getElementById('forgotLink').addEventListener('click',e=>{e.preventDefault();showForgot();});
+document.getElementById('backToLoginBtn').addEventListener('click',showLogin);
+document.getElementById('resetBtn').addEventListener('click',()=>{
+  const email=resetEmail.value.trim(); resetError.textContent=''; resetStatus.textContent='';
+  if(!email){resetError.textContent='Please enter your email address.';return;}
+  resetStatus.textContent='Sending reset email...';
+  auth.sendPasswordResetEmail(email).then(()=>{resetStatus.textContent='Password reset email sent. Check your inbox.';}).catch(err=>{resetStatus.textContent='';resetError.textContent=err.message;});
+});
+
+function setAuthBusy(msg){
+  authStatus.textContent = msg || '';
+  authError.textContent = '';
+}
+function setAuthError(err){
+  authStatus.textContent = '';
+  authError.textContent = err;
 }
 
-function applyTheme(theme){
-  const resolvedTheme = theme === "dark" ? "dark" : "light";
-  document.body.classList.toggle("dark", resolvedTheme === "dark");
-  localStorage.setItem(THEME_KEY, resolvedTheme);
-  const title = resolvedTheme === "dark" ? (currentLanguage === "en" ? "Switch to light mode" : "切换到亮色模式") : (currentLanguage === "en" ? "Switch to dark mode" : "切换到暗色模式");
-  $("themeToggleBtn").title = title;
-  $("authThemeToggleBtn").title = title;
+// Closing/cancelling a Google or Facebook sign-in is a normal user action.
+// Do not show Firebase's technical popup-cancel error on the login screen.
+function handleOAuthError(err){
+  const code = err && err.code ? err.code : '';
+  if(code === 'auth/popup-closed-by-user' ||
+     code === 'auth/cancelled-popup-request' ||
+     code === 'auth/user-cancelled'){
+    setAuthBusy('');
+    return;
+  }
+  setAuthError(err && err.message ? err.message : 'Sign-in could not be completed.');
 }
 
-let unsubscribeSnapshot = null;
+function applyPersistence(){
+  const remember = document.getElementById('rememberMe').checked;
+  const email = document.getElementById('authEmail').value.trim();
 
-function startFirestoreSync(uid){
-  if(unsubscribeSnapshot) unsubscribeSnapshot();
-  const docRef = db.collection("users").doc(uid);
-  unsubscribeSnapshot = docRef.onSnapshot((snap) => {
-    if(snap.exists){
-      state = Object.assign({plate:"", totalLoan:0, payments:[], theme:null}, snap.data());
+  if(remember && email) {
+    localStorage.setItem('wesaveRememberedEmail', email);
+    // Save the password only when Keep me signed in is checked.
+    // Note: localStorage is not encrypted.
+    localStorage.setItem('wesaveRememberedPassword', document.getElementById('authPassword').value);
+  } else {
+    localStorage.removeItem('wesaveRememberedEmail');
+    localStorage.removeItem('wesaveRememberedPassword');
+  }
+
+  return auth.setPersistence(firebase.auth.Auth.Persistence.SESSION);
+}
+
+function loadRememberedEmail(){
+  const email = localStorage.getItem('wesaveRememberedEmail');
+  const password = localStorage.getItem('wesaveRememberedPassword');
+  document.getElementById('authEmail').value = email || '';
+  document.getElementById('authPassword').value = password || '';
+  document.getElementById('rememberMe').checked = !!email;
+}
+loadRememberedEmail();
+
+document.getElementById('rememberMe').addEventListener('change', ()=>{
+  if(!document.getElementById('rememberMe').checked){
+    localStorage.removeItem('wesaveRememberedEmail');
+    localStorage.removeItem('wesaveRememberedPassword');
+    // Clear both fields immediately when Keep me signed in is unticked.
+    document.getElementById('authEmail').value = '';
+    document.getElementById('authPassword').value = '';
+  }
+});
+
+document.getElementById('loginBtn').addEventListener('click', ()=>{
+  const email = document.getElementById('authEmail').value.trim();
+  const password = document.getElementById('authPassword').value;
+  if(!email || !password){ setAuthError('Enter both email and password.'); return; }
+  setAuthBusy('Logging in...');
+  applyPersistence()
+    .then(()=> auth.signInWithEmailAndPassword(email, password))
+    .catch(err => setAuthError(err.message));
+});
+
+document.getElementById('signupBtn').addEventListener('click', ()=>{
+  const email = document.getElementById('authEmail').value.trim();
+  const password = document.getElementById('authPassword').value;
+  if(!email || !password){ setAuthError('Enter both email and password.'); return; }
+  if(password.length < 6){ setAuthError('Password needs at least 6 characters.'); return; }
+  setAuthBusy('Creating account...');
+  applyPersistence()
+    .then(()=> auth.createUserWithEmailAndPassword(email, password))
+    .catch(err => setAuthError(err.message));
+});
+
+document.getElementById('logoutBtn').addEventListener('click', ()=>{
+  auth.signOut();
+});
+
+// Popups are unreliable on mobile browsers (privacy-focused browsers like
+// Brave, and mobile Safari/Chrome in general, often block the popup's
+// postMessage handshake back to this page). Use a full-page redirect on
+// mobile instead, and keep the popup on desktop where it works fine.
+function isMobileBrowser(){
+  return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+}
+
+// Clear the temporary OAuth message as soon as the browser/app becomes active again.
+// This makes Cancel / Log Out return to a clean login screen immediately.
+function clearOAuthBusyOnReturn(){
+  if(document.visibilityState === 'visible' &&
+     authStatus.textContent.startsWith('Opening ')){
+    setAuthBusy('');
+  }
+}
+document.addEventListener('visibilitychange', clearOAuthBusyOnReturn);
+window.addEventListener('focus', clearOAuthBusyOnReturn);
+window.addEventListener('pageshow', clearOAuthBusyOnReturn);
+
+function startOAuthSignIn(provider, label){
+  setAuthBusy(`Opening ${label} sign-in...`);
+  applyPersistence().then(()=>{
+    if(isMobileBrowser()){
+      auth.signInWithRedirect(provider);
     } else {
-      state = { plate:"", totalLoan:0, payments:[], theme: state.theme || null };
-      docRef.set(state);
+      auth.signInWithPopup(provider).catch(handleOAuthError);
     }
-    if(!state.theme){
-      state.theme = (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches)
-        ? "dark" : "light";
-    }
-    applyTheme(state.theme);
-    render();
-  }, (err) => {
-    console.error("Firestore sync error:", err);
-    const hint = err && err.code ? `（${err.code}）` : "";
-    showToast(tr("cloudFail", {hint}));
   });
 }
 
-function stopFirestoreSync(){
+document.getElementById('googleBtn').addEventListener('click', ()=>{
+  startOAuthSignIn(new firebase.auth.GoogleAuthProvider(), 'Google');
+});
+
+document.getElementById('facebookBtn').addEventListener('click', ()=>{
+  startOAuthSignIn(new firebase.auth.FacebookAuthProvider(), 'Facebook');
+});
+
+// Handle the mobile redirect result. A cancelled/closed Facebook or Google
+// flow returns to the login screen quietly; a successful result is handled
+// by onAuthStateChanged below.
+auth.getRedirectResult()
+  .then(result => {
+    if(!result || !result.user) setAuthBusy('');
+  })
+  .catch(handleOAuthError);
+
+// Keep Firebase's existing session on page reload.
+// Do NOT sign the user out automatically during startup.
+auth.setPersistence(firebase.auth.Auth.Persistence.SESSION)
+  .catch(err=>console.warn('Auth initialization warning:', err));
+
+auth.onAuthStateChanged(user=>{
   if(unsubscribeSnapshot){ unsubscribeSnapshot(); unsubscribeSnapshot = null; }
-}
-
-$("authThemeToggleBtn").addEventListener("click", () => {
-  state.theme = state.theme === "dark" ? "light" : "dark";
-  applyTheme(state.theme);
-});
-
-$("themeToggleBtn").addEventListener("click", async () => {
-  state.theme = state.theme === "dark" ? "light" : "dark";
-  applyTheme(state.theme);
-  await saveState();
-});
-
-async function saveState(){
-  const user = auth.currentUser;
-  if(!user) return;
-  try{
-    await db.collection("users").doc(user.uid).set(state);
-  }catch(e){
-    console.error("Firestore save error:", e);
-    const hint = e && e.code ? `（${e.code}）` : "";
-    showToast(tr("saveFail", {hint}));
-  }
-}
-
-// ================== 登录 / 注册 / Google 登录 ==================
-function showAuthError(msg){
-  $("authError").textContent = msg || "";
-}
-
-function translateAuthError(err){
-  const map = {
-    "auth/invalid-email": "invalidEmail", "auth/user-not-found": "userNotFound", "auth/wrong-password": "wrongPassword",
-    "auth/invalid-credential": "invalidCredential", "auth/email-already-in-use": "emailInUse", "auth/weak-password": "weakPassword",
-    "auth/network-request-failed": "networkFailed", "auth/popup-closed-by-user": "loginCancelled", "auth/too-many-requests": "tooMany",
-    "auth/missing-email": "missingEmail", "auth/user-disabled": "userDisabled"
-  };
-  return map[err.code] ? tr(map[err.code]) : (err.message || tr("loginFailed"));
-}
-
-// Keep Me Signed In: remember the email and password on this device when selected.
-// The password field remains visually masked by type="password" until the eye icon is pressed.
-const REMEMBER_EMAIL_KEY = "carLoanRememberedEmail";
-const REMEMBER_PASSWORD_KEY = "carLoanRememberedPassword";
-const rememberedEmail = localStorage.getItem(REMEMBER_EMAIL_KEY) || "";
-const rememberedPassword = localStorage.getItem(REMEMBER_PASSWORD_KEY) || "";
-if(rememberedEmail || rememberedPassword){
-  $("authEmail").value = rememberedEmail;
-  $("authPassword").value = rememberedPassword;
-  $("authPassword").type = "password";
-  $("keepSignedIn").checked = true;
-}
-
-// Unticking Keep Me Signed In immediately forgets and clears both fields.
-$("keepSignedIn").addEventListener("change", () => {
-  if(!$("keepSignedIn").checked){
-    localStorage.removeItem(REMEMBER_EMAIL_KEY);
-    localStorage.removeItem(REMEMBER_PASSWORD_KEY);
-    $("authEmail").value = "";
-    $("authPassword").value = "";
-    $("authPassword").type = "password";
-    $("eyeNormal").style.display = "block";
-    $("eyeSlash").style.display = "none";
-  }
-});
-
-// Use in-memory auth persistence so reopening the Android app shows the login screen.
-// The remembered email is restored separately when Keep Me Signed In is checked.
-auth.setPersistence(firebase.auth.Auth.Persistence.NONE).catch((e) => {
-  console.warn("Could not set Firebase auth persistence:", e);
-});
-
-$("authLanguageBtn").addEventListener("click", () => applyLanguage(currentLanguage === "cn" ? "en" : "cn"));
-$("mainLanguageBtn").addEventListener("click", () => applyLanguage(currentLanguage === "cn" ? "en" : "cn"));
-
-$("passwordEyeBtn").addEventListener("click", () => {
-  const showing = $("authPassword").type === "text";
-  $("authPassword").type = showing ? "password" : "text";
-  $("eyeNormal").style.display = showing ? "block" : "none";
-  $("eyeSlash").style.display = showing ? "none" : "block";
-  $("passwordEyeBtn").setAttribute("aria-label", tr(showing ? "showPassword" : "hidePassword"));
-  $("passwordEyeBtn").title = tr(showing ? "showPassword" : "hidePassword");
-});
-
-if(!state.theme){
-  state.theme = (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? "dark" : "light";
-}
-applyTheme(state.theme);
-applyLanguage(currentLanguage);
-
-$("forgotPasswordLink").addEventListener("click", async (e) => {
-  e.preventDefault();
-  showAuthError("");
-  const email = $("authEmail").value.trim();
-  if(!email){
-    showAuthError(tr("enterEmailReset"));
-    $("authEmail").focus();
-    return;
-  }
-  try{
-    await auth.sendPasswordResetEmail(email);
-    showAuthError(tr("resetSent", {email}));
-  }catch(err){
-    showAuthError(translateAuthError(err));
-  }
-});
-
-$("emailLoginBtn").addEventListener("click", async () => {
-  showAuthError("");
-  const email = $("authEmail").value.trim();
-  const pass = $("authPassword").value;
-  if(!email || !pass){ showAuthError(tr("enterEmailPass")); return; }
-  try{
-    if($("keepSignedIn").checked){
-      localStorage.setItem(REMEMBER_EMAIL_KEY, email);
-      localStorage.setItem(REMEMBER_PASSWORD_KEY, pass);
-    }else{
-      localStorage.removeItem(REMEMBER_EMAIL_KEY);
-      localStorage.removeItem(REMEMBER_PASSWORD_KEY);
-    }
-    await auth.signInWithEmailAndPassword(email, pass);
-  }catch(e){
-    showAuthError(translateAuthError(e));
-  }
-});
-
-$("emailRegisterBtn").addEventListener("click", async () => {
-  showAuthError("");
-  const email = $("authEmail").value.trim();
-  const pass = $("authPassword").value;
-  if(!email || !pass){ showAuthError(tr("enterEmailPass")); return; }
-  try{
-    await auth.createUserWithEmailAndPassword(email, pass);
-  }catch(e){
-    showAuthError(translateAuthError(e));
-  }
-});
-
-$("googleSignInBtn").addEventListener("click", async () => {
-  showAuthError("");
-  try{
-    const provider = new firebase.auth.GoogleAuthProvider();
-    await auth.signInWithPopup(provider);
-  }catch(e){
-    // A cancelled Google sign-in is not an error. Return quietly to the login screen.
-    const code = String((e && e.code) || "").toLowerCase();
-    const message = String((e && e.message) || e || "").toLowerCase();
-    const cancelled =
-      code.includes("popup-closed-by-user") ||
-      code.includes("cancelled-popup-request") ||
-      code.includes("canceled") || code.includes("cancelled") ||
-      code === "12501" ||
-      message.includes("popup closed") ||
-      message.includes("closed by the user") ||
-      message.includes("user canceled") || message.includes("user cancelled") ||
-      message.includes("sign in canceled") || message.includes("sign-in canceled") ||
-      message.includes("sign in cancelled") || message.includes("sign-in cancelled") ||
-      message.includes("12501");
-    if(cancelled){
-      showAuthError("");
-      return;
-    }
-    console.error("Google 登录失败，完整错误：", e);
-    let detail = "";
-    try{ detail = JSON.stringify(e, Object.getOwnPropertyNames(e)); }catch(_){}
-    showAuthError(translateAuthError(e) + (detail ? ("\n\n完整信息：" + detail) : ""));
-  }
-});
-
-$("logoutBtn").addEventListener("click", async () => {
-  const ok = await showConfirm(tr("logoutConfirm"), tr("logoutTitle"));
-  if(!ok) return;
-  await auth.signOut();
-});
-
-$("accountToggle").addEventListener("click", () => {
-  $("accountToggle").classList.toggle("open");
-  $("accountBody").classList.toggle("open");
-});
-
-auth.onAuthStateChanged((user) => {
   if(user){
-    document.body.classList.add("authed");
-    $("accountEmailText").textContent = user.email ? `${tr("loggedIn")}: ${user.email}` : tr("loggedIn");
-    if(!$("keepSignedIn").checked){
-      $("authEmail").value = "";
-      $("authPassword").value = "";
+    authScreen.classList.add('hidden');
+    appScreen.classList.remove('hidden');
+    if(!document.getElementById('rememberMe').checked){
+      document.getElementById('authEmail').value = '';
     }
-    showAuthError("");
-    startFirestoreSync(user.uid);
+    document.getElementById('authPassword').value = '';
+    currentDocRef = db.collection('users').doc(user.uid);
+    unsubscribeSnapshot = currentDocRef.onSnapshot(doc=>{
+      const data = doc.data() || {};
+      transactions = data.transactions || [];
+      budgets = data.budgets || {};
+      render();
+    }, err=>{
+      console.error('Firestore sync error', err);
+      setAuthError('');
+    });
   } else {
-    document.body.classList.remove("authed");
-    stopFirestoreSync();
-    if($("keepSignedIn").checked){
-      $("authEmail").value = localStorage.getItem(REMEMBER_EMAIL_KEY) || "";
-      $("authPassword").value = localStorage.getItem(REMEMBER_PASSWORD_KEY) || "";
-      $("authPassword").type = "password";
-      $("eyeNormal").style.display = "block";
-      $("eyeSlash").style.display = "none";
-    }else{
-      $("authEmail").value = "";
-      $("authPassword").value = "";
-    }
+    appScreen.classList.add('hidden');
+    authScreen.classList.remove('hidden');
+    currentDocRef = null;
+    transactions = [];
+    budgets = {};
+    setAuthBusy('');
   }
 });
 
-function showToast(msg){
-  const t = $("toast");
-  t.textContent = msg;
-  t.classList.add("show");
-  clearTimeout(showToast._timer);
-  showToast._timer = setTimeout(()=> t.classList.remove("show"), 1800);
+function saveTransactions(){
+  if(!currentDocRef) return;
+  currentDocRef.set({ transactions }, { merge: true })
+    .catch(e=> console.error('Could not save transactions', e));
+}
+function saveBudgets(){
+  if(!currentDocRef) return;
+  currentDocRef.set({ budgets }, { merge: true })
+    .catch(e=> console.error('Could not save budgets', e));
 }
 
 function render(){
-  $("plateInput").value = state.plate || "";
-  $("totalInput").value = state.totalLoan || "";
-  $("plateChip").textContent = state.plate ? state.plate : tr("unsetPlate");
+  const balance = transactions.reduce((s,t)=> s + (t.type==='income'? t.amount : -t.amount), 0);
+  document.getElementById('balanceAmt').textContent = fmt(balance);
 
-  const totalPaid = state.payments.reduce((s,p)=> s + Number(p.amount||0), 0);
-  const remaining = Math.max(Number(state.totalLoan||0) - totalPaid, 0);
-  const pct = state.totalLoan > 0 ? Math.min(totalPaid / state.totalLoan, 1) : 0;
+  const now = new Date();
+  const inMonth = transactions.filter(t=>{
+    const d = new Date(t.date);
+    return d.getMonth()===now.getMonth() && d.getFullYear()===now.getFullYear();
+  });
+  const monthIn = inMonth.filter(t=>t.type==='income').reduce((s,t)=>s+t.amount,0);
+  const monthOut = inMonth.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0);
+  document.getElementById('monthIn').textContent = fmt(monthIn);
+  document.getElementById('monthOut').textContent = fmt(monthOut);
 
-  $("totalText").textContent = fmt(state.totalLoan);
-  $("paidText").textContent = fmt(totalPaid);
-  $("remainText").textContent = fmt(remaining);
-  $("countText").textContent = state.payments.length;
-  $("pctText").textContent = Math.round(pct*100) + "%";
-
-  const circumference = 289;
-  $("ring").style.strokeDashoffset = circumference - (pct * circumference);
-
-  updatePayoffEstimate(remaining, totalPaid);
-
-  const list = $("historyList");
-  if(state.payments.length === 0){
-    list.innerHTML = '<div class="empty-state" data-i18n="noPayments">还没有还款记录，添加第一笔吧。</div>';
-    return;
-  }
-  const sorted = [...state.payments].sort((a,b)=> (a.date < b.date ? 1 : -1));
-  list.innerHTML = sorted.map(p => `
-    <div class="history-item" data-id="${p.id}">
-      <div class="dot"></div>
-      <div class="info">
-        <div class="date">${p.date}</div>
-        ${p.note ? `<div class="note">${escapeHtml(p.note)}</div>` : ""}
-      </div>
-      <div class="amt">${fmt(p.amount)}</div>
-      <button class="btn-edit-text" onclick="editPayment('${p.id}')">${tr("edit")}</button>
-      <button class="btn-danger-text" onclick="deletePayment('${p.id}')">${tr("delete")}</button>
-    </div>
-  `).join("");
-}
-
-// 根据实际还款记录，自动算出"按目前的还款速度"大约还要多久还清
-function updatePayoffEstimate(remaining, totalPaid){
-  const el = $("payoffText");
-
-  if(!state.totalLoan){
-    el.textContent = "--";
-    return;
-  }
-  if(remaining <= 0){
-    el.textContent = tr("fullyPaid");
-    return;
-  }
-  if(state.payments.length === 0){
-    el.textContent = tr("noPaymentYet");
-    return;
-  }
-
-  // 计算从第一笔还款到今天，一共经过了几个月，取平均每月还款额
-  const dates = state.payments.map(p => new Date(p.date + "T00:00:00"));
-  const firstDate = new Date(Math.min(...dates));
-  const today = new Date();
-  let monthsElapsed = (today.getFullYear() - firstDate.getFullYear()) * 12
-                      + (today.getMonth() - firstDate.getMonth()) + 1;
-  monthsElapsed = Math.max(monthsElapsed, 1);
-
-  const avgMonthly = totalPaid / monthsElapsed;
-
-  if(avgMonthly <= 0){
-    el.textContent = tr("insufficientRate");
-    return;
-  }
-
-  const monthsLeft = Math.ceil(remaining / avgMonthly);
-  const years = Math.floor(monthsLeft / 12);
-  const remMonths = monthsLeft % 12;
-
-  let text = "";
-  if(years > 0 && remMonths > 0){
-    text = currentLanguage === "en" ? `${years} ${tr("year")}${years === 1 ? "" : "s"} ${remMonths} ${tr("month")}${remMonths === 1 ? "" : "s"}` : `${years} ${tr("year")} ${remMonths} ${tr("month")}`;
-  } else if(years > 0){
-    text = currentLanguage === "en" ? `${years} ${tr("year")}${years === 1 ? "" : "s"}` : `${years} ${tr("year")}`;
+  const ledger = document.getElementById('ledgerList');
+  ledger.innerHTML = '';
+  if(transactions.length===0){
+    ledger.innerHTML = '<div class="empty-row">No transactions yet. Add your first one above.</div>';
   } else {
-    text = currentLanguage === "en" ? `${remMonths} ${tr("month")}${remMonths === 1 ? "" : "s"}` : `${remMonths} ${tr("month")}`;
+    const sorted = [...transactions].sort((a,b)=> new Date(b.date) - new Date(a.date));
+    sorted.forEach(t=>{
+      const row = document.createElement('div');
+      row.className = 'row';
+      const d = new Date(t.date);
+      const dateStr = d.toLocaleDateString(undefined,{month:'short',day:'numeric'});
+      row.innerHTML = `
+        <div class="date">${dateStr}</div>
+        <div><span class="desc">${escapeHtml(t.desc)}</span><span class="cat">${t.category}${t.person ? ' · ' + t.person : ''}</span></div>
+        <div class="amt ${t.type}">${t.type==='income'?'+':'-'}${fmt(t.amount)}</div>
+        <button class="del" aria-label="Delete transaction" data-id="${t.id}">×</button>
+      `;
+      ledger.appendChild(row);
+    });
+    ledger.querySelectorAll('.del').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        transactions = transactions.filter(t=>String(t.id)!==btn.dataset.id);
+        saveTransactions();
+        render();
+      });
+    });
   }
 
-  el.textContent = text;
-  el.title = tr("avgMonthlyTitle", {amount: fmt(avgMonthly)});
+  const budgetCats = Object.keys(budgets);
+  const budgetsList = document.getElementById('budgetsList');
+  budgetsList.innerHTML = '';
+  if(budgetCats.length===0){
+    budgetsList.innerHTML = '<div class="empty-row" style="padding:0.5rem 0;">No budgets set. Add one below.</div>';
+  } else {
+    budgetCats.forEach(cat=>{
+      const spent = inMonth.filter(t=>t.type==='expense' && t.category===cat).reduce((s,t)=>s+t.amount,0);
+      const limit = budgets[cat];
+      const pct = Math.min(100, (spent/limit)*100 || 0);
+      const over = spent > limit;
+      const item = document.createElement('div');
+      item.className = 'budget-item';
+      item.innerHTML = `
+        <div class="budget-head">
+          <span class="cat-name">${cat}</span>
+          <div class="right">
+            <span class="fig">${fmt(spent)} / ${fmt(limit)}</span>
+            <button type="button" class="icon-btn del-budget" data-cat="${cat}" aria-label="Delete budget for ${cat}">×</button>
+          </div>
+        </div>
+        <div class="bar-track"><div class="bar-fill ${over?'over':''}" style="width:${pct}%"></div></div>
+      `;
+      budgetsList.appendChild(item);
+    });
+    budgetsList.querySelectorAll('.del-budget').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const cat = btn.dataset.cat;
+        if(!confirm(`Remove the budget set for ${cat}?`)) return;
+        delete budgets[cat];
+        saveBudgets();
+        render();
+      });
+    });
+  }
 }
 
 function escapeHtml(str){
-  const d = document.createElement('div');
-  d.textContent = str;
-  return d.innerHTML;
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
 }
 
-function showConfirm(message, title){
-  return new Promise((resolve) => {
-    $("confirmTitle").textContent = title || tr("confirmAction");
-    $("confirmMessage").textContent = message;
-    $("confirmOverlay").classList.add("show");
+document.getElementById('entryForm').addEventListener('submit', (e)=>{
+  e.preventDefault();
+  const descEl = document.getElementById('descInput');
+  const amtEl = document.getElementById('amtInput');
+  const errorEl = document.getElementById('formErrorMsg');
 
-    function cleanup(result){
-      $("confirmOverlay").classList.remove("show");
-      okBtn.removeEventListener("click", onOk);
-      cancelBtn.removeEventListener("click", onCancel);
-      resolve(result);
-    }
-    const okBtn = $("confirmOkBtn");
-    const cancelBtn = $("confirmCancelBtn");
-    function onOk(){ cleanup(true); }
-    function onCancel(){ cleanup(false); }
-    okBtn.addEventListener("click", onOk);
-    cancelBtn.addEventListener("click", onCancel);
+  const desc = descEl.value.trim();
+  const amount = parseFloat(amtEl.value);
+  const category = document.getElementById('catInput').value;
+  const person = document.getElementById('personInput').value;
+  const date = document.getElementById('dateInput').value || todayStr;
+
+  descEl.classList.remove('field-error');
+  amtEl.classList.remove('field-error');
+  errorEl.classList.add('hidden');
+
+  let message = '';
+  if(!desc) { descEl.classList.add('field-error'); message = 'Please fill out all required fields.'; }
+  if(!amount || amount<=0) { amtEl.classList.add('field-error'); message = 'Please fill out all required fields.'; }
+  if(date > todayStr) { message = 'Date cannot be in the future.'; }
+
+  if(message){
+    errorEl.textContent = message;
+    errorEl.classList.remove('hidden');
+    (!desc ? descEl : amtEl).focus();
+    return;
+  }
+
+  transactions.push({ id: Date.now(), desc, amount, category, person, type: currentType, date });
+  saveTransactions();
+  descEl.value='';
+  amtEl.value='';
+  render();
+});
+
+document.getElementById('setBudgetBtn').addEventListener('click', ()=>{
+  const cat = document.getElementById('budgetCat').value;
+  const amt = parseFloat(document.getElementById('budgetAmt').value);
+  if(!amt || amt<=0) return;
+  budgets[cat] = amt;
+  saveBudgets();
+  document.getElementById('budgetAmt').value='';
+  render();
+});
+
+if('serviceWorker' in navigator){
+  window.addEventListener('load', ()=>{
+    navigator.serviceWorker.register('sw.js').catch(err=>console.error('SW registration failed', err));
   });
 }
-
-let editingPaymentId = null;
-
-async function deletePayment(id){
-  state.payments = state.payments.filter(p => p.id !== id);
-  if(editingPaymentId === id) exitEditMode();
-  render();
-  await saveState();
-  showToast(tr("deleted"));
-}
-window.deletePayment = deletePayment;
-
-function editPayment(id){
-  const p = state.payments.find(p => p.id === id);
-  if(!p) return;
-  editingPaymentId = id;
-  $("payAmount").value = p.amount;
-  $("payDate").value = p.date;
-  $("payNote").value = p.note || "";
-  $("payCardTitle").textContent = tr("editPayment");
-  $("addPayBtn").textContent = tr("saveChanges");
-  $("cancelEditBtn").style.display = "inline-block";
-  $("payAmount").focus();
-}
-window.editPayment = editPayment;
-
-function exitEditMode(){
-  editingPaymentId = null;
-  $("payCardTitle").textContent = tr("recordPayment");
-  $("addPayBtn").textContent = tr("addPayment");
-  $("cancelEditBtn").style.display = "none";
-  $("payAmount").value = "";
-  $("payNote").value = "";
-  $("payDate").value = todayStr();
-}
-
-$("cancelEditBtn").addEventListener("click", () => {
-  exitEditMode();
-});
-
-$("settingsToggle").addEventListener("click", () => {
-  $("settingsToggle").classList.toggle("open");
-  $("settingsBody").classList.toggle("open");
-});
-
-$("saveSettingsBtn").addEventListener("click", async () => {
-  const plate = $("plateInput").value.trim();
-  const total = parseFloat($("totalInput").value);
-  if(!plate){
-    showToast(tr("enterPlate"));
-    return;
-  }
-  if(isNaN(total) || total < 0){
-    showToast(tr("invalidTotal"));
-    return;
-  }
-  state.plate = plate;
-  state.totalLoan = total;
-  render();
-  await saveState();
-  showToast(tr("settingsSaved"));
-});
-
-$("clearSettingsBtn").addEventListener("click", async () => {
-  if(!state.plate && !state.totalLoan){
-    showToast(tr("noSavedPlate"));
-    return;
-  }
-  const ok = await showConfirm(tr("clearConfirm"), tr("clearPlateTitle"));
-  if(!ok) return;
-  state.plate = "";
-  state.totalLoan = 0;
-  render();
-  await saveState();
-  showToast(tr("plateCleared"));
-});
-
-$("addPayBtn").addEventListener("click", async () => {
-  const amount = parseFloat($("payAmount").value);
-  const date = $("payDate").value || todayStr();
-  const note = $("payNote").value.trim();
-  if(isNaN(amount) || amount <= 0){
-    showToast(tr("invalidPayment"));
-    return;
-  }
-  if(date > todayStr()){
-    showToast(tr("futureDate"));
-    return;
-  }
-
-  if(editingPaymentId){
-    const p = state.payments.find(p => p.id === editingPaymentId);
-    if(p){
-      p.amount = amount;
-      p.date = date;
-      p.note = note;
-    }
-    exitEditMode();
-    render();
-    await saveState();
-    showToast(tr("paymentUpdated"));
-  } else {
-    state.payments.push({
-      id: Date.now().toString(36) + Math.random().toString(36).slice(2,7),
-      amount, date, note
-    });
-    $("payAmount").value = "";
-    $("payNote").value = "";
-    render();
-    await saveState();
-    showToast(tr("paymentAdded"));
-  }
-});
-
-$("payDate").max = todayStr();
-$("payDate").value = todayStr();
 </script>
-
 </body>
 </html>
+
+<style>
+body:not(.dark) #loginBtn,
+body:not(.dark) .add-btn,
+body:not(.dark) .budget-set button{
+  background:#0067C0;
+  color:#fff;
+}
+body:not(.dark) #loginBtn:hover,
+body:not(.dark) .add-btn:hover,
+body:not(.dark) .budget-set button:hover{
+  background:#005A9E;
+}
+body:not(.dark) #authScreen,
+body:not(.dark) #forgotScreen,
+body:not(.dark) form.entry{
+  box-shadow:0 8px 30px rgba(0,103,192,0.06);
+}
+body:not(.dark) input:focus,
+body:not(.dark) select:focus{
+  outline-color:#0067C0;
+}
+</style>
