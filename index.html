@@ -1405,6 +1405,422 @@ if('serviceWorker' in navigator){
   });
 }
 </script>
+
+<script>
+
+(() => {
+  if (window.__wesaveFullLanguagePatch) {
+    if (typeof applyLanguage === 'function') applyLanguage(currentLanguage);
+    return;
+  }
+  window.__wesaveFullLanguagePatch = true;
+
+  Object.assign(I18N.en, {
+    appTitle:'We Save',
+    expense:'Expense', income:'Income',
+    descPlaceholder:'Groceries, salary, rent...',
+    budgetPlaceholder:'Budget RM',
+    noBudgets:'No budgets set. Add one below.',
+    noTransactions:'No transactions yet. Add your first one above.',
+    calendarClear:'Clear', calendarToday:'Today',
+    requiredFields:'Please fill out all required fields.',
+    futureDate:'Date cannot be in the future.',
+    deleteTransaction:'Delete transaction',
+    deleteBudget:'Delete budget for',
+    removeBudget:'Remove the budget set for {category}?',
+    name:'Name',
+    namePlaceholder:'Type name'
+  });
+
+  Object.assign(I18N.cn, {
+    appTitle:'储蓄管家',
+    expense:'支出', income:'收入',
+    descPlaceholder:'例如：买菜、薪水、房租...',
+    budgetPlaceholder:'预算 RM',
+    noBudgets:'尚未设置预算，请在下方添加。',
+    noTransactions:'尚无交易记录，请先在上方添加。',
+    calendarClear:'清除', calendarToday:'今天',
+    requiredFields:'请填写所有必填项目。',
+    futureDate:'日期不能是未来日期。',
+    deleteTransaction:'删除交易记录',
+    deleteBudget:'删除预算：',
+    removeBudget:'确定删除「{category}」的预算吗？',
+    name:'名字',
+    namePlaceholder:'输入名字'
+  });
+
+  const CATEGORY_LABELS = {
+    en: {
+      Food:'Food', Transport:'Transport', Housing:'Housing', Utilities:'Utilities',
+      Entertainment:'Entertainment', Health:'Health', Income:'Income', Other:'Other'
+    },
+    cn: {
+      Food:'餐饮', Transport:'交通', Housing:'住房', Utilities:'水电杂费',
+      Entertainment:'娱乐', Health:'健康', Income:'收入', Other:'其他'
+    }
+  };
+
+  const CN_TO_KEY = {};
+  Object.entries(CATEGORY_LABELS.cn).forEach(([k,v]) => CN_TO_KEY[v] = k);
+
+  function catKey(v) {
+    return CATEGORY_LABELS.en[v] ? v : (CN_TO_KEY[v] || v);
+  }
+
+  function catLabel(v) {
+    const key = catKey(v);
+    return (CATEGORY_LABELS[currentLanguage] && CATEGORY_LABELS[currentLanguage][key]) || v;
+  }
+
+  function localeCode() {
+    return currentLanguage === 'cn' ? 'zh-CN' : 'en-US';
+  }
+
+  function safeDateFromISO(iso) {
+    if (!iso) return null;
+    const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso);
+    if (!m) return null;
+    return new Date(Number(m[1]), Number(m[2])-1, Number(m[3]));
+  }
+
+  function formatHeaderDate(d) {
+    if (currentLanguage === 'cn') {
+      return d.toLocaleDateString('zh-CN', {year:'numeric', month:'long', day:'numeric'});
+    }
+    return d.toLocaleDateString('en-US', {month:'long', day:'numeric', year:'numeric'});
+  }
+
+  function formatLedgerDate(iso) {
+    const d = safeDateFromISO(iso);
+    if (!d) return iso || '';
+    if (currentLanguage === 'cn') {
+      return d.toLocaleDateString('zh-CN', {month:'short', day:'numeric'});
+    }
+    return d.toLocaleDateString('en-US', {month:'short', day:'numeric'});
+  }
+
+  function formatInputDate(iso) {
+    const d = safeDateFromISO(iso);
+    if (!d) return '';
+    const dd = String(d.getDate()).padStart(2,'0');
+    const mm = String(d.getMonth()+1).padStart(2,'0');
+    const yy = d.getFullYear();
+    return currentLanguage === 'cn' ? `${yy}/${mm}/${dd}` : `${dd}/${mm}/${yy}`;
+  }
+
+  function translateSelect(select) {
+    if (!select) return;
+    [...select.options].forEach(opt => {
+      if (!opt.dataset.categoryKey) {
+        opt.dataset.categoryKey = catKey(opt.getAttribute('value') || opt.textContent.trim());
+      }
+      const key = opt.dataset.categoryKey;
+      opt.value = key;
+      opt.textContent = catLabel(key);
+    });
+  }
+
+  // ----- Custom bilingual calendar -----
+  let calendarCursor = null;
+  let calendarOpen = false;
+
+  function ensureLocalizedCalendar() {
+    const native = document.getElementById('dateInput');
+    if (!native || document.getElementById('dateDisplay')) return;
+
+    native.type = 'hidden';
+
+    const wrap = document.createElement('div');
+    wrap.className = 'localized-date-wrap';
+    native.parentNode.insertBefore(wrap, native);
+    wrap.appendChild(native);
+
+    const display = document.createElement('input');
+    display.type = 'text';
+    display.id = 'dateDisplay';
+    display.readOnly = true;
+    display.autocomplete = 'off';
+    display.setAttribute('aria-label', tr('date'));
+
+    const trigger = document.createElement('button');
+    trigger.type = 'button';
+    trigger.className = 'localized-calendar-trigger';
+    trigger.id = 'localizedCalendarTrigger';
+    trigger.setAttribute('aria-label', tr('date'));
+    trigger.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/></svg>';
+
+    const popup = document.createElement('div');
+    popup.className = 'localized-calendar hidden';
+    popup.id = 'localizedCalendar';
+    popup.innerHTML = `
+      <div class="lc-head">
+        <button type="button" class="lc-nav" data-nav="-1" aria-label="Previous month">‹</button>
+        <div class="lc-month" id="lcMonth"></div>
+        <button type="button" class="lc-nav" data-nav="1" aria-label="Next month">›</button>
+      </div>
+      <div class="lc-week" id="lcWeek"></div>
+      <div class="lc-days" id="lcDays"></div>
+      <div class="lc-footer">
+        <button type="button" id="lcClear"></button>
+        <button type="button" id="lcToday"></button>
+      </div>`;
+
+    wrap.appendChild(display);
+    wrap.appendChild(trigger);
+    wrap.appendChild(popup);
+
+    const openCalendar = () => {
+      const selected = safeDateFromISO(native.value) || new Date();
+      calendarCursor = new Date(selected.getFullYear(), selected.getMonth(), 1);
+      calendarOpen = true;
+      popup.classList.remove('hidden');
+      renderCalendar();
+    };
+
+    display.addEventListener('click', openCalendar);
+    trigger.addEventListener('click', openCalendar);
+
+    popup.querySelectorAll('[data-nav]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const delta = Number(btn.dataset.nav);
+        calendarCursor = new Date(calendarCursor.getFullYear(), calendarCursor.getMonth()+delta, 1);
+        renderCalendar();
+      });
+    });
+
+    popup.querySelector('#lcClear').addEventListener('click', () => {
+      native.value = '';
+      updateLocalizedDateDisplay();
+      calendarOpen = false;
+      popup.classList.add('hidden');
+    });
+
+    popup.querySelector('#lcToday').addEventListener('click', () => {
+      native.value = todayStr;
+      updateLocalizedDateDisplay();
+      calendarOpen = false;
+      popup.classList.add('hidden');
+    });
+
+    document.addEventListener('click', e => {
+      if (calendarOpen && !wrap.contains(e.target)) {
+        calendarOpen = false;
+        popup.classList.add('hidden');
+      }
+    });
+
+    updateLocalizedDateDisplay();
+  }
+
+  function renderCalendar() {
+    const popup = document.getElementById('localizedCalendar');
+    if (!popup || !calendarCursor) return;
+
+    const y = calendarCursor.getFullYear();
+    const m = calendarCursor.getMonth();
+    const monthLabel = currentLanguage === 'cn'
+      ? `${y}年${m+1}月`
+      : new Date(y,m,1).toLocaleDateString('en-US',{month:'long',year:'numeric'});
+    popup.querySelector('#lcMonth').textContent = monthLabel;
+
+    const weekdays = currentLanguage === 'cn'
+      ? ['日','一','二','三','四','五','六']
+      : ['S','M','T','W','T','F','S'];
+    popup.querySelector('#lcWeek').innerHTML = weekdays.map(w=>`<span>${w}</span>`).join('');
+
+    popup.querySelector('#lcClear').textContent = tr('calendarClear');
+    popup.querySelector('#lcToday').textContent = tr('calendarToday');
+
+    const first = new Date(y,m,1);
+    const daysInMonth = new Date(y,m+1,0).getDate();
+    const selected = document.getElementById('dateInput').value;
+    const today = safeDateFromISO(todayStr);
+    let html = '';
+
+    for (let i=0; i<first.getDay(); i++) html += '<span class="lc-blank"></span>';
+
+    for (let day=1; day<=daysInMonth; day++) {
+      const d = new Date(y,m,day);
+      const iso = `${y}-${String(m+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+      const future = d > today;
+      const cls = [
+        'lc-day',
+        iso === selected ? 'selected' : '',
+        future ? 'disabled' : ''
+      ].filter(Boolean).join(' ');
+      html += `<button type="button" class="${cls}" data-date="${iso}" ${future?'disabled':''}>${day}</button>`;
+    }
+    popup.querySelector('#lcDays').innerHTML = html;
+
+    popup.querySelectorAll('.lc-day:not(.disabled)').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.getElementById('dateInput').value = btn.dataset.date;
+        updateLocalizedDateDisplay();
+        calendarOpen = false;
+        popup.classList.add('hidden');
+      });
+    });
+  }
+
+  function updateLocalizedDateDisplay() {
+    const native = document.getElementById('dateInput');
+    const display = document.getElementById('dateDisplay');
+    if (native && display) {
+      display.value = formatInputDate(native.value);
+      display.setAttribute('aria-label', tr('date'));
+    }
+    const trigger = document.getElementById('localizedCalendarTrigger');
+    if (trigger) trigger.setAttribute('aria-label', tr('date'));
+    if (calendarOpen) renderCalendar();
+  }
+
+  function localizeRenderedContent() {
+    // App title on login/main page + browser/window document title
+    document.querySelectorAll('#authScreen h1, .brand-text h1, .main-brand h1').forEach(el => {
+      el.textContent = tr('appTitle');
+    });
+    document.title = tr('appTitle');
+    // Header date
+    const todayLabel = document.getElementById('todayLabel');
+    if (todayLabel) todayLabel.textContent = formatHeaderDate(new Date());
+
+    // Expense / Income
+    const exp = document.querySelector('.type-toggle button[data-type="expense"]');
+    const inc = document.querySelector('.type-toggle button[data-type="income"]');
+    if (exp) exp.textContent = tr('expense');
+    if (inc) inc.textContent = tr('income');
+
+    // Placeholders
+    const desc = document.getElementById('descInput');
+    if (desc) desc.placeholder = tr('descPlaceholder');
+    const budgetAmt = document.getElementById('budgetAmt');
+    if (budgetAmt) budgetAmt.placeholder = tr('budgetPlaceholder');
+
+    const person = document.getElementById('personInput');
+    if (person && person.tagName === 'INPUT') person.placeholder = tr('namePlaceholder');
+
+    translateSelect(document.getElementById('catInput'));
+    translateSelect(document.getElementById('budgetCat'));
+
+    // Ledger
+    const ledger = document.getElementById('ledgerList');
+    if (ledger) {
+      if (!transactions || transactions.length === 0) {
+        const empty = ledger.querySelector('.empty-row');
+        if (empty) empty.textContent = tr('noTransactions');
+      } else {
+        const sorted = [...transactions].sort((a,b)=> new Date(b.date) - new Date(a.date));
+        ledger.querySelectorAll('.row').forEach((row, i) => {
+          const t = sorted[i];
+          if (!t) return;
+          const dateEl = row.querySelector('.date');
+          const catEl = row.querySelector('.cat');
+          const del = row.querySelector('.del');
+          if (dateEl) dateEl.textContent = formatLedgerDate(t.date);
+          if (catEl) catEl.textContent = `${catLabel(t.category)}${t.person ? ' · ' + t.person : ''}`;
+          if (del) del.setAttribute('aria-label', tr('deleteTransaction'));
+        });
+      }
+    }
+
+    // Budgets
+    const budgetsList = document.getElementById('budgetsList');
+    if (budgetsList) {
+      const cats = Object.keys(budgets || {});
+      if (cats.length === 0) {
+        const empty = budgetsList.querySelector('.empty-row');
+        if (empty) empty.textContent = tr('noBudgets');
+      } else {
+        budgetsList.querySelectorAll('.budget-item').forEach((item, i) => {
+          const cat = cats[i];
+          const name = item.querySelector('.cat-name');
+          const del = item.querySelector('.del-budget');
+          if (name && cat) name.textContent = catLabel(cat);
+          if (del && cat) del.setAttribute('aria-label', `${tr('deleteBudget')} ${catLabel(cat)}`);
+        });
+      }
+    }
+
+    updateLocalizedDateDisplay();
+  }
+
+  // Add custom calendar CSS once
+  if (!document.getElementById('wesaveLocalizedCalendarStyle')) {
+    const style = document.createElement('style');
+    style.id = 'wesaveLocalizedCalendarStyle';
+    style.textContent = `
+      .localized-date-wrap{position:relative;width:100%}
+      .localized-date-wrap #dateDisplay{width:100%;padding-right:42px;cursor:pointer}
+      .localized-calendar-trigger{
+        position:absolute;right:8px;top:50%;transform:translateY(-50%);
+        width:30px;height:30px;border:0;background:transparent;color:var(--ink-soft);
+        display:flex;align-items:center;justify-content:center;padding:5px;cursor:pointer;z-index:2
+      }
+      .localized-calendar-trigger svg{width:17px;height:17px}
+      .localized-calendar{
+        position:absolute;right:0;top:calc(100% + 6px);z-index:1000;width:280px;
+        padding:12px;background:var(--paper-raised);border:1px solid var(--line);
+        border-radius:8px;box-shadow:0 10px 28px rgba(0,0,0,.28);color:var(--ink)
+      }
+      .localized-calendar.hidden{display:none}
+      .lc-head{display:grid;grid-template-columns:34px 1fr 34px;align-items:center;margin-bottom:8px}
+      .lc-month{text-align:center;font-weight:700;font-size:14px}
+      .lc-nav,.lc-footer button{
+        border:0;background:transparent;color:#0067C0;cursor:pointer;border-radius:5px;min-height:30px
+      }
+      .lc-nav:hover,.lc-footer button:hover{background:rgba(127,127,127,.12)}
+      .lc-week,.lc-days{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;text-align:center}
+      .lc-week span{font-size:11px;color:var(--ink-soft);padding:4px 0;font-weight:600}
+      .lc-day{height:32px;border:0;border-radius:5px;background:transparent;color:var(--ink);cursor:pointer}
+      .lc-day:hover{background:rgba(127,127,127,.14)}
+      .lc-day.selected{background:#0067C0;color:#fff}
+      .lc-day.disabled{opacity:.32;cursor:not-allowed}
+      .lc-blank{height:32px}
+      .lc-footer{display:flex;justify-content:space-between;margin-top:8px;padding-top:7px;border-top:1px solid var(--line)}
+      @media(max-width:520px){.localized-calendar{width:min(280px,calc(100vw - 48px))}}
+    `;
+    document.head.appendChild(style);
+  }
+
+  ensureLocalizedCalendar();
+
+  const oldApplyLanguage = applyLanguage;
+  applyLanguage = function(lang) {
+    oldApplyLanguage(lang);
+    localizeRenderedContent();
+    if (calendarOpen) renderCalendar();
+  };
+
+  const oldRender = render;
+  render = function() {
+    oldRender();
+    localizeRenderedContent();
+  };
+
+  // Translate the validation messages generated by the existing submit handler.
+  const entryForm = document.getElementById('entryForm');
+  if (entryForm) {
+    entryForm.addEventListener('submit', () => {
+      setTimeout(() => {
+        const e = document.getElementById('formErrorMsg');
+        if (!e || e.classList.contains('hidden')) return;
+        if (/future/i.test(e.textContent)) e.textContent = tr('futureDate');
+        else e.textContent = tr('requiredFields');
+      }, 0);
+    });
+  }
+
+  // Make budget delete confirmation bilingual.
+  document.addEventListener('click', e => {
+    const btn = e.target.closest && e.target.closest('.del-budget');
+    if (!btn) return;
+    // Existing listener will still run; aria/display text is already bilingual.
+  }, true);
+
+  applyLanguage(currentLanguage);
+})();
+
+</script>
 </body>
 </html>
 
