@@ -18,6 +18,8 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-functions-compat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 <style>
   :root{
     --ink:#1B1B1B;
@@ -800,11 +802,87 @@ body.dark .brand-text #todayLabel{color:#B8B8B8}
 }
 </style>
 
+
+<style id="wesaveQrLoginStyles">
+/* Compact QR icon on the Web/Windows login page. Click it to open the large scannable QR. */
+.qr-desktop-inline{
+  position:static;
+  width:30px;
+  height:30px;
+  padding:2px;
+  margin-right:auto;
+  flex:0 0 30px;
+  border:1px solid var(--line);
+  border-radius:7px;
+  background:#fff;
+  display:grid;
+  place-items:center;
+  z-index:3;
+  box-shadow:0 2px 8px rgba(0,0,0,.10);
+  cursor:zoom-in;
+  overflow:hidden;
+}
+.qr-desktop-inline:hover{transform:scale(1.05);box-shadow:0 4px 12px rgba(0,0,0,.16)}
+.qr-desktop-inline:focus-visible{outline:2px solid #2B88D8;outline-offset:2px}
+.qr-inline-title,.qr-inline-countdown,.qr-inline-status,.qr-inline-refresh{display:none!important}
+.qr-inline-code-wrap{width:24px;height:24px;background:#fff;display:grid;place-items:center;overflow:hidden}
+.qr-inline-code{width:24px;height:24px;display:grid;place-items:center;background:#fff;overflow:hidden}
+.qr-inline-code img,.qr-inline-code canvas{width:24px!important;height:24px!important;display:block!important}
+
+/* Android keeps its native scanner button; Web/Windows use the compact QR icon. */
+.qr-login-area{margin-top:14px}
+.qr-login-btn{width:100%;min-height:42px;border:1px solid var(--line);border-radius:8px;background:var(--paper-raised);color:var(--ink);font:600 14px 'Inter',sans-serif;cursor:pointer}
+.qr-login-btn:hover{border-color:#0067C0;background:rgba(0,103,192,.06)}
+
+/* Large QR pop-up shown after clicking the small QR icon. */
+.qr-modal{position:fixed;inset:0;z-index:9999;background:rgba(10,20,30,.62);display:grid;place-items:center;padding:20px}
+.qr-card{width:min(350px,94vw);max-height:min(680px,94vh);overflow:auto;background:var(--paper-raised);border:1px solid var(--line);border-radius:14px;padding:18px 18px 20px;box-shadow:0 20px 60px rgba(0,0,0,.34)}
+.qr-card-head{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:12px}
+.qr-card h2{font-size:20px;margin:0;text-align:center;flex:1}
+.qr-close{width:34px;height:34px;border:0;border-radius:8px;background:transparent;color:var(--ink);font-size:24px;cursor:pointer;line-height:1}
+.qr-close:hover{background:var(--line-soft)}
+.qr-head-spacer{width:34px;height:34px;flex:0 0 34px}
+.qr-modal-preview{text-align:center}
+.qr-modal-code-wrap{position:relative;width:260px;height:260px;max-width:100%;margin:0 auto;background:#fff;border-radius:14px;padding:10px;display:grid;place-items:center;overflow:hidden;box-shadow:inset 0 0 0 1px rgba(0,0,0,.08)}
+.qr-modal-code{width:240px;height:240px;display:grid;place-items:center;background:#fff;overflow:hidden}
+.qr-modal-code img,.qr-modal-code canvas{width:240px!important;height:240px!important;display:block!important}
+.qr-modal-refresh{position:absolute;right:12px;bottom:12px;width:44px;height:44px;border:0;border-radius:50%;background:rgba(255,255,255,.96);color:#333;font-size:28px;font-weight:700;line-height:44px;padding:0;cursor:pointer;box-shadow:0 2px 10px rgba(0,0,0,.22)}
+.qr-modal-refresh:hover{background:#fff;transform:scale(1.04)}
+.qr-modal-countdown{font-size:12px;color:var(--ink-soft);margin-top:10px;min-height:16px}
+.qr-modal-status{font-size:12px;line-height:1.35;color:var(--ink-soft);margin-top:3px;min-height:17px;word-break:break-word}
+.qr-help{font-size:13px;line-height:1.45;color:var(--ink-soft);margin:10px 0 16px}
+.qr-state{padding:10px 12px;border-radius:8px;background:rgba(0,103,192,.08);font-size:13px;line-height:1.45;margin:10px 0}
+.qr-email-panel{margin-top:14px}
+.qr-email-panel label{display:block;font-size:12px;font-weight:600;margin-bottom:6px}
+.qr-email-panel input{width:100%}
+.qr-email-panel button,.qr-new-btn{width:100%;min-height:42px;margin-top:10px;border:0;border-radius:8px;background:#0067C0;color:#fff;font-weight:600;cursor:pointer}
+.qr-email-panel button:hover,.qr-new-btn:hover{background:#005A9E}
+.qr-new-btn.secondary{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.qr-error{background:rgba(196,43,28,.10);color:var(--clay-deep)}
+body.dark .qr-desktop-inline,body.dark .qr-inline-code-wrap,body.dark .qr-inline-code,body.dark .qr-modal-code-wrap,body.dark .qr-modal-code{background:#fff}
+
+@media (max-width:520px){
+  .qr-desktop-inline{width:30px;height:30px;flex-basis:30px}
+  .qr-modal-code-wrap{width:250px;height:250px}
+  .qr-modal-code{width:230px;height:230px}
+  .qr-modal-code img,.qr-modal-code canvas{width:230px!important;height:230px!important}
+}
+</style>
+
 </head>
 <body>
 
 <div id="authScreen">
   <div class="top-controls">
+  <div class="qr-desktop-inline hidden" id="qrDesktopInline" role="button" tabindex="0" aria-label="Open Android QR Login" title="Open Android QR Login">
+    <div class="qr-inline-title" id="qrInlineTitle">Android QR Login</div>
+    <div class="qr-inline-code-wrap">
+      <div class="qr-inline-code" id="qrCodeBox"></div>
+      <button type="button" class="qr-inline-refresh" id="qrInlineRefreshBtn" title="Refresh QR code" aria-label="Refresh QR code">↻</button>
+    </div>
+    <div class="qr-inline-countdown" id="qrCountdown"></div>
+    <div class="qr-inline-status" id="qrInlineStatus"></div>
+  </div>
     <button class="language-toggle" id="authLanguageBtn" type="button">CN</button>
     <button class="theme-toggle" id="authThemeToggleBtn" type="button" title="Switch to dark mode">
       <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
@@ -857,6 +935,40 @@ body.dark .brand-text #todayLabel{color:#B8B8B8}
       <span data-i18n="facebook">Continue with Facebook</span>
     </button>
   </div>
+
+
+  <div class="qr-login-area" id="qrLoginArea">
+    <button type="button" class="qr-login-btn hidden" id="qrAndroidScanBtn">Scan QR Code to Login</button>
+  </div>
+
+  <div class="qr-modal hidden" id="qrLoginModal" role="dialog" aria-modal="true" aria-labelledby="qrLoginTitle">
+    <div class="qr-card">
+      <div class="qr-card-head">
+        <div class="qr-head-spacer" aria-hidden="true"></div>
+        <h2 id="qrLoginTitle">Android QR Login</h2>
+        <button class="qr-close" id="qrCloseBtn" type="button" aria-label="Close">×</button>
+      </div>
+
+      <div class="qr-modal-preview" id="qrModalPreview">
+        <div class="qr-modal-code-wrap">
+          <div class="qr-modal-code" id="qrModalCodeBox"></div>
+          <button type="button" class="qr-modal-refresh" id="qrModalRefreshBtn" title="Refresh QR code" aria-label="Refresh QR code">↻</button>
+        </div>
+        <div class="qr-modal-countdown" id="qrModalCountdown"></div>
+        <div class="qr-modal-status" id="qrModalStatus">Ready to scan</div>
+      </div>
+
+      <div class="qr-help hidden" id="qrHelpText">QR scanned. Enter your We Save account email to continue.</div>
+      <div class="qr-state hidden" id="qrStateText">Waiting for Android scanner...</div>
+      <div class="qr-email-panel hidden" id="qrEmailPanel">
+        <label for="qrEmailInput" id="qrEmailLabel">Account email</label>
+        <input type="email" id="qrEmailInput" autocomplete="email" placeholder="you@example.com">
+        <button type="button" id="qrSendEmailBtn">Send verification email</button>
+      </div>
+      <button type="button" class="qr-new-btn secondary hidden" id="qrNewBtn">Generate New QR Code</button>
+    </div>
+  </div>
+
 </div>
 
 <div id="forgotScreen" class="hidden">
@@ -997,7 +1109,7 @@ const I18N = {
     category:'Category',who:'Who',date:'Date',addLedger:'Add to ledger',categoryBudgets:'Category budgets — this month',set:'Set',transactions:'Transactions'
   },
   cn:{
-    appTitle:'We Save',email:'邮箱',password:'密码',keepSigned:'保持登录资料',forgot:'忘记密码？',login:'登录',createAccount:'创建账号',
+    appTitle:'储蓄管家',email:'邮箱',password:'密码',keepSigned:'保持登录资料',forgot:'忘记密码？',login:'登录',createAccount:'创建账号',
     orContinue:'或使用以下方式继续',google:'使用 Google 登录',facebook:'使用 Facebook 登录',resetPassword:'重置密码',sendReset:'发送重置邮件',
     backLogin:'返回登录',logout:'退出登录',balance:'余额',inMonth:'本月收入',outMonth:'本月支出',description:'说明',amount:'金额',
     category:'类别',who:'人员',date:'日期',addLedger:'添加记录',categoryBudgets:'本月分类预算',set:'设置',transactions:'交易记录'
@@ -1821,6 +1933,296 @@ if('serviceWorker' in navigator){
 })();
 
 </script>
+
+<script id="wesaveQrLoginScript">
+(() => {
+  const QR_REGION = 'asia-southeast1';
+  const QR_VERIFY_URL = 'https://wesave-ee5fd.web.app/qr-verify.html';
+  const qrFns = firebase.app().functions(QR_REGION);
+  const callQr = name => qrFns.httpsCallable(name);
+  const isNativeAndroid = !!(window.Capacitor && typeof window.Capacitor.isNativePlatform === 'function' && window.Capacitor.isNativePlatform() && String(window.Capacitor.getPlatform()).toLowerCase() === 'android');
+
+  const STR = {
+    en:{scanBtn:'Scan QR Code to Login',title:'Android QR Login',inlineTitle:'Android QR Login',openQr:'Open Android QR Login',refresh:'Refresh QR code',popupHelp:'QR scanned. Enter your We Save account email to continue.',preparing:'Preparing QR code...',waiting:'Ready to scan',scanned:'QR scanned. Enter your We Save account email below.',emailLabel:'Account email',send:'Send verification email',sending:'Sending verification email...',sent:'Verification email sent. Open your email and click the sign-in link.',verified:'Email verified. Android is signing in...',done:'Android signed in successfully.',expired:'QR expired',newQr:'Generate New QR Code',close:'Close',seconds:'s',scanOpening:'Opening QR scanner...',scanWaiting:'QR scanned. Complete the email verification shown on the Windows/Web screen.',scanVerified:'Email verified. Signing in...',invalidQr:'This is not a valid We Save login QR code.',backend:'QR login backend is not available yet. Deploy the included Firebase Functions first.',emailRequired:'Enter your account email.',cancelled:''},
+    cn:{scanBtn:'扫描二维码登录',title:'Android 二维码登录',inlineTitle:'Android 二维码登录',openQr:'打开 Android 二维码登录',refresh:'刷新二维码',popupHelp:'二维码已扫描。请输入储蓄管家账号邮箱以继续。',preparing:'正在生成二维码…',waiting:'可以扫描',scanned:'已扫描二维码。请在下方输入储蓄管家账号邮箱。',emailLabel:'账号邮箱',send:'发送验证邮件',sending:'正在发送验证邮件…',sent:'验证邮件已发送。请打开邮箱并点击登录链接。',verified:'邮箱已验证，Android 正在自动登录…',done:'Android 已成功登录。',expired:'二维码已过期',newQr:'生成新二维码',close:'关闭',seconds:'秒',scanOpening:'正在打开二维码扫描器…',scanWaiting:'二维码已扫描。请在 Windows/网页版完成邮箱验证。',scanVerified:'邮箱已验证，正在登录…',invalidQr:'这不是有效的储蓄管家登录二维码。',backend:'二维码登录后端尚未部署，请先部署随附的 Firebase Functions。',emailRequired:'请输入账号邮箱。',cancelled:''}
+  };
+
+  const lang = () => (typeof currentLanguage !== 'undefined' && currentLanguage === 'cn') ? 'cn' : 'en';
+  const qt = key => (STR[lang()] && STR[lang()][key]) || STR.en[key] || key;
+  const $ = id => document.getElementById(id);
+
+  const desktopInline=$('qrDesktopInline'), scanBtn=$('qrAndroidScanBtn'), refreshBtn=$('qrInlineRefreshBtn'), qrBox=$('qrCodeBox'), countdownEl=$('qrCountdown'), inlineStatus=$('qrInlineStatus'), inlineTitle=$('qrInlineTitle');
+  const modal=$('qrLoginModal'), closeBtn=$('qrCloseBtn'), stateEl=$('qrStateText'), helpEl=$('qrHelpText'), emailPanel=$('qrEmailPanel'), emailInput=$('qrEmailInput'), emailLabel=$('qrEmailLabel'), sendEmailBtn=$('qrSendEmailBtn'), newBtn=$('qrNewBtn'), titleEl=$('qrLoginTitle');
+  const modalPreview=$('qrModalPreview'), modalQrBox=$('qrModalCodeBox'), modalRefreshBtn=$('qrModalRefreshBtn'), modalCountdown=$('qrModalCountdown'), modalStatus=$('qrModalStatus');
+  if(!desktopInline || !scanBtn || !modal || !modalQrBox) return;
+
+  let desktopSession=null, desktopPollTimer=null, countdownTimer=null, desktopLastStatus='', desktopPayload='';
+  let androidSession=null, androidPollTimer=null;
+
+  function localizeQr(){
+    scanBtn.textContent=qt('scanBtn');
+    titleEl.textContent=qt('title');
+    inlineTitle.textContent=qt('inlineTitle');
+    desktopInline.title=qt('openQr'); desktopInline.setAttribute('aria-label',qt('openQr'));
+    refreshBtn.title=qt('refresh'); refreshBtn.setAttribute('aria-label',qt('refresh'));
+    modalRefreshBtn.title=qt('refresh'); modalRefreshBtn.setAttribute('aria-label',qt('refresh'));
+    helpEl.textContent=qt('popupHelp');
+    emailLabel.textContent=qt('emailLabel');
+    sendEmailBtn.textContent=qt('send');
+    newBtn.textContent=qt('newQr');
+    closeBtn.setAttribute('aria-label',qt('close'));
+    if(desktopLastStatus==='' || desktopLastStatus==='waiting') modalStatus.textContent=qt('waiting');
+  }
+  const oldApply = (typeof applyLanguage === 'function') ? applyLanguage : null;
+  if(oldApply){ applyLanguage=function(v){ oldApply(v); localizeQr(); }; }
+  localizeQr();
+
+  if(isNativeAndroid){
+    desktopInline.classList.add('hidden');
+    scanBtn.classList.remove('hidden');
+  }else{
+    desktopInline.classList.remove('hidden');
+    scanBtn.classList.add('hidden');
+  }
+
+  function setState(text,error=false){
+    stateEl.textContent=text||'';
+    stateEl.classList.remove('hidden');
+    stateEl.classList.toggle('qr-error',!!error);
+  }
+  function setInline(text,error=false){
+    inlineStatus.textContent=text||'';
+    inlineStatus.style.color=error?'var(--clay-deep)':'var(--ink-soft)';
+  }
+  function setModalStatus(text,error=false){
+    modalStatus.textContent=text||'';
+    modalStatus.style.color=error?'var(--clay-deep)':'var(--ink-soft)';
+  }
+  function clearDesktopTimers(){
+    if(desktopPollTimer){clearTimeout(desktopPollTimer);desktopPollTimer=null;}
+    if(countdownTimer){clearInterval(countdownTimer);countdownTimer=null;}
+  }
+  function showQrPreview(){
+    modalPreview.classList.remove('hidden');
+    helpEl.classList.add('hidden');
+    stateEl.classList.add('hidden');
+    emailPanel.classList.add('hidden');
+    newBtn.classList.add('hidden');
+  }
+  function showVerificationView(){
+    modalPreview.classList.add('hidden');
+    helpEl.classList.remove('hidden');
+    stateEl.classList.remove('hidden');
+  }
+  function openQrModal(){
+    if(isNativeAndroid) return;
+    modal.classList.remove('hidden');
+    if(desktopLastStatus==='scanned' || desktopLastStatus==='email_sent' || desktopLastStatus==='verified' || desktopLastStatus==='token_issued' || desktopLastStatus==='consumed'){
+      showVerificationView();
+    }else{
+      showQrPreview();
+      setModalStatus(desktopSession?qt('waiting'):qt('preparing'));
+    }
+  }
+  function closeModal(){ modal.classList.add('hidden'); }
+  closeBtn.addEventListener('click',closeModal);
+  modal.addEventListener('click',e=>{ if(e.target===modal) closeModal(); });
+  desktopInline.addEventListener('click',openQrModal);
+  desktopInline.addEventListener('keydown',e=>{ if(e.key==='Enter'||e.key===' '){e.preventDefault();openQrModal();} });
+
+  function readableError(err){
+    const msg=err&&err.message?err.message:String(err||'');
+    if(/not found|UNAVAILABLE|functions/i.test(msg) && /404|not found|internal|network/i.test(msg)) return qt('backend');
+    return msg;
+  }
+
+  function makeQr(target,payload,size){
+    target.innerHTML='';
+    new QRCode(target,{text:payload,width:size,height:size,correctLevel:QRCode.CorrectLevel.M});
+  }
+  function renderQrPayload(payload){
+    if(typeof QRCode!=='function') throw new Error('QR code library did not load. Check the internet connection and try again.');
+    desktopPayload=payload;
+    makeQr(qrBox,payload,34);
+    const largeSize=window.innerWidth<=520?230:240;
+    makeQr(modalQrBox,payload,largeSize);
+  }
+
+  async function createDesktopQr(openAfter=false){
+    if(isNativeAndroid) return;
+    clearDesktopTimers();
+    desktopLastStatus='';
+    desktopSession=null;
+    desktopPayload='';
+    emailPanel.classList.add('hidden');
+    newBtn.classList.add('hidden');
+    stateEl.classList.add('hidden');
+    helpEl.classList.add('hidden');
+    qrBox.innerHTML='';
+    modalQrBox.innerHTML='';
+    countdownEl.textContent='';
+    modalCountdown.textContent='';
+    setInline(qt('preparing'));
+    setModalStatus(qt('preparing'));
+    if(openAfter){ modal.classList.remove('hidden'); showQrPreview(); }
+    try{
+      const result=await callQr('createQrLoginRequest')({});
+      desktopSession=result.data;
+      desktopLastStatus='waiting';
+      const payload=`wesave://qr-login?requestId=${encodeURIComponent(desktopSession.requestId)}&scanKey=${encodeURIComponent(desktopSession.scanKey)}`;
+      renderQrPayload(payload);
+      setInline(qt('waiting'));
+      setModalStatus(qt('waiting'));
+      updateCountdown();
+      countdownTimer=setInterval(updateCountdown,1000);
+      pollDesktop();
+    }catch(err){
+      console.error(err);
+      const msg=readableError(err);
+      setInline(msg,true);
+      setModalStatus(msg,true);
+    }
+  }
+
+  function updateCountdown(){
+    if(!desktopSession) return;
+    const left=Math.max(0,Math.ceil((desktopSession.expiresAt-Date.now())/1000));
+    const m=Math.floor(left/60), s=String(left%60).padStart(2,'0');
+    const text=`${m}:${s}`;
+    countdownEl.textContent=text;
+    modalCountdown.textContent=text;
+    if(left<=0){
+      clearDesktopTimers();
+      setInline(qt('expired'),true);
+      setModalStatus(qt('expired'),true);
+      qrBox.innerHTML='';
+      modalQrBox.innerHTML='';
+      if(desktopLastStatus==='scanned' || desktopLastStatus==='email_sent' || desktopLastStatus==='verified' || desktopLastStatus==='token_issued'){
+        showVerificationView();
+        setState(qt('expired'),true);
+        newBtn.classList.remove('hidden');
+        emailPanel.classList.add('hidden');
+        modal.classList.remove('hidden');
+      }else{
+        const keepOpen=!modal.classList.contains('hidden');
+        setTimeout(()=>createDesktopQr(keepOpen),900);
+      }
+    }
+  }
+
+  async function pollDesktop(){
+    if(!desktopSession) return;
+    try{
+      const res=await callQr('getQrLoginStatus')({requestId:desktopSession.requestId,desktopKey:desktopSession.desktopKey});
+      const st=res.data.status;
+      if(st!==desktopLastStatus){
+        desktopLastStatus=st;
+        if(st==='scanned'){
+          setInline('✓');
+          modal.classList.remove('hidden');
+          showVerificationView();
+          helpEl.textContent=qt('popupHelp');
+          setState(qt('scanned'));
+          emailPanel.classList.remove('hidden');
+          newBtn.classList.add('hidden');
+          if(!emailInput.value) emailInput.value=(document.getElementById('authEmail')||{}).value||'';
+          setTimeout(()=>emailInput.focus(),100);
+        }else if(st==='email_sent'){
+          modal.classList.remove('hidden'); showVerificationView(); setState(qt('sent')); emailPanel.classList.add('hidden');
+        }else if(st==='verified'||st==='token_issued'){
+          modal.classList.remove('hidden'); showVerificationView(); setState(qt('verified')); emailPanel.classList.add('hidden');
+        }else if(st==='consumed'){
+          modal.classList.remove('hidden'); showVerificationView(); setState(qt('done')); emailPanel.classList.add('hidden'); newBtn.classList.remove('hidden'); setInline('✓'); clearDesktopTimers(); return;
+        }
+      }
+      desktopPollTimer=setTimeout(pollDesktop,1400);
+    }catch(err){
+      if(/expired|deadline/i.test(err&&err.message||'')){
+        setInline(qt('expired'),true); showVerificationView(); setState(qt('expired'),true); newBtn.classList.remove('hidden'); emailPanel.classList.add('hidden'); clearDesktopTimers(); return;
+      }
+      desktopPollTimer=setTimeout(pollDesktop,2200);
+    }
+  }
+
+  refreshBtn.addEventListener('click',e=>{ e.stopPropagation(); createDesktopQr(false); });
+  modalRefreshBtn.addEventListener('click',()=>createDesktopQr(true));
+  newBtn.addEventListener('click',()=>createDesktopQr(true));
+
+  sendEmailBtn.addEventListener('click',async()=>{
+    if(!desktopSession) return;
+    const email=emailInput.value.trim();
+    if(!email){ setState(qt('emailRequired'),true); return; }
+    sendEmailBtn.disabled=true; setState(qt('sending'));
+    try{
+      auth.languageCode=lang()==='cn'?'zh-CN':'en';
+      localStorage.setItem('wesaveQrVerifyEmail',email);
+      const url=new URL(QR_VERIFY_URL);
+      url.searchParams.set('requestId',desktopSession.requestId);
+      url.searchParams.set('verifyKey',desktopSession.verifyKey);
+      await auth.sendSignInLinkToEmail(email,{url:url.toString(),handleCodeInApp:true});
+      await callQr('markQrEmailSent')({requestId:desktopSession.requestId,desktopKey:desktopSession.desktopKey});
+      emailPanel.classList.add('hidden'); setState(qt('sent'));
+    }catch(err){ console.error(err); setState(readableError(err),true); }
+    finally{ sendEmailBtn.disabled=false; }
+  });
+
+  function parseQr(raw){
+    try{
+      const u=new URL(raw);
+      if(u.protocol!=='wesave:'||u.hostname!=='qr-login') return null;
+      const requestId=u.searchParams.get('requestId'), scanKey=u.searchParams.get('scanKey');
+      if(!requestId||!scanKey) return null;
+      return{requestId,scanKey};
+    }catch(_){ return null; }
+  }
+
+  async function startAndroidScan(){
+    if(!isNativeAndroid){ setInline(qt('invalidQr'),true); return; }
+    const plugin=window.Capacitor&&window.Capacitor.Plugins?window.Capacitor.Plugins.WeSaveQrScanner:null;
+    if(!plugin||typeof plugin.scan!=='function'){ setInline('QR scanner plugin is missing. Sync/rebuild the Android project.',true); return; }
+    setInline(qt('scanOpening'));
+    try{
+      const result=await plugin.scan();
+      if(!result||result.cancelled){ setInline(qt('cancelled')); return; }
+      const parsed=parseQr(result.value||'');
+      if(!parsed){ setInline(qt('invalidQr'),true); return; }
+      androidSession=parsed;
+      const scanned=await callQr('scanQrLogin')(parsed);
+      androidSession.expiresAt=scanned.data.expiresAt;
+      setInline(qt('scanWaiting'));
+      pollAndroidExchange();
+    }catch(err){ console.error(err); setInline(readableError(err),true); }
+  }
+
+  async function pollAndroidExchange(){
+    if(!androidSession) return;
+    try{
+      const res=await callQr('exchangeQrLogin')({requestId:androidSession.requestId,scanKey:androidSession.scanKey});
+      const data=res.data||{};
+      if(data.customToken){
+        setInline(qt('scanVerified'));
+        const remember=document.getElementById('rememberMe');
+        await auth.setPersistence(remember&&remember.checked?firebase.auth.Auth.Persistence.LOCAL:firebase.auth.Auth.Persistence.SESSION);
+        await auth.signInWithCustomToken(data.customToken);
+        try{ await callQr('completeQrLogin')({requestId:androidSession.requestId,scanKey:androidSession.scanKey}); }catch(completeErr){ console.warn('QR login completion acknowledgement failed',completeErr); }
+        setInline(''); androidSession=null; return;
+      }
+      if(Date.now()>=Number(data.expiresAt||androidSession.expiresAt||0)){ setInline(qt('expired'),true); androidSession=null; return; }
+      androidPollTimer=setTimeout(pollAndroidExchange,1500);
+    }catch(err){
+      if(/already used/i.test(err&&err.message||'')){ setInline(qt('done')); androidSession=null; return; }
+      if(/expired|deadline/i.test(err&&err.message||'')){ setInline(qt('expired'),true); androidSession=null; return; }
+      androidPollTimer=setTimeout(pollAndroidExchange,2200);
+    }
+  }
+
+  scanBtn.addEventListener('click',startAndroidScan);
+
+  // Web/Windows: create the functional QR immediately. Clicking the small QR opens the large scannable version.
+  if(!isNativeAndroid) setTimeout(createDesktopQr,250);
+})();
+</script>
+
 </body>
 </html>
 
