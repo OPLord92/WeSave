@@ -1284,7 +1284,16 @@ document.getElementById('signupBtn').addEventListener('click', ()=>{
     .catch(err => setAuthError(err.message));
 });
 
-document.getElementById('logoutBtn').addEventListener('click', ()=>{
+document.getElementById('logoutBtn').addEventListener('click', async ()=>{
+  // A QR login is one-time. Clear its completed pairing/session before
+  // signing out so the next QR login must start with a fresh scan.
+  try {
+    if(typeof window.resetWeSaveQrLoginAfterLogout === 'function'){
+      await window.resetWeSaveQrLoginAfterLogout();
+    }
+  } catch(err) {
+    console.warn('QR logout reset warning:', err);
+  }
   auth.signOut();
 });
 
@@ -2170,6 +2179,51 @@ if('serviceWorker' in navigator){
   }
 
   if(scanBtn)scanBtn.addEventListener('click',startAndroidScan);if(scanIcon)scanIcon.addEventListener('click',startAndroidScan);
+
+  async function resetDesktopQrAfterLogout(){
+    if(isNativeAndroid) return;
+
+    // Save references before clearing local state so we can remove the old
+    // one-time QR session/claim from Realtime Database as best-effort cleanup.
+    const oldSessionRef = desktopSessionRef;
+    const oldClaimRef = desktopClaimRef;
+
+    stopDesktopWatch();
+    stopDesktopClaim(false);
+
+    desktopSession = null;
+    desktopSessionRef = null;
+    desktopLastStatus = '';
+    desktopRelayToken = '';
+    desktopEmail = '';
+    desktopClaimBusy = false;
+    localStorage.removeItem('wesaveQrDesktopClaim');
+
+    // Reset every visible QR-login state. The next click on the small QR icon
+    // will therefore call createDesktopQr(true) and generate a new QR code.
+    modal.classList.add('hidden');
+    modalQrBox.innerHTML = '';
+    if(qrBox) showSmallQrIcon();
+    if(countdownEl) countdownEl.textContent = '';
+    if(modalCountdown) modalCountdown.textContent = '';
+    if(emailInput) emailInput.value = '';
+    if(emailPanel) emailPanel.classList.add('hidden');
+    if(newBtn) newBtn.classList.add('hidden');
+    if(helpEl) helpEl.classList.add('hidden');
+    if(stateEl){ stateEl.classList.add('hidden'); stateEl.textContent = ''; stateEl.classList.remove('error'); }
+    setInline('');
+    setModalStatus('');
+
+    // Database cleanup is best effort; UI/session reset above must still finish
+    // even if the network is temporarily unavailable.
+    const removals = [];
+    if(oldClaimRef) removals.push(oldClaimRef.remove().catch(()=>{}));
+    if(oldSessionRef) removals.push(oldSessionRef.remove().catch(()=>{}));
+    if(removals.length) await Promise.all(removals);
+  }
+
+  // Used by the main Log out button above.
+  window.resetWeSaveQrLoginAfterLogout = resetDesktopQrAfterLogout;
 
   if(!isNativeAndroid){
     showSmallQrIcon();
