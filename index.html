@@ -1937,27 +1937,49 @@ if('serviceWorker' in navigator){
 <script id="wesaveQrLoginScript">
 (() => {
   const QR_SESSION_MS = 5 * 60 * 1000;
-  const QR_FINISH_URL = 'https://wesave-ee5fd.web.app/qr-finish.html';
-  const QR_ANDROID_PACKAGE = 'com.wellchin.wesave';
+  const QR_APPROVE_URL = 'https://wesave-ee5fd.web.app/qr-approve.html';
   const QR_DB_ROOT = 'qrLoginSessions';
+  const QR_CLAIM_ROOT = 'qrLoginClaims';
   const isNativeAndroid = !!(window.Capacitor && typeof window.Capacitor.isNativePlatform === 'function' && window.Capacitor.isNativePlatform() && String(window.Capacitor.getPlatform()).toLowerCase() === 'android');
 
   const STR = {
-    en:{scanBtn:'Scan QR Code to Login',title:'Android QR Login',inlineTitle:'Android QR Login',openQr:'Open Android QR Login',refresh:'Refresh QR code',popupHelp:'QR scanned. Enter your We Save account email to continue.',preparing:'Preparing QR code...',waiting:'Ready to scan',scanned:'QR scanned. Enter your We Save account email below.',emailLabel:'Account email',send:'Send verification email',sending:'Sending verification email...',sent:'Verification email sent. Open that email on your Android phone and tap the sign-in link.',verified:'Email verified. Android is signing in...',done:'Android signed in successfully.',expired:'QR expired',newQr:'Generate New QR Code',close:'Close',seconds:'s',scanOpening:'Opening QR scanner...',scanWaiting:'QR scanned. Waiting for the verification email...',scanEmailReady:'Verification email sent. Open it on this Android phone and tap the sign-in link.',scanVerified:'Email verified. Signing in...',invalidQr:'This is not a valid We Save login QR code.',sessionUnavailable:'QR session is unavailable. Refresh the QR and scan again.',anonDisabled:'Enable Anonymous sign-in in Firebase Authentication first.',rulesMissing:'QR database access is blocked. Deploy the included Realtime Database rules.',emailRequired:'Enter your account email.',openOnAndroid:'Open the verification email on this Android phone so We Save can complete the sign-in.',cancelled:''},
-    cn:{scanBtn:'扫描二维码登录',title:'Android 二维码登录',inlineTitle:'Android 二维码登录',openQr:'打开 Android 二维码登录',refresh:'刷新二维码',popupHelp:'二维码已扫描。请输入储蓄管家账号邮箱以继续。',preparing:'正在生成二维码…',waiting:'可以扫描',scanned:'已扫描二维码。请在下方输入储蓄管家账号邮箱。',emailLabel:'账号邮箱',send:'发送验证邮件',sending:'正在发送验证邮件…',sent:'验证邮件已发送。请在这部 Android 手机上打开邮件并点击登录链接。',verified:'邮箱已验证，Android 正在自动登录…',done:'Android 已成功登录。',expired:'二维码已过期',newQr:'生成新二维码',close:'关闭',seconds:'秒',scanOpening:'正在打开二维码扫描器…',scanWaiting:'二维码已扫描，正在等待验证邮件…',scanEmailReady:'验证邮件已发送。请在这部 Android 手机上打开并点击登录链接。',scanVerified:'邮箱已验证，正在登录…',invalidQr:'这不是有效的储蓄管家登录二维码。',sessionUnavailable:'二维码登录会话不可用，请刷新二维码后重新扫描。',anonDisabled:'请先在 Firebase Authentication 启用 Anonymous 匿名登录。',rulesMissing:'二维码数据库访问被阻止，请部署随附的 Realtime Database Rules。',emailRequired:'请输入账号邮箱。',openOnAndroid:'请在这部 Android 手机上打开验证邮件，让储蓄管家完成登录。',cancelled:''}
+    en:{
+      title:'Android QR Login',inlineTitle:'Android QR Login',openQr:'Open Android QR Login',refresh:'Refresh QR code',
+      popupHelp:'QR scanned. Enter your We Save account email to continue.',preparing:'Preparing QR code...',waiting:'Ready to scan',
+      scanned:'QR scanned. Enter your We Save account email below.',emailLabel:'Account email',send:'Send sign-in email',sending:'Sending sign-in email...',
+      sent:'Sign-in email sent. Open it on any phone, tablet, or computer and tap Sign in. This Web/Windows app will log in automatically.',
+      approving:'Email link approved. Signing this Web/Windows app in...',done:'Signed in successfully.',expired:'QR expired',newQr:'Generate New QR Code',close:'Close',
+      scanOpening:'Opening QR scanner...',scanWaiting:'QR scanned successfully. Continue on the Web/Windows screen and enter your email.',
+      scanEmailReady:'Sign-in email sent. It can be opened on any device. The Web/Windows app will sign in automatically.',
+      scanDone:'Web/Windows signed in successfully.',invalidQr:'This is not a valid We Save login QR code.',
+      sessionUnavailable:'QR session is unavailable. Refresh the QR and scan again.',anonDisabled:'Enable Anonymous sign-in in Firebase Authentication first.',
+      rulesMissing:'QR database access is blocked. Deploy the included Realtime Database rules.',emailRequired:'Enter your account email.',
+      invalidEmailLink:'The email sign-in link is invalid or has expired. Generate a new QR and try again.',cancelled:''
+    },
+    cn:{
+      title:'Android 二维码登录',inlineTitle:'Android 二维码登录',openQr:'打开 Android 二维码登录',refresh:'刷新二维码',
+      popupHelp:'二维码已扫描。请输入储蓄管家账号邮箱以继续。',preparing:'正在生成二维码…',waiting:'可以扫描',
+      scanned:'已扫描二维码。请在下方输入储蓄管家账号邮箱。',emailLabel:'账号邮箱',send:'发送登录邮件',sending:'正在发送登录邮件…',
+      sent:'登录邮件已发送。可在任何手机、平板或电脑打开邮件并点击登录；当前网页／Windows 储蓄管家会自动登录。',
+      approving:'邮件链接已确认，当前网页／Windows 正在自动登录…',done:'登录成功。',expired:'二维码已过期',newQr:'生成新二维码',close:'关闭',
+      scanOpening:'正在打开二维码扫描器…',scanWaiting:'二维码扫描成功。请回到网页／Windows 输入邮箱。',
+      scanEmailReady:'登录邮件已发送，可在任何设备打开；网页／Windows 会自动登录。',scanDone:'网页／Windows 已成功登录。',
+      invalidQr:'这不是有效的储蓄管家登录二维码。',sessionUnavailable:'二维码登录会话不可用，请刷新二维码后重新扫描。',
+      anonDisabled:'请先在 Firebase Authentication 启用 Anonymous 匿名登录。',rulesMissing:'二维码数据库访问被阻止，请部署随附的 Realtime Database Rules。',
+      emailRequired:'请输入账号邮箱。',invalidEmailLink:'邮件登录链接无效或已过期，请生成新的二维码后重试。',cancelled:''
+    }
   };
 
   const lang = () => (typeof currentLanguage !== 'undefined' && currentLanguage === 'cn') ? 'cn' : 'en';
   const qt = key => (STR[lang()] && STR[lang()][key]) || STR.en[key] || key;
   const $ = id => document.getElementById(id);
 
-  const desktopInline=$('qrDesktopInline'), scanBtn=$('qrAndroidScanBtn'), refreshBtn=$('qrInlineRefreshBtn'), qrBox=$('qrCodeBox'), countdownEl=$('qrCountdown'), inlineStatus=$('qrInlineStatus'), inlineTitle=$('qrInlineTitle');
+  const desktopInline=$('qrDesktopInline'), scanBtn=$('qrAndroidScanBtn'), scanIcon=$('qrAndroidScanIcon'), androidToast=$('qrAndroidStatusToast');
+  const refreshBtn=$('qrInlineRefreshBtn'), qrBox=$('qrCodeBox'), countdownEl=$('qrCountdown'), inlineStatus=$('qrInlineStatus'), inlineTitle=$('qrInlineTitle');
   const modal=$('qrLoginModal'), closeBtn=$('qrCloseBtn'), stateEl=$('qrStateText'), helpEl=$('qrHelpText'), emailPanel=$('qrEmailPanel'), emailInput=$('qrEmailInput'), emailLabel=$('qrEmailLabel'), sendEmailBtn=$('qrSendEmailBtn'), newBtn=$('qrNewBtn'), titleEl=$('qrLoginTitle');
   const modalPreview=$('qrModalPreview'), modalQrBox=$('qrModalCodeBox'), modalRefreshBtn=$('qrModalRefreshBtn'), modalCountdown=$('qrModalCountdown'), modalStatus=$('qrModalStatus');
-  if(!desktopInline || !scanBtn || !modal || !modalQrBox) return;
+  if(!desktopInline || !modal || !modalQrBox) return;
 
-  // Use a second Firebase app for the short-lived QR session. This keeps its
-  // anonymous auth state separate from the user's real We Save login.
   let qrApp;
   try { qrApp = firebase.app('qrSession'); }
   catch (_) { qrApp = firebase.initializeApp(firebase.app().options, 'qrSession'); }
@@ -1965,20 +1987,18 @@ if('serviceWorker' in navigator){
   const qrDb = qrApp.database();
 
   let desktopSession=null, desktopSessionRef=null, desktopValueHandler=null, countdownTimer=null, desktopLastStatus='';
-  let androidSession=null, androidSessionRef=null, androidValueHandler=null, androidLinkCheckTimer=null, processingEmailLink=false;
+  let desktopClaimRef=null, desktopClaimHandler=null, desktopClaimBusy=false, desktopRelayToken='', desktopEmail='';
+  let androidSession=null, androidSessionRef=null, androidValueHandler=null;
 
   function localizeQr(){
-    scanBtn.textContent=qt('scanBtn');
     titleEl.textContent=qt('title');
-    inlineTitle.textContent=qt('inlineTitle');
+    if(inlineTitle) inlineTitle.textContent=qt('inlineTitle');
     desktopInline.title=qt('openQr'); desktopInline.setAttribute('aria-label',qt('openQr'));
-    refreshBtn.title=qt('refresh'); refreshBtn.setAttribute('aria-label',qt('refresh'));
-    modalRefreshBtn.title=qt('refresh'); modalRefreshBtn.setAttribute('aria-label',qt('refresh'));
-    helpEl.textContent=qt('popupHelp');
-    emailLabel.textContent=qt('emailLabel');
-    sendEmailBtn.textContent=qt('send');
-    newBtn.textContent=qt('newQr');
+    if(refreshBtn){refreshBtn.title=qt('refresh');refreshBtn.setAttribute('aria-label',qt('refresh'));}
+    if(modalRefreshBtn){modalRefreshBtn.title=qt('refresh');modalRefreshBtn.setAttribute('aria-label',qt('refresh'));}
+    helpEl.textContent=qt('popupHelp'); emailLabel.textContent=qt('emailLabel'); sendEmailBtn.textContent=qt('send'); newBtn.textContent=qt('newQr');
     closeBtn.setAttribute('aria-label',qt('close'));
+    if(scanIcon){scanIcon.title=lang()==='cn'?'扫描二维码登录':'Scan QR Code to Login';scanIcon.setAttribute('aria-label',scanIcon.title);}
     if(!desktopLastStatus || desktopLastStatus==='waiting') modalStatus.textContent=qt('waiting');
   }
   const oldApply = (typeof applyLanguage === 'function') ? applyLanguage : null;
@@ -1987,302 +2007,183 @@ if('serviceWorker' in navigator){
 
   if(isNativeAndroid){
     desktopInline.classList.add('hidden');
-    scanBtn.classList.remove('hidden');
+    if(scanBtn) scanBtn.classList.add('hidden');
+    if(scanIcon) scanIcon.classList.remove('hidden');
   }else{
     desktopInline.classList.remove('hidden');
-    scanBtn.classList.add('hidden');
+    if(scanBtn) scanBtn.classList.add('hidden');
+    if(scanIcon) scanIcon.classList.add('hidden');
   }
 
   function setState(text,error=false){
-    stateEl.textContent=text||'';
-    stateEl.classList.remove('hidden');
-    stateEl.classList.toggle('qr-error',!!error);
+    stateEl.textContent=text||''; stateEl.classList.remove('hidden'); stateEl.classList.toggle('qr-error',!!error);
   }
   function setInline(text,error=false){
-    inlineStatus.textContent=text||'';
-    inlineStatus.style.color=error?'var(--clay-deep)':'var(--ink-soft)';
+    if(isNativeAndroid && androidToast){
+      androidToast.textContent=text||'';
+      androidToast.classList.toggle('hidden',!text);
+      androidToast.classList.toggle('error',!!error);
+      return;
+    }
+    if(inlineStatus){ inlineStatus.textContent=text||''; inlineStatus.style.color=error?'var(--clay-deep)':'var(--ink-soft)'; }
   }
-  function setModalStatus(text,error=false){
-    modalStatus.textContent=text||'';
-    modalStatus.style.color=error?'var(--clay-deep)':'var(--ink-soft)';
-  }
+  function setModalStatus(text,error=false){ modalStatus.textContent=text||''; modalStatus.style.color=error?'var(--clay-deep)':'var(--ink-soft)'; }
   function readableError(err){
-    const code=String(err&&err.code||'');
-    const msg=String(err&&err.message||err||'');
+    const code=String(err&&err.code||''); const msg=String(err&&err.message||err||'');
     if(/operation-not-allowed/i.test(code+msg)) return qt('anonDisabled');
     if(/permission-denied|permission_denied|PERMISSION_DENIED/i.test(code+msg)) return qt('rulesMissing');
+    if(/invalid-action-code|expired-action-code|invalid-email/i.test(code+msg)) return qt('invalidEmailLink');
     return msg;
   }
-  function randomId(bytes=24){
-    const a=new Uint8Array(bytes);
-    crypto.getRandomValues(a);
-    return Array.from(a,b=>b.toString(16).padStart(2,'0')).join('');
-  }
+  function randomId(bytes=24){ const a=new Uint8Array(bytes); crypto.getRandomValues(a); return Array.from(a,b=>b.toString(16).padStart(2,'0')).join(''); }
   async function ensureQrUser(){
     if(qrAuth.currentUser) return qrAuth.currentUser;
     await qrAuth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
-    const result=await qrAuth.signInAnonymously();
-    return result.user;
+    const result=await qrAuth.signInAnonymously(); return result.user;
   }
 
-  function showQrPreview(){
-    modalPreview.classList.remove('hidden');
-    helpEl.classList.add('hidden');
-    stateEl.classList.add('hidden');
-    emailPanel.classList.add('hidden');
-    newBtn.classList.add('hidden');
-  }
-  function showVerificationView(){
-    modalPreview.classList.add('hidden');
-    helpEl.classList.remove('hidden');
-    stateEl.classList.remove('hidden');
-  }
+  function showQrPreview(){ modalPreview.classList.remove('hidden');helpEl.classList.add('hidden');stateEl.classList.add('hidden');emailPanel.classList.add('hidden');newBtn.classList.add('hidden'); }
+  function showVerificationView(){ modalPreview.classList.add('hidden');helpEl.classList.remove('hidden');stateEl.classList.remove('hidden'); }
   function openQrModal(){
     if(isNativeAndroid) return;
     if(!desktopSession){ createDesktopQr(true); return; }
     modal.classList.remove('hidden');
-    if(['scanned','email_sent','completed'].includes(desktopLastStatus)) showVerificationView();
-    else { showQrPreview(); setModalStatus(qt('waiting')); }
+    if(['scanned','email_sent','completed'].includes(desktopLastStatus)) showVerificationView(); else { showQrPreview(); setModalStatus(qt('waiting')); }
   }
   function closeModal(){ modal.classList.add('hidden'); }
-  closeBtn.addEventListener('click',closeModal);
-  modal.addEventListener('click',e=>{ if(e.target===modal) closeModal(); });
-  desktopInline.addEventListener('click',openQrModal);
-  desktopInline.addEventListener('keydown',e=>{ if(e.key==='Enter'||e.key===' '){e.preventDefault();openQrModal();} });
+  closeBtn.addEventListener('click',closeModal); modal.addEventListener('click',e=>{if(e.target===modal)closeModal();});
+  desktopInline.addEventListener('click',openQrModal); desktopInline.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openQrModal();}});
 
-  const SMALL_QR_ICON='<svg viewBox="0 0 29 29" width="24" height="24" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">\n<rect width="29" height="29" fill="#fff"/>\n<g fill="#8f8f8f">\n<rect x="1" y="1" width="8" height="8"/><rect x="3" y="3" width="4" height="4" fill="#fff"/><rect x="4" y="4" width="2" height="2"/>\n<rect x="20" y="1" width="8" height="8"/><rect x="22" y="3" width="4" height="4" fill="#fff"/><rect x="23" y="4" width="2" height="2"/>\n<rect x="1" y="20" width="8" height="8"/><rect x="3" y="22" width="4" height="4" fill="#fff"/><rect x="4" y="23" width="2" height="2"/>\n<rect x="11" y="2" width="2" height="2"/><rect x="14" y="1" width="2" height="3"/><rect x="17" y="3" width="2" height="2"/>\n<rect x="10" y="6" width="3" height="2"/><rect x="14" y="5" width="2" height="2"/><rect x="17" y="7" width="2" height="3"/>\n<rect x="10" y="10" width="2" height="2"/><rect x="13" y="9" width="3" height="3"/><rect x="17" y="11" width="3" height="2"/><rect x="22" y="11" width="2" height="3"/><rect x="25" y="10" width="3" height="2"/>\n<rect x="2" y="11" width="2" height="3"/><rect x="5" y="10" width="4" height="2"/><rect x="6" y="13" width="3" height="2"/>\n<rect x="10" y="14" width="4" height="2"/><rect x="15" y="13" width="2" height="4"/><rect x="18" y="15" width="3" height="2"/><rect x="22" y="16" width="2" height="2"/><rect x="25" y="14" width="3" height="3"/>\n<rect x="2" y="16" width="3" height="2"/><rect x="6" y="17" width="3" height="2"/><rect x="11" y="18" width="2" height="3"/><rect x="14" y="18" width="3" height="2"/><rect x="18" y="19" width="2" height="2"/>\n<rect x="10" y="22" width="2" height="2"/><rect x="13" y="21" width="2" height="3"/><rect x="16" y="22" width="2" height="2"/><rect x="20" y="21" width="3" height="2"/><rect x="24" y="20" width="2" height="3"/><rect x="27" y="23" width="1" height="4"/>\n<rect x="10" y="25" width="3" height="2"/><rect x="14" y="26" width="2" height="2"/><rect x="17" y="24" width="3" height="2"/><rect x="21" y="25" width="2" height="3"/><rect x="24" y="24" width="3" height="2"/>\n</g></svg>';
+  const SMALL_QR_ICON='<svg viewBox="0 0 29 29" width="24" height="24" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg"><rect width="29" height="29" fill="#fff"/><g fill="#8f8f8f"><rect x="1" y="1" width="8" height="8"/><rect x="3" y="3" width="4" height="4" fill="#fff"/><rect x="4" y="4" width="2" height="2"/><rect x="20" y="1" width="8" height="8"/><rect x="22" y="3" width="4" height="4" fill="#fff"/><rect x="23" y="4" width="2" height="2"/><rect x="1" y="20" width="8" height="8"/><rect x="3" y="22" width="4" height="4" fill="#fff"/><rect x="4" y="23" width="2" height="2"/><rect x="11" y="2" width="2" height="2"/><rect x="14" y="1" width="2" height="3"/><rect x="17" y="3" width="2" height="2"/><rect x="10" y="6" width="3" height="2"/><rect x="14" y="5" width="2" height="2"/><rect x="17" y="7" width="2" height="3"/><rect x="10" y="10" width="2" height="2"/><rect x="13" y="9" width="3" height="3"/><rect x="17" y="11" width="3" height="2"/><rect x="22" y="11" width="2" height="3"/><rect x="25" y="10" width="3" height="2"/><rect x="2" y="11" width="2" height="3"/><rect x="5" y="10" width="4" height="2"/><rect x="6" y="13" width="3" height="2"/><rect x="10" y="14" width="4" height="2"/><rect x="15" y="13" width="2" height="4"/><rect x="18" y="15" width="3" height="2"/><rect x="22" y="16" width="2" height="2"/><rect x="25" y="14" width="3" height="3"/><rect x="2" y="16" width="3" height="2"/><rect x="6" y="17" width="3" height="2"/><rect x="11" y="18" width="2" height="3"/><rect x="14" y="18" width="3" height="2"/><rect x="18" y="19" width="2" height="2"/><rect x="10" y="22" width="2" height="2"/><rect x="13" y="21" width="2" height="3"/><rect x="16" y="22" width="2" height="2"/><rect x="20" y="21" width="3" height="2"/><rect x="24" y="20" width="2" height="3"/><rect x="27" y="23" width="1" height="4"/><rect x="10" y="25" width="3" height="2"/><rect x="14" y="26" width="2" height="2"/><rect x="17" y="24" width="3" height="2"/><rect x="21" y="25" width="2" height="3"/><rect x="24" y="24" width="3" height="2"/></g></svg>';
   function showSmallQrIcon(){ if(qrBox) qrBox.innerHTML=SMALL_QR_ICON; }
   function makeQr(target,payload,size){ target.innerHTML=''; new QRCode(target,{text:payload,width:size,height:size,correctLevel:QRCode.CorrectLevel.M}); }
   function renderQrPayload(payload){
     if(typeof QRCode!=='function') throw new Error('QR code library did not load. Check the internet connection and try again.');
-    showSmallQrIcon();
-    makeQr(modalQrBox,payload,window.innerWidth<=520?230:240);
+    showSmallQrIcon(); makeQr(modalQrBox,payload,window.innerWidth<=520?230:240);
   }
 
+  function stopDesktopClaim(remove=false){
+    if(desktopClaimRef&&desktopClaimHandler) desktopClaimRef.off('value',desktopClaimHandler);
+    if(remove&&desktopClaimRef) desktopClaimRef.remove().catch(()=>{});
+    desktopClaimRef=null; desktopClaimHandler=null; desktopClaimBusy=false;
+  }
   function stopDesktopWatch(){
-    if(desktopSessionRef && desktopValueHandler) desktopSessionRef.off('value',desktopValueHandler);
-    desktopSessionRef=null; desktopValueHandler=null;
-    if(countdownTimer){clearInterval(countdownTimer);countdownTimer=null;}
+    if(desktopSessionRef&&desktopValueHandler) desktopSessionRef.off('value',desktopValueHandler);
+    desktopSessionRef=null;desktopValueHandler=null;if(countdownTimer){clearInterval(countdownTimer);countdownTimer=null;}stopDesktopClaim(false);
   }
-  function stopAndroidWatch(){
-    if(androidSessionRef && androidValueHandler) androidSessionRef.off('value',androidValueHandler);
-    androidSessionRef=null; androidValueHandler=null;
-    if(androidLinkCheckTimer){clearInterval(androidLinkCheckTimer);androidLinkCheckTimer=null;}
-  }
+  function stopAndroidWatch(){ if(androidSessionRef&&androidValueHandler) androidSessionRef.off('value',androidValueHandler);androidSessionRef=null;androidValueHandler=null; }
 
   async function createDesktopQr(openAfter=false){
     if(isNativeAndroid) return;
-    const oldRef=desktopSessionRef;
-    stopDesktopWatch();
-    if(oldRef){ oldRef.remove().catch(()=>{}); }
-    desktopLastStatus=''; desktopSession=null;
-    emailPanel.classList.add('hidden'); newBtn.classList.add('hidden'); stateEl.classList.add('hidden'); helpEl.classList.add('hidden');
-    showSmallQrIcon(); modalQrBox.innerHTML=''; countdownEl.textContent=''; modalCountdown.textContent='';
-    setInline(qt('preparing')); setModalStatus(qt('preparing'));
-    if(openAfter){ modal.classList.remove('hidden'); showQrPreview(); }
+    const oldRef=desktopSessionRef; const oldClaim=desktopClaimRef;
+    stopDesktopWatch(); if(oldRef)oldRef.remove().catch(()=>{}); if(oldClaim)oldClaim.remove().catch(()=>{});
+    desktopLastStatus='';desktopSession=null;desktopRelayToken='';desktopEmail='';
+    emailPanel.classList.add('hidden');newBtn.classList.add('hidden');stateEl.classList.add('hidden');helpEl.classList.add('hidden');
+    showSmallQrIcon();modalQrBox.innerHTML='';if(countdownEl)countdownEl.textContent='';modalCountdown.textContent='';setInline(qt('preparing'));setModalStatus(qt('preparing'));
+    if(openAfter){modal.classList.remove('hidden');showQrPreview();}
     try{
-      const user=await ensureQrUser();
-      const sid=randomId();
-      const expiresAt=Date.now()+QR_SESSION_MS;
-      const ref=qrDb.ref(`${QR_DB_ROOT}/${sid}`);
+      const user=await ensureQrUser();const sid=randomId();const expiresAt=Date.now()+QR_SESSION_MS;const ref=qrDb.ref(`${QR_DB_ROOT}/${sid}`);
       await ref.set({ownerUid:user.uid,status:'waiting',createdAt:firebase.database.ServerValue.TIMESTAMP,expiresAt});
-      desktopSession={sid,expiresAt,ownerUid:user.uid}; desktopSessionRef=ref; desktopLastStatus='waiting';
-      renderQrPayload(`wesave://qr-login?sid=${encodeURIComponent(sid)}`);
-      setInline(qt('waiting')); setModalStatus(qt('waiting'));
-      updateCountdown(); countdownTimer=setInterval(updateCountdown,1000);
-      watchDesktopSession();
-    }catch(err){ console.error(err); const msg=readableError(err); setInline(msg,true); setModalStatus(msg,true); }
+      desktopSession={sid,expiresAt,ownerUid:user.uid};desktopSessionRef=ref;desktopLastStatus='waiting';
+      renderQrPayload(`wesave://qr-login?sid=${encodeURIComponent(sid)}`);setInline(qt('waiting'));setModalStatus(qt('waiting'));updateCountdown();countdownTimer=setInterval(updateCountdown,1000);watchDesktopSession();
+    }catch(err){console.error(err);const msg=readableError(err);setInline(msg,true);setModalStatus(msg,true);}
   }
 
   function updateCountdown(){
-    if(!desktopSession) return;
-    const left=Math.max(0,Math.ceil((desktopSession.expiresAt-Date.now())/1000));
-    const text=`${Math.floor(left/60)}:${String(left%60).padStart(2,'0')}`;
-    countdownEl.textContent=text; modalCountdown.textContent=text;
-    if(left<=0){
-      const expiredRef=desktopSessionRef;
-      stopDesktopWatch();
-      if(expiredRef){ expiredRef.remove().catch(()=>{}); }
-      desktopLastStatus='expired'; setInline(qt('expired'),true); setModalStatus(qt('expired'),true); showSmallQrIcon(); modalQrBox.innerHTML='';
-      showVerificationView(); setState(qt('expired'),true); newBtn.classList.remove('hidden'); emailPanel.classList.add('hidden');
-    }
+    if(!desktopSession)return;const left=Math.max(0,Math.ceil((desktopSession.expiresAt-Date.now())/1000));const text=`${Math.floor(left/60)}:${String(left%60).padStart(2,'0')}`;
+    if(countdownEl)countdownEl.textContent=text;modalCountdown.textContent=text;
+    if(left<=0){const expiredRef=desktopSessionRef;stopDesktopWatch();if(expiredRef)expiredRef.remove().catch(()=>{});desktopLastStatus='expired';setInline(qt('expired'),true);setModalStatus(qt('expired'),true);showSmallQrIcon();modalQrBox.innerHTML='';showVerificationView();setState(qt('expired'),true);newBtn.classList.remove('hidden');emailPanel.classList.add('hidden');}
   }
 
   function watchDesktopSession(){
-    if(!desktopSessionRef) return;
+    if(!desktopSessionRef)return;
     desktopValueHandler=snap=>{
-      const data=snap.val();
-      if(!data){ setInline(qt('sessionUnavailable'),true); return; }
-      const st=data.status||'waiting';
-      if(st===desktopLastStatus) return;
-      desktopLastStatus=st;
+      const data=snap.val();if(!data){setInline(qt('sessionUnavailable'),true);return;}const st=data.status||'waiting';if(st===desktopLastStatus)return;desktopLastStatus=st;
       if(st==='scanned'){
-        setInline('✓'); modal.classList.remove('hidden'); showVerificationView(); helpEl.textContent=qt('popupHelp'); setState(qt('scanned')); emailPanel.classList.remove('hidden'); newBtn.classList.add('hidden');
-        if(!emailInput.value) emailInput.value=(document.getElementById('authEmail')||{}).value||'';
-        setTimeout(()=>emailInput.focus(),100);
+        setInline('✓');modal.classList.remove('hidden');showVerificationView();helpEl.textContent=qt('popupHelp');setState(qt('scanned'));emailPanel.classList.remove('hidden');newBtn.classList.add('hidden');if(!emailInput.value)emailInput.value=(document.getElementById('authEmail')||{}).value||'';setTimeout(()=>emailInput.focus(),100);
       }else if(st==='email_sent'){
-        modal.classList.remove('hidden'); showVerificationView(); setState(qt('sent')); emailPanel.classList.add('hidden');
+        modal.classList.remove('hidden');showVerificationView();setState(qt('sent'));emailPanel.classList.add('hidden');
       }else if(st==='completed'){
-        modal.classList.remove('hidden'); showVerificationView(); setState(qt('done')); emailPanel.classList.add('hidden'); newBtn.classList.remove('hidden'); setInline('✓');
-        const doneRef=desktopSessionRef;
-        stopDesktopWatch();
-        if(doneRef){ setTimeout(()=>doneRef.remove().catch(()=>{}),15000); }
+        setState(qt('done'));emailPanel.classList.add('hidden');setInline('✓');
       }
     };
-    desktopSessionRef.on('value',desktopValueHandler,err=>{ const msg=readableError(err); setInline(msg,true); setModalStatus(msg,true); });
+    desktopSessionRef.on('value',desktopValueHandler,err=>{const msg=readableError(err);setInline(msg,true);setModalStatus(msg,true);});
   }
 
-  refreshBtn.addEventListener('click',e=>{e.stopPropagation();createDesktopQr(false);});
-  modalRefreshBtn.addEventListener('click',()=>createDesktopQr(true));
-  newBtn.addEventListener('click',()=>createDesktopQr(true));
+  async function consumeApprovedEmailLink(link,email){
+    if(desktopClaimBusy)return;desktopClaimBusy=true;
+    try{
+      if(!auth.isSignInWithEmailLink(link))throw new Error(qt('invalidEmailLink'));
+      setState(qt('approving'));
+      await auth.setPersistence(firebase.auth.Auth.Persistence.SESSION);
+      const result=await auth.signInWithEmailLink(email,link);
+      if(desktopSessionRef)await desktopSessionRef.update({status:'completed',completedAt:firebase.database.ServerValue.TIMESTAMP,signedInUid:result.user?result.user.uid:''});
+      localStorage.removeItem('wesaveQrDesktopClaim');
+      stopDesktopClaim(true);
+      setState(qt('done'));setInline('✓');
+      setTimeout(()=>closeModal(),250);
+    }catch(err){console.error(err);desktopClaimBusy=false;setState(readableError(err),true);newBtn.classList.remove('hidden');}
+  }
+
+  function watchDesktopClaim(sid,token,email){
+    stopDesktopClaim(false);desktopRelayToken=token;desktopEmail=email;desktopClaimRef=qrDb.ref(`${QR_CLAIM_ROOT}/${sid}/${token}`);
+    localStorage.setItem('wesaveQrDesktopClaim',JSON.stringify({sid,token,email,expiresAt:desktopSession?desktopSession.expiresAt:Date.now()+QR_SESSION_MS}));
+    desktopClaimHandler=snap=>{const data=snap.val();if(!data||!data.emailLink)return;consumeApprovedEmailLink(String(data.emailLink),email);};
+    desktopClaimRef.on('value',desktopClaimHandler,err=>setState(readableError(err),true));
+  }
+
+  if(refreshBtn)refreshBtn.addEventListener('click',e=>{e.stopPropagation();createDesktopQr(false);});
+  if(modalRefreshBtn)modalRefreshBtn.addEventListener('click',()=>createDesktopQr(true));newBtn.addEventListener('click',()=>createDesktopQr(true));
 
   sendEmailBtn.addEventListener('click',async()=>{
-    if(!desktopSessionRef || !desktopSession) return;
-    const email=emailInput.value.trim();
-    if(!email){setState(qt('emailRequired'),true);return;}
-    sendEmailBtn.disabled=true; setState(qt('sending'));
+    if(!desktopSessionRef||!desktopSession)return;const email=emailInput.value.trim();if(!email){setState(qt('emailRequired'),true);return;}
+    sendEmailBtn.disabled=true;setState(qt('sending'));
     try{
-      auth.languageCode=lang()==='cn'?'zh-CN':'en';
-      const finishUrl=new URL(QR_FINISH_URL);
-      finishUrl.searchParams.set('sid',desktopSession.sid);
-      await auth.sendSignInLinkToEmail(email,{
-        url:finishUrl.toString(),
-        handleCodeInApp:true,
-        android:{packageName:QR_ANDROID_PACKAGE,installApp:false,minimumVersion:'1'}
-      });
+      auth.languageCode=lang()==='cn'?'zh-CN':'en';const relay=randomId(32);const approveUrl=new URL(QR_APPROVE_URL);approveUrl.searchParams.set('sid',desktopSession.sid);approveUrl.searchParams.set('relay',relay);
+      await auth.sendSignInLinkToEmail(email,{url:approveUrl.toString(),handleCodeInApp:true});
       await desktopSessionRef.update({email,status:'email_sent',emailSentAt:firebase.database.ServerValue.TIMESTAMP});
-      emailPanel.classList.add('hidden'); setState(qt('sent'));
-    }catch(err){console.error(err);setState(readableError(err),true);}
-    finally{sendEmailBtn.disabled=false;}
+      watchDesktopClaim(desktopSession.sid,relay,email);emailPanel.classList.add('hidden');setState(qt('sent'));
+    }catch(err){console.error(err);setState(readableError(err),true);}finally{sendEmailBtn.disabled=false;}
   });
 
   function parseQr(raw){
-    try{
-      const u=new URL(raw);
-      if(u.protocol!=='wesave:'||u.hostname!=='qr-login') return null;
-      const sid=u.searchParams.get('sid');
-      if(!sid || !/^[a-f0-9]{32,96}$/i.test(sid)) return null;
-      return {sid};
-    }catch(_){return null;}
-  }
-
-  function nestedStateParam(raw,name,depth=0){
-    if(!raw||depth>4) return null;
-    try{
-      const u=new URL(raw);
-      const direct=u.searchParams.get(name); if(direct) return direct;
-      for(const key of ['continueUrl','link','deep_link_id']){
-        const nested=u.searchParams.get(key);
-        if(!nested) continue;
-        const found=nestedStateParam(nested,name,depth+1); if(found) return found;
-      }
-    }catch(_){ }
-    return null;
+    try{const u=new URL(raw);if(u.protocol!=='wesave:'||u.hostname!=='qr-login')return null;const sid=u.searchParams.get('sid');if(!sid||!/^[a-f0-9]{32,96}$/i.test(sid))return null;return{sid};}catch(_){return null;}
   }
 
   async function startAndroidSession(sid){
-    const user=await ensureQrUser();
-    const ref=qrDb.ref(`${QR_DB_ROOT}/${sid}`);
-    const snap=await ref.once('value');
-    const data=snap.val();
-    if(!data || Number(data.expiresAt||0)<=Date.now()) throw new Error(qt('sessionUnavailable'));
-    if(data.scannerUid && data.scannerUid!==user.uid) throw new Error(qt('sessionUnavailable'));
+    const user=await ensureQrUser();const ref=qrDb.ref(`${QR_DB_ROOT}/${sid}`);const snap=await ref.once('value');const data=snap.val();
+    if(!data||Number(data.expiresAt||0)<=Date.now())throw new Error(qt('sessionUnavailable'));if(data.scannerUid&&data.scannerUid!==user.uid)throw new Error(qt('sessionUnavailable'));
     await ref.update({scannerUid:user.uid,status:data.status==='email_sent'?'email_sent':'scanned',scannedAt:firebase.database.ServerValue.TIMESTAMP});
-    localStorage.setItem('wesaveQrPendingSession',sid);
-    androidSession={sid,expiresAt:Number(data.expiresAt||0)};
-    watchAndroidSession();
+    androidSession={sid,expiresAt:Number(data.expiresAt||0)};watchAndroidSession();setInline(qt('scanWaiting'));
   }
 
   function watchAndroidSession(){
-    stopAndroidWatch();
-    if(!androidSession) return;
-    androidSessionRef=qrDb.ref(`${QR_DB_ROOT}/${androidSession.sid}`);
-    androidValueHandler=snap=>{
-      const data=snap.val();
-      if(!data){setInline(qt('sessionUnavailable'),true);return;}
-      if(Number(data.expiresAt||0)<=Date.now()){setInline(qt('expired'),true);stopAndroidWatch();return;}
-      if(data.email){localStorage.setItem(`wesaveQrEmail:${androidSession.sid}`,data.email);}
-      if(data.status==='email_sent') setInline(qt('scanEmailReady'));
-      else if(data.status==='completed') {setInline(qt('done'));stopAndroidWatch();}
-      else setInline(qt('scanWaiting'));
-    };
+    stopAndroidWatch();if(!androidSession)return;androidSessionRef=qrDb.ref(`${QR_DB_ROOT}/${androidSession.sid}`);
+    androidValueHandler=snap=>{const data=snap.val();if(!data){setInline(qt('sessionUnavailable'),true);return;}if(Number(data.expiresAt||0)<=Date.now()){setInline(qt('expired'),true);stopAndroidWatch();return;}if(data.status==='email_sent')setInline(qt('scanEmailReady'));else if(data.status==='completed'){setInline(qt('scanDone'));setTimeout(()=>setInline(''),2500);stopAndroidWatch();}else setInline(qt('scanWaiting'));};
     androidSessionRef.on('value',androidValueHandler,err=>setInline(readableError(err),true));
-    checkPendingEmailLink();
-    androidLinkCheckTimer=setInterval(checkPendingEmailLink,1400);
   }
 
   async function startAndroidScan(){
-    if(!isNativeAndroid){setInline(qt('invalidQr'),true);return;}
-    const plugin=window.Capacitor&&window.Capacitor.Plugins?window.Capacitor.Plugins.WeSaveQrScanner:null;
-    if(!plugin||typeof plugin.scan!=='function'){setInline('QR scanner plugin is missing. Sync/rebuild the Android project.',true);return;}
-    setInline(qt('scanOpening'));
-    try{
-      const result=await plugin.scan();
-      if(!result||result.cancelled){setInline(qt('cancelled'));return;}
-      const parsed=parseQr(result.value||'');
-      if(!parsed){setInline(qt('invalidQr'),true);return;}
-      await startAndroidSession(parsed.sid);
-    }catch(err){console.error(err);setInline(readableError(err),true);}
+    if(!isNativeAndroid){setInline(qt('invalidQr'),true);return;}const plugin=window.Capacitor&&window.Capacitor.Plugins?window.Capacitor.Plugins.WeSaveQrScanner:null;
+    if(!plugin||typeof plugin.scan!=='function'){setInline('QR scanner plugin is missing. Sync/rebuild the Android project.',true);return;}setInline(qt('scanOpening'));
+    try{const result=await plugin.scan();if(!result||result.cancelled){setInline(qt('cancelled'));return;}const parsed=parseQr(result.value||'');if(!parsed){setInline(qt('invalidQr'),true);return;}await startAndroidSession(parsed.sid);}catch(err){console.error(err);setInline(readableError(err),true);}
   }
 
-  async function waitForSessionEmail(sid,attempts=10){
-    const saved=localStorage.getItem(`wesaveQrEmail:${sid}`); if(saved) return saved;
-    const ref=qrDb.ref(`${QR_DB_ROOT}/${sid}`);
-    for(let i=0;i<attempts;i++){
-      const snap=await ref.once('value'); const data=snap.val();
-      if(data&&data.email){localStorage.setItem(`wesaveQrEmail:${sid}`,data.email);return data.email;}
-      await new Promise(r=>setTimeout(r,600));
-    }
-    return '';
-  }
+  if(scanBtn)scanBtn.addEventListener('click',startAndroidScan);if(scanIcon)scanIcon.addEventListener('click',startAndroidScan);
 
-  async function checkPendingEmailLink(){
-    if(!isNativeAndroid || processingEmailLink) return;
-    const plugin=window.Capacitor&&window.Capacitor.Plugins?window.Capacitor.Plugins.WeSaveQrScanner:null;
-    if(!plugin||typeof plugin.getPendingEmailLink!=='function') return;
-    try{
-      const pending=await plugin.getPendingEmailLink();
-      const link=pending&&pending.url?pending.url:'';
-      if(!link || !auth.isSignInWithEmailLink(link)) return;
-      processingEmailLink=true;
-      setInline(qt('scanVerified'));
-      const sid=nestedStateParam(link,'sid') || localStorage.getItem('wesaveQrPendingSession');
-      if(!sid) throw new Error(qt('sessionUnavailable'));
-      await ensureQrUser();
-      const email=await waitForSessionEmail(sid,12);
-      if(!email) throw new Error(qt('openOnAndroid'));
-      await auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
-      await auth.signInWithEmailLink(email,link);
-      const ref=qrDb.ref(`${QR_DB_ROOT}/${sid}`);
-      await ref.update({status:'completed',completedAt:firebase.database.ServerValue.TIMESTAMP,signedInUid:auth.currentUser?auth.currentUser.uid:''});
-      localStorage.removeItem(`wesaveQrEmail:${sid}`); localStorage.removeItem('wesaveQrPendingSession');
-      if(typeof plugin.clearPendingEmailLink==='function') await plugin.clearPendingEmailLink();
-      setInline(''); stopAndroidWatch(); androidSession=null;
-    }catch(err){
-      console.error(err); setInline(readableError(err),true);
-    }finally{processingEmailLink=false;}
-  }
-
-  scanBtn.addEventListener('click',startAndroidScan);
-
-  if(isNativeAndroid){
-    const pendingSid=localStorage.getItem('wesaveQrPendingSession');
-    if(pendingSid){
-      ensureQrUser().then(async()=>{
-        const snap=await qrDb.ref(`${QR_DB_ROOT}/${pendingSid}`).once('value');
-        const data=snap.val();
-        if(data&&Number(data.expiresAt||0)>Date.now()){
-          androidSession={sid:pendingSid,expiresAt:Number(data.expiresAt)}; watchAndroidSession();
-        }else{
-          localStorage.removeItem('wesaveQrPendingSession');
-        }
-      }).catch(err=>setInline(readableError(err),true));
-    }
-    window.addEventListener('focus',()=>setTimeout(checkPendingEmailLink,150));
-    document.addEventListener('visibilitychange',()=>{if(!document.hidden)setTimeout(checkPendingEmailLink,150);});
-    setTimeout(checkPendingEmailLink,500);
-  }else{
+  if(!isNativeAndroid){
     showSmallQrIcon();
+    try{
+      const saved=JSON.parse(localStorage.getItem('wesaveQrDesktopClaim')||'null');
+      if(saved&&saved.sid&&saved.token&&saved.email&&Number(saved.expiresAt||0)>Date.now()){
+        ensureQrUser().then(async()=>{
+          const ref=qrDb.ref(`${QR_DB_ROOT}/${saved.sid}`);const snap=await ref.once('value');const data=snap.val();
+          if(data&&data.ownerUid===qrAuth.currentUser.uid&&Number(data.expiresAt||0)>Date.now()){
+            desktopSession={sid:saved.sid,expiresAt:Number(data.expiresAt),ownerUid:data.ownerUid};desktopSessionRef=ref;desktopLastStatus=data.status||'email_sent';desktopEmail=saved.email;watchDesktopSession();watchDesktopClaim(saved.sid,saved.token,saved.email);
+          }else localStorage.removeItem('wesaveQrDesktopClaim');
+        }).catch(()=>localStorage.removeItem('wesaveQrDesktopClaim'));
+      }
+    }catch(_){localStorage.removeItem('wesaveQrDesktopClaim');}
   }
 })();
 </script>
