@@ -2046,9 +2046,16 @@ if('serviceWorker' in navigator){
   }
   function randomId(bytes=24){ const a=new Uint8Array(bytes); crypto.getRandomValues(a); return Array.from(a,b=>b.toString(16).padStart(2,'0')).join(''); }
   async function ensureQrUser(){
-    if(qrAuth.currentUser) return qrAuth.currentUser;
+    if(qrAuth.currentUser){
+      // Refresh the anonymous QR-session token so a second login after logout
+      // cannot be blocked by a stale Realtime Database auth connection.
+      try{ await qrAuth.currentUser.getIdToken(true); }catch(_){}
+      return qrAuth.currentUser;
+    }
     await qrAuth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
-    const result=await qrAuth.signInAnonymously(); return result.user;
+    const result=await qrAuth.signInAnonymously();
+    try{ await result.user.getIdToken(true); }catch(_){}
+    return result.user;
   }
 
   function showQrPreview(){ modalPreview.classList.remove('hidden');helpEl.classList.add('hidden');stateEl.classList.add('hidden');emailPanel.classList.add('hidden');newBtn.classList.add('hidden'); }
@@ -2183,11 +2190,10 @@ if('serviceWorker' in navigator){
   async function resetDesktopQrAfterLogout(){
     if(isNativeAndroid) return;
 
-    // Save references before clearing local state so we can remove the old
-    // one-time QR session/claim from Realtime Database as best-effort cleanup.
-    const oldSessionRef = desktopSessionRef;
-    const oldClaimRef = desktopClaimRef;
-
+    // IMPORTANT: detach the previous one-time QR session locally, but do not
+    // delete it from Realtime Database during logout. The session already has a
+    // short expiry. Deleting it while the Android app is still finishing its
+    // previous watcher can leave the scanner in an unavailable/stale state.
     stopDesktopWatch();
     stopDesktopClaim(false);
 
@@ -2199,8 +2205,8 @@ if('serviceWorker' in navigator){
     desktopClaimBusy = false;
     localStorage.removeItem('wesaveQrDesktopClaim');
 
-    // Reset every visible QR-login state. The next click on the small QR icon
-    // will therefore call createDesktopQr(true) and generate a new QR code.
+    // Completely clear the successful state. The next click always creates a
+    // brand-new SID/QR and requires Android to scan again.
     modal.classList.add('hidden');
     modalQrBox.innerHTML = '';
     if(qrBox) showSmallQrIcon();
@@ -2210,16 +2216,14 @@ if('serviceWorker' in navigator){
     if(emailPanel) emailPanel.classList.add('hidden');
     if(newBtn) newBtn.classList.add('hidden');
     if(helpEl) helpEl.classList.add('hidden');
-    if(stateEl){ stateEl.classList.add('hidden'); stateEl.textContent = ''; stateEl.classList.remove('error'); }
+    if(stateEl){ stateEl.classList.add('hidden'); stateEl.textContent = ''; stateEl.classList.remove('error','qr-error'); }
     setInline('');
     setModalStatus('');
 
-    // Database cleanup is best effort; UI/session reset above must still finish
-    // even if the network is temporarily unavailable.
-    const removals = [];
-    if(oldClaimRef) removals.push(oldClaimRef.remove().catch(()=>{}));
-    if(oldSessionRef) removals.push(oldSessionRef.remove().catch(()=>{}));
-    if(removals.length) await Promise.all(removals);
+    // Keep the named Firebase QR app online and refresh its anonymous token so
+    // the next freshly generated QR can be claimed immediately.
+    try{ qrDb.goOnline(); }catch(_){}
+    try{ await ensureQrUser(); }catch(err){ console.warn('QR session refresh warning:', err); }
   }
 
   // Used by the main Log out button above.
