@@ -2016,12 +2016,16 @@ if('serviceWorker' in navigator){
   }
   function openQrModal(){
     if(isNativeAndroid) return;
+    if(!desktopSession){
+      createDesktopQr(true);
+      return;
+    }
     modal.classList.remove('hidden');
     if(desktopLastStatus==='scanned' || desktopLastStatus==='email_sent' || desktopLastStatus==='verified' || desktopLastStatus==='token_issued' || desktopLastStatus==='consumed'){
       showVerificationView();
     }else{
       showQrPreview();
-      setModalStatus(desktopSession?qt('waiting'):qt('preparing'));
+      setModalStatus(qt('waiting'));
     }
   }
   function closeModal(){ modal.classList.add('hidden'); }
@@ -2036,6 +2040,10 @@ if('serviceWorker' in navigator){
     return msg;
   }
 
+  const SMALL_QR_ICON='<svg viewBox="0 0 29 29" width="24" height="24" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">\n<rect width="29" height="29" fill="#fff"/>\n<g fill="#8f8f8f">\n<rect x="1" y="1" width="8" height="8"/><rect x="3" y="3" width="4" height="4" fill="#fff"/><rect x="4" y="4" width="2" height="2"/>\n<rect x="20" y="1" width="8" height="8"/><rect x="22" y="3" width="4" height="4" fill="#fff"/><rect x="23" y="4" width="2" height="2"/>\n<rect x="1" y="20" width="8" height="8"/><rect x="3" y="22" width="4" height="4" fill="#fff"/><rect x="4" y="23" width="2" height="2"/>\n<rect x="11" y="2" width="2" height="2"/><rect x="14" y="1" width="2" height="3"/><rect x="17" y="3" width="2" height="2"/>\n<rect x="10" y="6" width="3" height="2"/><rect x="14" y="5" width="2" height="2"/><rect x="17" y="7" width="2" height="3"/>\n<rect x="10" y="10" width="2" height="2"/><rect x="13" y="9" width="3" height="3"/><rect x="17" y="11" width="3" height="2"/><rect x="22" y="11" width="2" height="3"/><rect x="25" y="10" width="3" height="2"/>\n<rect x="2" y="11" width="2" height="3"/><rect x="5" y="10" width="4" height="2"/><rect x="6" y="13" width="3" height="2"/>\n<rect x="10" y="14" width="4" height="2"/><rect x="15" y="13" width="2" height="4"/><rect x="18" y="15" width="3" height="2"/><rect x="22" y="16" width="2" height="2"/><rect x="25" y="14" width="3" height="3"/>\n<rect x="2" y="16" width="3" height="2"/><rect x="6" y="17" width="3" height="2"/><rect x="11" y="18" width="2" height="3"/><rect x="14" y="18" width="3" height="2"/><rect x="18" y="19" width="2" height="2"/>\n<rect x="10" y="22" width="2" height="2"/><rect x="13" y="21" width="2" height="3"/><rect x="16" y="22" width="2" height="2"/><rect x="20" y="21" width="3" height="2"/><rect x="24" y="20" width="2" height="3"/><rect x="27" y="23" width="1" height="4"/>\n<rect x="10" y="25" width="3" height="2"/><rect x="14" y="26" width="2" height="2"/><rect x="17" y="24" width="3" height="2"/><rect x="21" y="25" width="2" height="3"/><rect x="24" y="24" width="3" height="2"/>\n</g></svg>';
+  function showSmallQrIcon(){
+    if(qrBox) qrBox.innerHTML=SMALL_QR_ICON;
+  }
   function makeQr(target,payload,size){
     target.innerHTML='';
     new QRCode(target,{text:payload,width:size,height:size,correctLevel:QRCode.CorrectLevel.M});
@@ -2043,7 +2051,7 @@ if('serviceWorker' in navigator){
   function renderQrPayload(payload){
     if(typeof QRCode!=='function') throw new Error('QR code library did not load. Check the internet connection and try again.');
     desktopPayload=payload;
-    makeQr(qrBox,payload,34);
+    showSmallQrIcon();
     const largeSize=window.innerWidth<=520?230:240;
     makeQr(modalQrBox,payload,largeSize);
   }
@@ -2058,7 +2066,7 @@ if('serviceWorker' in navigator){
     newBtn.classList.add('hidden');
     stateEl.classList.add('hidden');
     helpEl.classList.add('hidden');
-    qrBox.innerHTML='';
+    showSmallQrIcon();
     modalQrBox.innerHTML='';
     countdownEl.textContent='';
     modalCountdown.textContent='';
@@ -2095,7 +2103,7 @@ if('serviceWorker' in navigator){
       clearDesktopTimers();
       setInline(qt('expired'),true);
       setModalStatus(qt('expired'),true);
-      qrBox.innerHTML='';
+      showSmallQrIcon();
       modalQrBox.innerHTML='';
       if(desktopLastStatus==='scanned' || desktopLastStatus==='email_sent' || desktopLastStatus==='verified' || desktopLastStatus==='token_issued'){
         showVerificationView();
@@ -2218,8 +2226,8 @@ if('serviceWorker' in navigator){
 
   scanBtn.addEventListener('click',startAndroidScan);
 
-  // Web/Windows: create the functional QR immediately. Clicking the small QR opens the large scannable version.
-  if(!isNativeAndroid) setTimeout(createDesktopQr,250);
+  // Web/Windows: always show a QR icon. Create the functional login QR only when the icon is clicked.
+  if(!isNativeAndroid) showSmallQrIcon();
 })();
 </script>
 
