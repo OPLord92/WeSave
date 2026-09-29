@@ -800,6 +800,121 @@ body.dark .brand-text #todayLabel{color:#B8B8B8}
 }
 </style>
 
+
+<style>
+/* Settings button (header) + settings dialog */
+.masthead{flex-wrap:wrap;row-gap:.6rem;}
+.settings-toggle{
+  height:30px;width:30px;padding:0;border-radius:7px;border:1px solid var(--line);
+  background:transparent;color:var(--ink);cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+}
+.settings-toggle svg{width:16px;height:16px;}
+.settings-toggle:hover{background:var(--line-soft);}
+body:not(.dark) .main-controls .settings-toggle{background:rgba(0,0,0,.035);border-color:rgba(0,0,0,.10);color:#1B1B1B;}
+body.dark .main-controls .settings-toggle{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.14);color:#F3F3F3;}
+
+.settings-overlay{
+  position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.45);
+  display:flex;align-items:center;justify-content:center;
+  padding:calc(1rem + env(safe-area-inset-top,0px)) 1rem calc(1rem + env(safe-area-inset-bottom,0px));
+}
+.settings-sheet{
+  width:100%;max-width:400px;max-height:100%;overflow-y:auto;overscroll-behavior:contain;
+  border-radius:14px;padding:1.1rem 1.1rem 1.25rem;
+  background:#fff;color:#1B1B1B;border:1px solid rgba(0,0,0,.07);
+  box-shadow:0 20px 60px rgba(0,0,0,.25);
+}
+body.dark .settings-sheet{background:#2D2D2D;color:#F3F3F3;border-color:rgba(255,255,255,.09);}
+.settings-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:.2rem;}
+.settings-title{font-family:'Source Serif 4',serif;font-weight:600;font-size:1.2rem;}
+.settings-close{
+  background:none;border:none;color:inherit;font-size:1.6rem;line-height:1;
+  cursor:pointer;padding:0 .25rem;opacity:.7;
+}
+.settings-close:hover{opacity:1;}
+
+.settings-section{margin-top:1.15rem;}
+.settings-section h3{
+  margin:0 0 .3rem;font-family:'Inter',sans-serif;font-size:.7rem;font-weight:600;
+  letter-spacing:.08em;text-transform:uppercase;color:#5D5D5D;
+}
+body.dark .settings-section h3{color:#B8B8B8;}
+.settings-row{
+  display:flex;align-items:center;justify-content:space-between;gap:.75rem;
+  padding:.55rem 0;border-bottom:1px solid rgba(0,0,0,.07);min-height:44px;
+}
+body.dark .settings-row{border-bottom-color:rgba(255,255,255,.09);}
+.settings-row .lbl{font-size:.9rem;}
+.settings-row .sub{font-size:.8rem;color:#5D5D5D;text-align:right;word-break:break-all;}
+body.dark .settings-row .sub{color:#B8B8B8;}
+.settings-hint{margin:.4rem 0 0;font-size:.75rem;line-height:1.4;color:#5D5D5D;}
+body.dark .settings-hint{color:#B8B8B8;}
+
+/* Segmented control (Language / Theme) */
+.seg{display:inline-flex;border:1px solid rgba(0,0,0,.18);border-radius:8px;overflow:hidden;flex:none;}
+body.dark .seg{border-color:rgba(255,255,255,.22);}
+.seg button{
+  border:0;background:transparent;color:inherit;padding:.4rem .8rem;
+  font:inherit;font-size:.82rem;cursor:pointer;min-width:58px;
+}
+.seg button.active{background:#0067C0;color:#fff;}
+body.dark .seg button.active{background:#3AA0F0;}
+.settings-select{max-width:170px;font:inherit;font-size:.85rem;}
+
+/* Switch */
+.switch{position:relative;display:inline-block;width:44px;height:26px;flex:none;}
+.switch input{opacity:0;width:0;height:0;position:absolute;}
+.switch .slider{
+  position:absolute;inset:0;border-radius:26px;background:rgba(0,0,0,.25);cursor:pointer;transition:background .15s;
+}
+.switch .slider:before{
+  content:"";position:absolute;left:3px;top:3px;width:20px;height:20px;border-radius:50%;
+  background:#fff;transition:transform .15s;
+}
+.switch input:checked + .slider{background:#0067C0;}
+body.dark .switch input:checked + .slider{background:#3AA0F0;}
+.switch input:checked + .slider:before{transform:translateX(18px);}
+.switch input:focus-visible + .slider{outline:2px solid #3AA0F0;outline-offset:2px;}
+
+/* Buttons: Privacy Policy, Delete Account etc. share one style */
+.settings-action{
+  display:block;width:100%;margin-top:.6rem;padding:.7rem .8rem;
+  font:inherit;text-align:center;cursor:pointer;border-radius:10px;
+  background:transparent;color:inherit;border:1px solid rgba(0,0,0,.25);
+}
+body.dark .settings-action{border-color:rgba(255,255,255,.28);}
+.settings-action.danger{border-color:#b42318;color:#b42318;}
+body.dark .settings-action.danger{border-color:#ff8a80;color:#ff8a80;}
+
+/* Change-password form */
+.pw-form{margin-top:.6rem;}
+.pw-form input{display:block;width:100%;margin-top:.5rem;padding:.6rem .7rem;font:inherit;border-radius:8px;}
+.pw-form .pw-buttons{display:flex;gap:.6rem;margin-top:.6rem;}
+.pw-form .pw-buttons button{flex:1;margin-top:0;}
+.settings-action.primary{background:#0067C0;border-color:#0067C0;color:#fff;}
+body.dark .settings-action.primary{background:#3AA0F0;border-color:#3AA0F0;}
+
+.about-box{margin-top:.4rem;font-size:.82rem;line-height:1.5;color:#5D5D5D;}
+body.dark .about-box{color:#B8B8B8;}
+.about-box .about-name{font-weight:600;color:inherit;}
+
+.account-note{margin-top:.65rem;font-size:.78rem;color:var(--ink-soft);line-height:1.45;}
+body.dark .account-note{color:#B8B8B8;}
+#accountStatus{margin-top:.6rem;font-size:.8rem;}
+
+/* Status line pinned to the bottom of the sheet */
+.settings-status{
+  position:sticky;bottom:-1.25rem;margin:1rem -1.1rem -1.25rem;padding:.7rem 1.1rem;
+  font-size:.82rem;line-height:1.4;background:#F3F7FB;border-top:1px solid rgba(0,0,0,.08);
+  border-radius:0 0 14px 14px;
+}
+body.dark .settings-status{background:#383838;border-top-color:rgba(255,255,255,.1);}
+.settings-status:empty{display:none;}
+.settings-status.err{color:#b42318;}
+body.dark .settings-status.err{color:#ff8a80;}
+</style>
+
 </head>
 <body>
 
@@ -880,10 +995,8 @@ body.dark .brand-text #todayLabel{color:#B8B8B8}
 </div><div class="brand-text"><h1>We Save</h1><span id="todayLabel"></span></div></div>
     <div class="main-controls">
       <button type="button" class="logout-link" id="logoutBtn" data-i18n="logout">Log out</button>
-      <button class="language-toggle" id="mainLanguageBtn" type="button">CN</button>
-      <button class="theme-toggle" id="mainThemeToggleBtn" type="button" title="Switch to dark mode">
-        <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+      <button class="settings-toggle" id="settingsBtn" type="button" title="Settings" aria-label="Settings">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
       </button>
     </div>
   </div>
@@ -927,10 +1040,10 @@ body.dark .brand-text #todayLabel{color:#B8B8B8}
         </select>
       </div>
       <div>
-        <label data-i18n="who">Who</label>
-        <select id="personInput">
-          <option>Gary</option>
-          <option>Kiki</option>
+        <label data-i18n="name">Name</label>
+        <select id="personInput" required aria-label="Name">
+          <option value="Gary">Gary</option>
+          <option value="Kiki">Kiki</option>
         </select>
       </div>
       <div>
@@ -967,6 +1080,103 @@ body.dark .brand-text #todayLabel{color:#B8B8B8}
     <div class="ledger" id="ledgerList"></div>
   </div>
 
+  <div class="settings-overlay hidden" id="settingsOverlay">
+    <div class="settings-sheet" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+      <div class="settings-head">
+        <div class="settings-title" id="settingsTitle" data-i18n="settings">Settings</div>
+        <button type="button" class="settings-close" id="settingsCloseBtn" aria-label="Close">&times;</button>
+      </div>
+
+      <!-- ACCOUNT -->
+      <div class="settings-section">
+        <h3 data-i18n="secAccount">Account</h3>
+        <div class="settings-row">
+          <div class="lbl" data-i18n="signedInAs">Signed in as</div>
+          <div class="sub" id="acctEmail">—</div>
+        </div>
+        <div class="settings-row">
+          <div class="lbl" data-i18n="signInMethod">Sign-in method</div>
+          <div class="sub" id="acctMethod">—</div>
+        </div>
+        <button type="button" class="settings-action hidden" id="changePwBtn" data-i18n="changePassword">Change password</button>
+        <div class="pw-form hidden" id="pwForm">
+          <input type="password" id="pwCurrent" autocomplete="current-password" data-i18n-ph="currentPassword" placeholder="Current password">
+          <input type="password" id="pwNew" autocomplete="new-password" data-i18n-ph="newPassword" placeholder="New password (min 6 characters)">
+          <input type="password" id="pwConfirm" autocomplete="new-password" data-i18n-ph="confirmPassword" placeholder="Confirm new password">
+          <div class="pw-buttons">
+            <button type="button" class="settings-action" id="pwCancelBtn" data-i18n="cancel">Cancel</button>
+            <button type="button" class="settings-action primary" id="pwSaveBtn" data-i18n="savePassword">Update password</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- PREFERENCES -->
+      <div class="settings-section">
+        <h3 data-i18n="secPrefs">Preferences</h3>
+        <div class="settings-row">
+          <div class="lbl" data-i18n="language">Language</div>
+          <div class="seg" id="langSeg">
+            <button type="button" data-lang="en">EN</button>
+            <button type="button" data-lang="cn">中文</button>
+          </div>
+        </div>
+        <div class="settings-row">
+          <div class="lbl" data-i18n="theme">Theme</div>
+          <div class="seg" id="themeSeg">
+            <button type="button" data-theme="light" data-i18n="themeLight">Light</button>
+            <button type="button" data-theme="dark" data-i18n="themeDark">Dark</button>
+          </div>
+        </div>
+        <div class="settings-row">
+          <div class="lbl" data-i18n="currency">Currency</div>
+          <select id="currencySelect" class="settings-select"></select>
+        </div>
+        <div class="settings-hint" data-i18n="currencyNote">Only changes the symbol shown. Amounts are not converted.</div>
+        <div class="settings-row hidden" id="reminderRow">
+          <div class="lbl" data-i18n="dailyReminder">Daily reminder</div>
+          <label class="switch"><input type="checkbox" id="reminderToggle"><span class="slider"></span></label>
+        </div>
+        <div class="settings-row hidden" id="reminderTimeRow">
+          <div class="lbl" data-i18n="reminderTime">Reminder time</div>
+          <input type="time" id="reminderTime" value="20:00">
+        </div>
+      </div>
+
+      <!-- DATA -->
+      <div class="settings-section">
+        <h3 data-i18n="secData">Your data</h3>
+        <button type="button" class="settings-action" id="exportBtn" data-i18n="exportCsv">Export data (CSV)</button>
+        <button type="button" class="settings-action danger" id="clearTxBtn" data-i18n="clearTx">Clear all transactions</button>
+      </div>
+
+      <!-- SUPPORT -->
+      <div class="settings-section">
+        <h3 data-i18n="secSupport">Support</h3>
+        <button type="button" class="settings-action hidden" id="feedbackBtn" data-i18n="sendFeedback">Send feedback</button>
+        <button type="button" class="settings-action" id="rateBtn" data-i18n="rateApp">Rate We Save</button>
+      </div>
+
+      <!-- ABOUT & LEGAL -->
+      <div class="settings-section">
+        <h3 data-i18n="secAbout">About &amp; legal</h3>
+        <div class="about-box">
+          <div class="about-name">We Save</div>
+          <div data-i18n="aboutText">A simple ledger for your income, expenses and budgets.</div>
+          <div id="aboutVersion"></div>
+          <div id="aboutDev"></div>
+          <div id="aboutContact"></div>
+        </div>
+        <button type="button" class="settings-action" id="privacyPolicyBtn" data-i18n="privacyPolicy">Privacy Policy</button>
+        <button type="button" class="settings-action" id="termsBtn" data-i18n="terms">Terms of Service</button>
+        <button type="button" class="settings-action danger" id="deleteAccountBtn" data-i18n="deleteAccount">Delete Account</button>
+        <div class="account-note" data-i18n="deleteNote">Deleting your account permanently removes your We Save account and its saved transactions and budgets.</div>
+        <div id="accountStatus"></div>
+      </div>
+
+      <div class="settings-status" id="settingsStatus" role="status" aria-live="polite"></div>
+    </div>
+  </div>
+
 </div>
 
 <script>
@@ -994,15 +1204,59 @@ const I18N = {
     appTitle:'We Save',email:'Email',password:'Password',keepSigned:'Keep me signed in',forgot:'Forgot Password?',login:'Login',createAccount:'Create account',
     orContinue:'or continue with',google:'Sign in with Google',facebook:'Continue with Facebook',resetPassword:'Reset Password',sendReset:'Send Reset Email',
     backLogin:'Back to Login',logout:'Log out',balance:'Balance',inMonth:'In this month',outMonth:'Out this month',description:'Description',amount:'Amount',
-    category:'Category',who:'Who',date:'Date',addLedger:'Add to ledger',categoryBudgets:'Category budgets — this month',set:'Set',transactions:'Transactions'
+    category:'Category',who:'Who',date:'Date',addLedger:'Add to ledger',categoryBudgets:'Category budgets — this month',set:'Set',transactions:'Transactions',accountPrivacy:'Account & privacy',settings:'Settings',close:'Close',privacyPolicy:'Privacy Policy',deleteAccount:'Delete Account',deleteNote:'Deleting your account permanently removes your We Save account and its saved transactions and budgets.',deletingAccount:'Deleting account...',deleteSuccess:'Account deleted successfully.'
   },
   cn:{
     appTitle:'We Save',email:'邮箱',password:'密码',keepSigned:'保持登录资料',forgot:'忘记密码？',login:'登录',createAccount:'创建账号',
     orContinue:'或使用以下方式继续',google:'使用 Google 登录',facebook:'使用 Facebook 登录',resetPassword:'重置密码',sendReset:'发送重置邮件',
     backLogin:'返回登录',logout:'退出登录',balance:'余额',inMonth:'本月收入',outMonth:'本月支出',description:'说明',amount:'金额',
-    category:'类别',who:'人员',date:'日期',addLedger:'添加记录',categoryBudgets:'本月分类预算',set:'设置',transactions:'交易记录'
+    category:'类别',who:'人员',date:'日期',addLedger:'添加记录',categoryBudgets:'本月分类预算',set:'设置',transactions:'交易记录',accountPrivacy:'账户与隐私',settings:'设置',close:'关闭',privacyPolicy:'隐私政策',deleteAccount:'删除账户',deleteNote:'删除账户会永久删除您的 We Save 账户、交易记录和预算资料。',deletingAccount:'正在删除账户...',deleteSuccess:'账户已成功删除。'
   }
 };
+Object.assign(I18N.en, {
+  secAccount:'Account', signedInAs:'Signed in as', signInMethod:'Sign-in method', methodEmail:'Email & password',
+  changePassword:'Change password', currentPassword:'Current password', newPassword:'New password (min 6 characters)',
+  confirmPassword:'Confirm new password', savePassword:'Update password', cancel:'Cancel',
+  pwFillAll:'Please fill in all fields.', pwMismatch:'New passwords do not match.',
+  pwShort:'New password must be at least 6 characters.', pwSame:'The new password must be different from the current one.',
+  pwWrong:'Current password is incorrect.', pwUpdated:'Password updated.',
+  pwTooMany:'Too many attempts. Please try again later.', pwFailed:'Could not update password: ',
+  secPrefs:'Preferences', language:'Language', theme:'Theme', themeLight:'Light', themeDark:'Dark',
+  currency:'Currency', currencyNote:'Only changes the symbol shown. Amounts are not converted.',
+  dailyReminder:'Daily reminder', reminderTime:'Reminder time', reminderBody:"Have you logged today's spending?",
+  reminderChannel:'Daily reminder', reminderDenied:'Notifications are blocked. Allow them for We Save in your phone settings.',
+  reminderError:'Could not set the reminder.',
+  secData:'Your data', exportCsv:'Export data (CSV)', exportEmpty:'There are no transactions to export.',
+  exportFailed:'Export failed: ', exportUnavailable:'Export is not available in this build (missing app plugins).',
+  clearTx:'Clear all transactions', nothingToClear:'There are no transactions to clear.',
+  clearTxConfirm1:'Delete ALL transactions? Your account and budgets are kept. This cannot be undone.',
+  clearTxConfirm2:'Final confirmation: delete all transactions?', clearTxDone:'All transactions cleared.',
+  secSupport:'Support', sendFeedback:'Send feedback', rateApp:'Rate We Save',
+  secAbout:'About & legal', aboutText:'A simple ledger for your income, expenses and budgets.',
+  version:'Version', developer:'Developer', contact:'Contact', terms:'Terms of Service'
+});
+Object.assign(I18N.cn, {
+  secAccount:'账户', signedInAs:'当前登录', signInMethod:'登录方式', methodEmail:'邮箱和密码',
+  changePassword:'修改密码', currentPassword:'当前密码', newPassword:'新密码（至少 6 位）',
+  confirmPassword:'确认新密码', savePassword:'更新密码', cancel:'取消',
+  pwFillAll:'请填写所有栏位。', pwMismatch:'两次输入的新密码不一致。',
+  pwShort:'新密码至少需要 6 位。', pwSame:'新密码不能与当前密码相同。',
+  pwWrong:'当前密码不正确。', pwUpdated:'密码已更新。',
+  pwTooMany:'尝试次数过多，请稍后再试。', pwFailed:'无法更新密码：',
+  secPrefs:'偏好设置', language:'语言', theme:'主题', themeLight:'浅色', themeDark:'深色',
+  currency:'货币', currencyNote:'仅更改显示的货币符号，金额不会换算。',
+  dailyReminder:'每日提醒', reminderTime:'提醒时间', reminderBody:'今天记账了吗？',
+  reminderChannel:'每日提醒', reminderDenied:'通知权限已关闭，请在手机设置中为 We Save 开启通知。',
+  reminderError:'无法设置提醒。',
+  secData:'我的数据', exportCsv:'导出数据（CSV）', exportEmpty:'目前没有可导出的交易记录。',
+  exportFailed:'导出失败：', exportUnavailable:'此版本暂不支持导出（缺少应用插件）。',
+  clearTx:'清空所有交易记录', nothingToClear:'目前没有可清空的交易记录。',
+  clearTxConfirm1:'确定要删除所有交易记录吗？账户和预算会保留，此操作无法撤销。',
+  clearTxConfirm2:'最后确认：删除所有交易记录？', clearTxDone:'已清空所有交易记录。',
+  secSupport:'支持', sendFeedback:'发送反馈', rateApp:'给 We Save 评分',
+  secAbout:'关于与条款', aboutText:'简单的收支与预算记账工具。',
+  version:'版本', developer:'开发者', contact:'联系方式', terms:'使用条款'
+});
 function tr(k){ return (I18N[currentLanguage] && I18N[currentLanguage][k]) || k; }
 function applyLanguage(lang){
   currentLanguage = lang === 'cn' ? 'cn' : 'en';
@@ -1012,27 +1266,29 @@ function applyLanguage(lang){
   document.title=tr('appTitle');
   const next=currentLanguage==='en'?'CN':'EN';
   document.getElementById('authLanguageBtn').textContent=next;
-  document.getElementById('mainLanguageBtn').textContent=next;
+  const sBtn=document.getElementById('settingsBtn');
+  if(sBtn){ sBtn.title=tr('settings'); sBtn.setAttribute('aria-label',tr('settings')); }
+  const sClose=document.getElementById('settingsCloseBtn');
+  if(sClose){ sClose.setAttribute('aria-label',tr('close')); }
   updateThemeTitles();
+  if(typeof syncSettingsUI==='function') syncSettingsUI();
 }
 function updateThemeTitles(){
   const title=currentTheme==='dark'
     ? (currentLanguage==='cn'?'切换到亮色模式':'Switch to light mode')
     : (currentLanguage==='cn'?'切换到暗色模式':'Switch to dark mode');
   document.getElementById('authThemeToggleBtn').title=title;
-  document.getElementById('mainThemeToggleBtn').title=title;
 }
 function applyTheme(theme){
   currentTheme=theme==='dark'?'dark':'light';
   document.body.classList.toggle('dark',currentTheme==='dark');
   localStorage.setItem(THEME_KEY,currentTheme);
   updateThemeTitles();
+  if(typeof syncSettingsUI==='function') syncSettingsUI();
 }
 function toggleTheme(){ applyTheme(currentTheme==='dark'?'light':'dark'); }
 document.getElementById('authLanguageBtn').addEventListener('click',()=>applyLanguage(currentLanguage==='en'?'cn':'en'));
-document.getElementById('mainLanguageBtn').addEventListener('click',()=>applyLanguage(currentLanguage==='en'?'cn':'en'));
 document.getElementById('authThemeToggleBtn').addEventListener('click',toggleTheme);
-document.getElementById('mainThemeToggleBtn').addEventListener('click',toggleTheme);
 applyTheme(currentTheme);
 applyLanguage(currentLanguage);
 
@@ -1054,9 +1310,27 @@ let unsubscribeSnapshot = null;
 let currentDocRef = null;
 let suppressNextSave = false;
 
+// ---- Currency (display symbol only; amounts are never converted) ----
+const CURRENCY_KEY = 'wesaveCurrency';
+const CURRENCIES = [
+  {code:'MYR', symbol:'RM'}, {code:'SGD', symbol:'S$'}, {code:'USD', symbol:'$'},
+  {code:'CNY', symbol:'¥'},  {code:'HKD', symbol:'HK$'}, {code:'IDR', symbol:'Rp'},
+  {code:'THB', symbol:'฿'},  {code:'EUR', symbol:'€'},   {code:'GBP', symbol:'£'},
+  {code:'AUD', symbol:'A$'}
+];
+function getCurrencyCode(){
+  let c = 'MYR';
+  try{ c = localStorage.getItem(CURRENCY_KEY) || 'MYR'; }catch(e){}
+  return CURRENCIES.some(x=>x.code===c) ? c : 'MYR';
+}
+function getCurrencySymbol(){
+  const code = getCurrencyCode();
+  return CURRENCIES.find(x=>x.code===code).symbol;
+}
+
 function fmt(n){
   const sign = n < 0 ? '-' : '';
-  return sign + 'RM' + Math.abs(n).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
+  return sign + getCurrencySymbol() + Math.abs(n).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
 }
 
 document.getElementById('todayLabel').textContent = new Date().toLocaleDateString(undefined,{month:'long',day:'numeric',year:'numeric'});
@@ -1176,53 +1450,466 @@ document.getElementById('logoutBtn').addEventListener('click', ()=>{
   auth.signOut();
 });
 
-// Popups are unreliable on mobile browsers (privacy-focused browsers like
-// Brave, and mobile Safari/Chrome in general, often block the popup's
-// postMessage handshake back to this page). Use a full-page redirect on
-// mobile instead, and keep the popup on desktop where it works fine.
-function isMobileBrowser(){
-  return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+async function freshOAuthCredential(providerName){
+  const user = auth.currentUser;
+  if(!user) throw new Error('No signed-in account.');
+
+  if(isCapacitorNative()){
+    const nativeAuth = getNativeFirebaseAuth();
+    if(!nativeAuth) throw new Error('Native authentication is not available.');
+    let result;
+    if(providerName === 'google'){
+      result = await nativeAuth.signInWithGoogle({ skipNativeAuth:true, useCredentialManager:false });
+      const c = result && result.credential ? result.credential : null;
+      if(!c || (!c.idToken && !c.accessToken)) throw new Error('Google did not return a credential.');
+      return firebase.auth.GoogleAuthProvider.credential(c.idToken || null, c.accessToken || null);
+    }
+    result = await nativeAuth.signInWithFacebook({ skipNativeAuth:true });
+    const c = result && result.credential ? result.credential : null;
+    if(!c || !c.accessToken) throw new Error('Facebook did not return a credential.');
+    return firebase.auth.FacebookAuthProvider.credential(c.accessToken);
+  }
+
+  const provider = providerName === 'google'
+    ? new firebase.auth.GoogleAuthProvider()
+    : new firebase.auth.FacebookAuthProvider();
+  await user.reauthenticateWithPopup(provider);
+  return null;
 }
 
-// Clear the temporary OAuth message as soon as the browser/app becomes active again.
-// This makes Cancel / Log Out return to a clean login screen immediately.
-function clearOAuthBusyOnReturn(){
-  if(document.visibilityState === 'visible' &&
-     authStatus.textContent.startsWith('Opening ')){
+async function reauthenticateForDeletion(user){
+  const providers = (user.providerData || []).map(p=>p && p.providerId).filter(Boolean);
+  if(providers.includes('password')){
+    const password = window.prompt(currentLanguage==='cn' ? '请输入您的密码以确认删除账户：' : 'Enter your password to confirm account deletion:');
+    if(password === null) throw new Error('cancelled');
+    if(!password) throw new Error(currentLanguage==='cn' ? '需要输入密码。' : 'Password is required.');
+    const credential = firebase.auth.EmailAuthProvider.credential(user.email, password);
+    await user.reauthenticateWithCredential(credential);
+    return;
+  }
+  if(providers.includes('google.com')){
+    const credential = await freshOAuthCredential('google');
+    if(credential) await user.reauthenticateWithCredential(credential);
+    return;
+  }
+  if(providers.includes('facebook.com')){
+    const credential = await freshOAuthCredential('facebook');
+    if(credential) await user.reauthenticateWithCredential(credential);
+    return;
+  }
+  throw new Error(currentLanguage==='cn' ? '无法确认此账户的登录方式。' : 'Could not determine how to re-authenticate this account.');
+}
+
+document.getElementById('deleteAccountBtn').addEventListener('click', async ()=>{
+  const user = auth.currentUser;
+  const status = document.getElementById('accountStatus');
+  if(!user) return;
+
+  const first = window.confirm(currentLanguage==='cn'
+    ? '确定要永久删除您的 We Save 账户吗？这将删除所有交易记录和预算，且无法恢复。'
+    : 'Permanently delete your We Save account? This will remove all transactions and budgets and cannot be undone.');
+  if(!first) return;
+  const second = window.confirm(currentLanguage==='cn'
+    ? '最后确认：永久删除账户和所有已保存资料？'
+    : 'Final confirmation: permanently delete the account and all saved data?');
+  if(!second) return;
+
+  try{
+    status.textContent = tr('deletingAccount');
+    await reauthenticateForDeletion(user);
+    const uid = user.uid;
+    await db.collection('users').doc(uid).delete();
+    await user.delete();
+    localStorage.removeItem('wesaveRememberedEmail');
+    localStorage.removeItem('wesaveRememberedPassword');
+    transactions = [];
+    budgets = {};
+    status.textContent = tr('deleteSuccess');
+    window.alert(tr('deleteSuccess'));
+  }catch(err){
+    if(err && err.message === 'cancelled'){ status.textContent=''; return; }
+    console.error('Account deletion failed', err);
+    status.textContent = (currentLanguage==='cn' ? '删除失败：' : 'Deletion failed: ') + (err && err.message ? err.message : 'Unknown error');
+  }
+});
+
+// ---- Settings: account, preferences, data, support, legal ----
+// EDIT THESE before you publish:
+const APP_VERSION = '1.0';        // keep in sync with versionName in android/app/build.gradle
+const SUPPORT_EMAIL = '';         // your support email, e.g. 'support@example.com' (empty = "Send feedback" is hidden)
+const DEVELOPER_NAME = '';        // optional, shown under About
+const PLAY_STORE_ID = 'com.wellchin.wesave';
+
+const REMINDER_ON_KEY = 'wesaveReminderOn';
+const REMINDER_TIME_KEY = 'wesaveReminderTime';
+const REMINDER_ID = 1001;
+const CAT_CN_TO_EN = {'餐饮':'Food','交通':'Transport','住房':'Housing','水电杂费':'Utilities','娱乐':'Entertainment','健康':'Health','收入':'Income','其他':'Other'};
+
+const settingsOverlay = document.getElementById('settingsOverlay');
+const settingsStatus = document.getElementById('settingsStatus');
+function setSettingsStatus(text, isErr){
+  settingsStatus.textContent = text || '';
+  settingsStatus.classList.toggle('err', !!isErr);
+}
+function capPlugin(name){
+  return (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins[name]) || null;
+}
+function currentProviders(){
+  const u = auth.currentUser;
+  return u ? (u.providerData || []).map(p=>p && p.providerId).filter(Boolean) : [];
+}
+
+// Re-draws the settings controls to match the current language/theme/account.
+function syncSettingsUI(){
+  if(!window.__settingsReady) return;
+  document.querySelectorAll('#langSeg button').forEach(b=>b.classList.toggle('active', b.dataset.lang===currentLanguage));
+  document.querySelectorAll('#themeSeg button').forEach(b=>b.classList.toggle('active', b.dataset.theme===currentTheme));
+  document.querySelectorAll('[data-i18n-ph]').forEach(el=>{ el.placeholder = tr(el.dataset.i18nPh); });
+
+  const u = auth.currentUser;
+  const prov = currentProviders();
+  document.getElementById('acctEmail').textContent = u ? (u.email || u.uid) : '—';
+  document.getElementById('acctMethod').textContent =
+    prov.includes('password') ? tr('methodEmail') :
+    prov.includes('google.com') ? 'Google' :
+    prov.includes('facebook.com') ? 'Facebook' : '—';
+  document.getElementById('changePwBtn').classList.toggle('hidden', !prov.includes('password'));
+
+  document.getElementById('currencySelect').value = getCurrencyCode();
+  document.getElementById('aboutVersion').textContent = tr('version') + ' ' + APP_VERSION;
+  const dev = document.getElementById('aboutDev');
+  dev.textContent = DEVELOPER_NAME ? (tr('developer') + ': ' + DEVELOPER_NAME) : '';
+  dev.classList.toggle('hidden', !DEVELOPER_NAME);
+  const con = document.getElementById('aboutContact');
+  con.textContent = SUPPORT_EMAIL ? (tr('contact') + ': ' + SUPPORT_EMAIL) : '';
+  con.classList.toggle('hidden', !SUPPORT_EMAIL);
+  document.getElementById('feedbackBtn').classList.toggle('hidden', !SUPPORT_EMAIL);
+}
+
+function openSettings(){
+  setSettingsStatus('');
+  document.getElementById('accountStatus').textContent = '';
+  resetPasswordForm();
+  syncSettingsUI();
+  settingsOverlay.classList.remove('hidden');
+  document.body.style.overflow = 'hidden';
+  const sheet = settingsOverlay.querySelector('.settings-sheet');
+  if(sheet) sheet.scrollTop = 0;
+}
+function closeSettings(){
+  settingsOverlay.classList.add('hidden');
+  document.body.style.overflow = '';
+}
+document.getElementById('settingsBtn').addEventListener('click', openSettings);
+document.getElementById('settingsCloseBtn').addEventListener('click', closeSettings);
+settingsOverlay.addEventListener('click', e=>{ if(e.target === settingsOverlay) closeSettings(); });
+document.addEventListener('keydown', e=>{ if(e.key === 'Escape') closeSettings(); });
+
+// ---- Language / theme / currency ----
+document.querySelectorAll('#langSeg button').forEach(b=>{
+  b.addEventListener('click', ()=>{
+    applyLanguage(b.dataset.lang);
+    if(localStorage.getItem(REMINDER_ON_KEY)==='1') applyReminder().catch(()=>{});
+  });
+});
+document.querySelectorAll('#themeSeg button').forEach(b=>{
+  b.addEventListener('click', ()=> applyTheme(b.dataset.theme));
+});
+(function buildCurrencySelect(){
+  const sel = document.getElementById('currencySelect');
+  sel.innerHTML = CURRENCIES.map(c=>'<option value="'+c.code+'">'+c.symbol+'  ('+c.code+')</option>').join('');
+  sel.value = getCurrencyCode();
+  sel.addEventListener('change', ()=>{
+    try{ localStorage.setItem(CURRENCY_KEY, sel.value); }catch(e){}
+    render();
+  });
+})();
+
+// ---- Change password (email/password accounts only) ----
+function resetPasswordForm(){
+  ['pwCurrent','pwNew','pwConfirm'].forEach(id=>{ document.getElementById(id).value=''; });
+  document.getElementById('pwForm').classList.add('hidden');
+}
+document.getElementById('changePwBtn').addEventListener('click', ()=>{
+  setSettingsStatus('');
+  const form = document.getElementById('pwForm');
+  form.classList.toggle('hidden');
+  if(!form.classList.contains('hidden')) document.getElementById('pwCurrent').focus();
+});
+document.getElementById('pwCancelBtn').addEventListener('click', ()=>{ resetPasswordForm(); setSettingsStatus(''); });
+document.getElementById('pwSaveBtn').addEventListener('click', async ()=>{
+  const user = auth.currentUser;
+  if(!user || !user.email) return;
+  const cur = document.getElementById('pwCurrent').value;
+  const nw = document.getElementById('pwNew').value;
+  const cf = document.getElementById('pwConfirm').value;
+  if(!cur || !nw || !cf){ setSettingsStatus(tr('pwFillAll'), true); return; }
+  if(nw.length < 6){ setSettingsStatus(tr('pwShort'), true); return; }
+  if(nw !== cf){ setSettingsStatus(tr('pwMismatch'), true); return; }
+  if(nw === cur){ setSettingsStatus(tr('pwSame'), true); return; }
+  try{
+    const cred = firebase.auth.EmailAuthProvider.credential(user.email, cur);
+    await user.reauthenticateWithCredential(cred);
+    await user.updatePassword(nw);
+    // Keep the "Keep me signed in" auto-fill in step with the new password.
+    if(localStorage.getItem('wesaveRememberedPassword') !== null){
+      localStorage.setItem('wesaveRememberedPassword', nw);
+    }
+    resetPasswordForm();
+    setSettingsStatus(tr('pwUpdated'));
+  }catch(err){
+    const code = err && err.code;
+    if(code==='auth/wrong-password' || code==='auth/invalid-credential' || code==='auth/invalid-login-credentials'){
+      setSettingsStatus(tr('pwWrong'), true);
+    }else if(code==='auth/too-many-requests'){
+      setSettingsStatus(tr('pwTooMany'), true);
+    }else if(code==='auth/weak-password'){
+      setSettingsStatus(tr('pwShort'), true);
+    }else{
+      console.error('Password update failed', err);
+      setSettingsStatus(tr('pwFailed') + (err && err.message ? err.message : ''), true);
+    }
+  }
+});
+
+// ---- Daily reminder (Android app only; uses local notifications, no server) ----
+async function applyReminder(){
+  const LN = capPlugin('LocalNotifications');
+  if(!LN) return;
+  try{ await LN.cancel({ notifications:[{ id: REMINDER_ID }] }); }catch(e){}
+  if(localStorage.getItem(REMINDER_ON_KEY) !== '1') return;
+  const parts = (localStorage.getItem(REMINDER_TIME_KEY) || '20:00').split(':');
+  const hour = Math.min(23, Math.max(0, parseInt(parts[0],10) || 0));
+  const minute = Math.min(59, Math.max(0, parseInt(parts[1],10) || 0));
+  try{
+    await LN.createChannel({
+      id:'wesave-daily-reminder', name: tr('reminderChannel'),
+      description:'Daily reminder to log your spending', importance:3
+    });
+  }catch(e){}
+  await LN.schedule({ notifications:[{
+    id: REMINDER_ID,
+    title:'We Save',
+    body: tr('reminderBody'),
+    channelId:'wesave-daily-reminder',
+    schedule:{ on:{ hour, minute }, allowWhileIdle:true },
+    isExactNotification:false   // inexact = no special "exact alarm" permission needed
+  }]});
+}
+(function initReminderUI(){
+  const row = document.getElementById('reminderRow');
+  const timeRow = document.getElementById('reminderTimeRow');
+  const toggle = document.getElementById('reminderToggle');
+  const timeInput = document.getElementById('reminderTime');
+  if(!(isCapacitorNative() && capPlugin('LocalNotifications'))) return;   // hidden on web / if plugin missing
+  row.classList.remove('hidden');
+  const on = localStorage.getItem(REMINDER_ON_KEY) === '1';
+  toggle.checked = on;
+  timeInput.value = localStorage.getItem(REMINDER_TIME_KEY) || '20:00';
+  timeRow.classList.toggle('hidden', !on);
+
+  toggle.addEventListener('change', async ()=>{
+    setSettingsStatus('');
+    const LN = capPlugin('LocalNotifications');
+    if(toggle.checked){
+      try{
+        let p = await LN.checkPermissions();
+        if(p.display !== 'granted') p = await LN.requestPermissions();
+        if(p.display !== 'granted'){
+          toggle.checked = false;
+          setSettingsStatus(tr('reminderDenied'), true);
+          return;
+        }
+        localStorage.setItem(REMINDER_ON_KEY, '1');
+        await applyReminder();
+      }catch(err){
+        console.error('Reminder setup failed', err);
+        toggle.checked = false;
+        localStorage.removeItem(REMINDER_ON_KEY);
+        setSettingsStatus(tr('reminderError'), true);
+      }
+    }else{
+      localStorage.removeItem(REMINDER_ON_KEY);
+      try{ await applyReminder(); }catch(e){}
+    }
+    timeRow.classList.toggle('hidden', !toggle.checked);
+  });
+  timeInput.addEventListener('change', ()=>{
+    localStorage.setItem(REMINDER_TIME_KEY, timeInput.value || '20:00');
+    applyReminder().catch(err=>{ console.error(err); setSettingsStatus(tr('reminderError'), true); });
+  });
+  // Refresh the schedule at every app start (keeps the wording in the right language).
+  if(on) applyReminder().catch(()=>{});
+})();
+
+// ---- Export CSV ----
+function csvText(v){
+  let s = String(v == null ? '' : v);
+  if(/^[=+\-@\t\r]/.test(s)) s = "'" + s;   // stops spreadsheet formula injection
+  return '"' + s.replace(/"/g,'""') + '"';
+}
+function buildCsv(){
+  const rows = ['Date,Type,Category,Description,Amount (' + getCurrencyCode() + '),Name'];
+  [...transactions]
+    .sort((a,b)=> String(a.date).localeCompare(String(b.date)) || ((a.id||0)-(b.id||0)))
+    .forEach(t=>{
+      const cat = CAT_CN_TO_EN[t.category] || t.category;
+      rows.push([
+        csvText(t.date),
+        t.type === 'income' ? 'Income' : 'Expense',
+        csvText(cat),
+        csvText(t.desc),
+        (Number(t.amount) || 0).toFixed(2),
+        csvText(t.person)
+      ].join(','));
+    });
+  return '\uFEFF' + rows.join('\r\n') + '\r\n';   // BOM so Excel shows Chinese text correctly
+}
+document.getElementById('exportBtn').addEventListener('click', async ()=>{
+  if(!transactions.length){ setSettingsStatus(tr('exportEmpty'), true); return; }
+  setSettingsStatus('');
+  const csv = buildCsv();
+  const fname = 'wesave-export-' + new Date().toISOString().slice(0,10) + '.csv';
+  try{
+    if(isCapacitorNative()){
+      const FS = capPlugin('Filesystem'), SH = capPlugin('Share');
+      if(!FS || !SH){ setSettingsStatus(tr('exportUnavailable'), true); return; }
+      const res = await FS.writeFile({ path: fname, data: csv, directory:'CACHE', encoding:'utf8' });
+      await SH.share({ title:'We Save', dialogTitle: tr('exportCsv'), files:[res.uri] });
+    }else{
+      const blob = new Blob([csv], { type:'text/csv;charset=utf-8' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = fname;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(()=>URL.revokeObjectURL(a.href), 1000);
+    }
+  }catch(err){
+    if(err && /cancel/i.test(String(err.message || err))) return;   // user closed the share sheet
+    console.error('Export failed', err);
+    setSettingsStatus(tr('exportFailed') + (err && err.message ? err.message : ''), true);
+  }
+});
+
+// ---- Clear all transactions (keeps the account and budgets) ----
+document.getElementById('clearTxBtn').addEventListener('click', ()=>{
+  if(!auth.currentUser) return;
+  if(!transactions.length){ setSettingsStatus(tr('nothingToClear'), true); return; }
+  if(!window.confirm(tr('clearTxConfirm1'))) return;
+  if(!window.confirm(tr('clearTxConfirm2'))) return;
+  transactions = [];
+  saveTransactions();
+  render();
+  setSettingsStatus(tr('clearTxDone'));
+});
+
+// ---- Support ----
+document.getElementById('feedbackBtn').addEventListener('click', ()=>{
+  if(!SUPPORT_EMAIL) return;
+  const body = '\n\n---\nWe Save v' + APP_VERSION + (isCapacitorNative() ? ' (Android)' : ' (Web)');
+  window.location.href = 'mailto:' + SUPPORT_EMAIL +
+    '?subject=' + encodeURIComponent('We Save feedback') +
+    '&body=' + encodeURIComponent(body);
+});
+document.getElementById('rateBtn').addEventListener('click', ()=>{
+  const url = 'https://play.google.com/store/apps/details?id=' + PLAY_STORE_ID;
+  if(isCapacitorNative()) window.location.href = url;
+  else window.open(url, '_blank', 'noopener');
+});
+
+// ---- Legal pages (bundled with the app; "?from=app" shows a Back button on them) ----
+document.getElementById('privacyPolicyBtn').addEventListener('click', ()=>{ window.location.href = 'privacy-policy.html?from=app'; });
+document.getElementById('termsBtn').addEventListener('click', ()=>{ window.location.href = 'terms.html?from=app'; });
+
+window.__settingsReady = true;
+syncSettingsUI();
+
+// Native Android social sign-in. Capacitor uses the provider SDKs directly,
+// then the returned credential is used to sign in the Firebase JavaScript SDK.
+// This avoids signInWithRedirect() and Firebase's __/auth/handler inside WebView.
+function isCapacitorNative(){
+  return !!(window.Capacitor &&
+            typeof window.Capacitor.isNativePlatform === 'function' &&
+            window.Capacitor.isNativePlatform());
+}
+
+function getNativeFirebaseAuth(){
+  return window.Capacitor && window.Capacitor.Plugins
+    ? window.Capacitor.Plugins.FirebaseAuthentication
+    : null;
+}
+
+async function nativeSocialSignIn(providerName, label){
+  const nativeAuth = getNativeFirebaseAuth();
+  if(!nativeAuth) throw new Error('Native Firebase Authentication plugin is not available. Run npx cap sync android and rebuild the APK.');
+
+  setAuthBusy(`Opening ${label} sign-in...`);
+  try{
+    let result;
+    if(providerName === 'google'){
+      result = await nativeAuth.signInWithGoogle({ skipNativeAuth:true, useCredentialManager:false });
+    }else{
+      result = await nativeAuth.signInWithFacebook({ skipNativeAuth:true });
+    }
+
+    const c = result && result.credential ? result.credential : null;
+    if(!c) throw new Error(`${label} did not return an authentication credential.`);
+
+    let webCredential;
+    if(providerName === 'google'){
+      if(!c.idToken && !c.accessToken) throw new Error('Google did not return an ID token or access token.');
+      webCredential = firebase.auth.GoogleAuthProvider.credential(c.idToken || null, c.accessToken || null);
+    }else{
+      if(!c.accessToken) throw new Error('Facebook did not return an access token.');
+      webCredential = firebase.auth.FacebookAuthProvider.credential(c.accessToken);
+    }
+
+    await auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+    await auth.signInWithCredential(webCredential);
     setAuthBusy('');
+  }catch(err){
+    handleOAuthError(err);
   }
 }
-document.addEventListener('visibilitychange', clearOAuthBusyOnReturn);
-window.addEventListener('focus', clearOAuthBusyOnReturn);
-window.addEventListener('pageshow', clearOAuthBusyOnReturn);
 
-function startOAuthSignIn(provider, label){
+function startOAuthSignIn(providerName, label){
+  if(isCapacitorNative()){
+    nativeSocialSignIn(providerName, label);
+    return;
+  }
+
+  // Web/Desktop keep the regular Firebase popup/redirect flow.
+  const provider = providerName === 'google'
+    ? new firebase.auth.GoogleAuthProvider()
+    : new firebase.auth.FacebookAuthProvider();
   setAuthBusy(`Opening ${label} sign-in...`);
   applyPersistence().then(()=>{
-    if(isMobileBrowser()){
+    if(/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)){
       auth.signInWithRedirect(provider);
-    } else {
+    }else{
       auth.signInWithPopup(provider).catch(handleOAuthError);
     }
-  });
+  }).catch(handleOAuthError);
 }
 
 document.getElementById('googleBtn').addEventListener('click', ()=>{
-  startOAuthSignIn(new firebase.auth.GoogleAuthProvider(), 'Google');
+  startOAuthSignIn('google', 'Google');
 });
 
 document.getElementById('facebookBtn').addEventListener('click', ()=>{
-  startOAuthSignIn(new firebase.auth.FacebookAuthProvider(), 'Facebook');
+  startOAuthSignIn('facebook', 'Facebook');
 });
 
-// Handle the mobile redirect result. A cancelled/closed Facebook or Google
-// flow returns to the login screen quietly; a successful result is handled
-// by onAuthStateChanged below.
-auth.getRedirectResult()
-  .then(result => {
-    if(!result || !result.user) setAuthBusy('');
-  })
-  .catch(handleOAuthError);
+// Redirect result is only for normal browsers. Never call it in the Android WebView.
+if(!isCapacitorNative()){
+  auth.getRedirectResult()
+    .then(result => {
+      if(!result || !result.user) setAuthBusy('');
+    })
+    .catch(handleOAuthError);
+}
 
 // Keep Firebase's existing session on page reload.
 // Do NOT sign the user out automatically during startup.
@@ -1249,6 +1936,7 @@ auth.onAuthStateChanged(user=>{
       setAuthError('');
     });
   } else {
+    closeSettings();
     appScreen.classList.add('hidden');
     authScreen.classList.remove('hidden');
     currentDocRef = null;
@@ -1405,6 +2093,8 @@ if('serviceWorker' in navigator){
   });
 }
 </script>
+
+
 
 <script>
 
@@ -1694,7 +2384,7 @@ if('serviceWorker' in navigator){
     const desc = document.getElementById('descInput');
     if (desc) desc.placeholder = tr('descPlaceholder');
     const budgetAmt = document.getElementById('budgetAmt');
-    if (budgetAmt) budgetAmt.placeholder = tr('budgetPlaceholder');
+    if (budgetAmt) budgetAmt.placeholder = tr('budgetPlaceholder').replace('RM', ()=>getCurrencySymbol());
 
     const person = document.getElementById('personInput');
     if (person && person.tagName === 'INPUT') person.placeholder = tr('namePlaceholder');
