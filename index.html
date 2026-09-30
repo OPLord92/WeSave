@@ -1987,6 +1987,19 @@ auth.onAuthStateChanged(user=>{
       console.error('Firestore sync error', err);
       setAuthError('');
     });
+
+    // If the user returned from Privacy Policy / Terms, reopen Settings at About & legal.
+    const returnParams = new URLSearchParams(window.location.search);
+    if(returnParams.get('settings') === 'about'){
+      const returnLang = returnParams.get('lang');
+      if(returnLang === 'en' || returnLang === 'cn') applyLanguage(returnLang);
+      openSettings();
+      activateSettingsPane('settingsPaneAbout');
+      try{
+        const cleanUrl = window.location.pathname + window.location.hash;
+        window.history.replaceState({}, document.title, cleanUrl);
+      }catch(_e){}
+    }
   } else {
     closeSettings();
     appScreen.classList.add('hidden');
