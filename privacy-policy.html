@@ -5,7 +5,7 @@
 </style></head>
 <body><main class="card">
 <div class="legal-switch" aria-label="Language"><button type="button" data-lang-switch="en">EN</button><button type="button" data-lang-switch="cn">中文</button></div>
-<p class="backbar"><a class="backlink" href="index.html">&larr; <span data-en="Back to We Save" data-cn="返回储蓄管家">Back to We Save</span></a></p>
+<p class="backbar"><a class="backlink" id="backToSettingsLink" href="index.html?settings=about">&larr; <span data-en="Back to We Save" data-cn="返回储蓄管家">Back to We Save</span></a></p>
 <section data-page-lang="en">
 <h1>We Save Privacy Policy</h1>
 <p class="muted">Effective date: 28 September 2026</p>
@@ -53,6 +53,13 @@
     document.querySelectorAll('[data-page-lang]').forEach(el=>el.hidden=el.dataset.pageLang!==lang);
     document.querySelectorAll('[data-lang-switch]').forEach(b=>b.classList.toggle('active',b.dataset.langSwitch===lang));
     document.querySelectorAll('[data-en][data-cn]').forEach(el=>el.textContent=lang==='cn'?el.dataset.cn:el.dataset.en);
+    const backLink=document.getElementById('backToSettingsLink');
+    if(backLink){
+      const backUrl=new URL('index.html',location.href);
+      backUrl.searchParams.set('settings','about');
+      backUrl.searchParams.set('lang',lang);
+      backLink.href=backUrl.pathname.split('/').pop()+backUrl.search;
+    }
     document.querySelectorAll('[data-legal-link]').forEach(a=>{const u=new URL(a.getAttribute('href'),location.href);u.searchParams.set('lang',lang);if(q.get('from')==='app')u.searchParams.set('from','app');a.href=u.pathname.split('/').pop()+u.search;});
   }
   document.querySelectorAll('[data-lang-switch]').forEach(b=>b.addEventListener('click',()=>applyLanguage(b.dataset.langSwitch)));
