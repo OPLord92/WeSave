@@ -11,7 +11,7 @@
 <!-- iOS doesn't read the web manifest, so it needs its own tags -->
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="We Save">
+<meta id="appleAppTitle" name="apple-mobile-web-app-title" content="We Save">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
@@ -1043,7 +1043,7 @@ body.dark .settings-status.err{color:#FF9187;}
     <path d="M4 9.5h16v9.5H4zM7 9.5V7.8C7 5.7 8.7 4 10.8 4h2.4C15.3 4 17 5.7 17 7.8v1.7M8 14h8" stroke="white" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
     <circle cx="8" cy="14" r="1.15" fill="white"/><circle cx="16" cy="14" r="1.15" fill="white"/>
   </svg>
-</div><div class="brand-text"><h1>We Save</h1><span id="todayLabel"></span></div></div>
+</div><div class="brand-text"><h1 data-i18n="appTitle">We Save</h1><span id="todayLabel"></span></div></div>
     <div class="main-controls">
       <button type="button" class="logout-link" id="logoutBtn" data-i18n="logout">Log out</button>
       <button class="settings-toggle" id="settingsBtn" type="button" title="Settings" aria-label="Settings">
@@ -1148,7 +1148,7 @@ body.dark .settings-status.err{color:#FF9187;}
           <button type="button" class="settings-nav-btn" data-settings-target="settingsPaneSupport"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 12a8 8 0 0 1 16 0v4a2 2 0 0 1-2 2h-2v-6h4M4 12v6H2a2 2 0 0 1-2-2v-4h4M9 20h6"/></svg><span data-i18n="secSupport">Support</span></button>
           <button type="button" class="settings-nav-btn" data-settings-target="settingsPaneAbout"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 10v6M12 7h.01"/></svg><span data-i18n="secAbout">About &amp; legal</span></button>
         </nav>
-        <div class="settings-sidebar-footer">We Save</div>
+        <div class="settings-sidebar-footer" data-i18n="appTitle">We Save</div>
       </aside>
 
       <section class="settings-main">
@@ -1204,7 +1204,7 @@ body.dark .settings-status.err{color:#FF9187;}
           <div class="settings-pane" id="settingsPaneAbout">
             <div class="settings-pane-head"><h2 data-i18n="secAbout">About &amp; legal</h2><p data-i18n="aboutPaneDesc">App information, privacy and legal documents.</p></div>
             <div class="settings-card">
-              <div class="about-box"><div class="about-name">We Save</div><div data-i18n="aboutText">A simple ledger for your income, expenses and budgets.</div><div id="aboutVersion"></div><div id="aboutDev"></div><div id="aboutContact"></div></div>
+              <div class="about-box"><div class="about-name" data-i18n="appTitle">We Save</div><div data-i18n="aboutText">A simple ledger for your income, expenses and budgets.</div><div id="aboutVersion"></div><div id="aboutDev"></div><div id="aboutContact"></div></div>
               <div class="settings-actions-grid"><button type="button" class="settings-action" id="privacyPolicyBtn" data-i18n="privacyPolicy">Privacy Policy</button><button type="button" class="settings-action" id="termsBtn" data-i18n="terms">Terms of Service</button></div>
             </div>
           </div>
@@ -1244,10 +1244,10 @@ const I18N = {
     category:'Category',who:'Who',date:'Date',addLedger:'Add to ledger',categoryBudgets:'Category budgets — this month',set:'Set',transactions:'Transactions',accountPrivacy:'Account & privacy',settings:'Settings',close:'Close',privacyPolicy:'Privacy Policy',deleteAccount:'Delete Account',deleteNote:'Deleting your account permanently removes your We Save account and its saved transactions and budgets.',deletingAccount:'Deleting account...',deleteSuccess:'Account deleted successfully.'
   },
   cn:{
-    appTitle:'We Save',email:'邮箱',password:'密码',keepSigned:'保持登录资料',forgot:'忘记密码？',login:'登录',createAccount:'创建账号',
+    appTitle:'储蓄管家',email:'邮箱',password:'密码',keepSigned:'保持登录资料',forgot:'忘记密码？',login:'登录',createAccount:'创建账号',
     orContinue:'或使用以下方式继续',google:'使用 Google 登录',facebook:'使用 Facebook 登录',resetPassword:'重置密码',sendReset:'发送重置邮件',
     backLogin:'返回登录',logout:'退出登录',balance:'余额',inMonth:'本月收入',outMonth:'本月支出',description:'说明',amount:'金额',
-    category:'类别',who:'人员',date:'日期',addLedger:'添加记录',categoryBudgets:'本月分类预算',set:'设置',transactions:'交易记录',accountPrivacy:'账户与隐私',settings:'设置',close:'关闭',privacyPolicy:'隐私政策',deleteAccount:'删除账户',deleteNote:'删除账户会永久删除您的 We Save 账户、交易记录和预算资料。',deletingAccount:'正在删除账户...',deleteSuccess:'账户已成功删除。'
+    category:'类别',who:'人员',date:'日期',addLedger:'添加记录',categoryBudgets:'本月分类预算',set:'设置',transactions:'交易记录',accountPrivacy:'账户与隐私',settings:'设置',close:'关闭',privacyPolicy:'隐私政策',deleteAccount:'删除账户',deleteNote:'删除账户会永久删除您的储蓄管家账户、交易记录和预算资料。',deletingAccount:'正在删除账户...',deleteSuccess:'账户已成功删除。'
   }
 };
 Object.assign(I18N.en, {
@@ -1274,7 +1274,7 @@ Object.assign(I18N.en, {
   version:'Version', developer:'Developer', contact:'Contact', terms:'Terms of Service'
 });
 Object.assign(I18N.cn, {
-  settingsIntro:'管理您的账户、偏好设置、数据与隐私。', accountPaneDesc:'管理登录资料与账户安全。', accountDetails:'账户资料', dangerZone:'危险区域', prefsPaneDesc:'自定义 We Save 的外观与使用方式。', dataPaneDesc:'导出或管理保存在账户中的财务记录。', supportPaneDesc:'获取帮助或向 We Save 提供反馈。', aboutPaneDesc:'查看应用信息、隐私与法律文件。',
+  settingsIntro:'管理您的账户、偏好设置、数据与隐私。', accountPaneDesc:'管理登录资料与账户安全。', accountDetails:'账户资料', dangerZone:'危险区域', prefsPaneDesc:'自定义储蓄管家的外观与使用方式。', dataPaneDesc:'导出或管理保存在账户中的财务记录。', supportPaneDesc:'获取帮助或向储蓄管家提供反馈。', aboutPaneDesc:'查看应用信息、隐私与法律文件。',
   secAccount:'账户', signedInAs:'当前登录', signInMethod:'登录方式', methodEmail:'邮箱和密码',
   changePassword:'修改密码', currentPassword:'当前密码', newPassword:'新密码（至少 6 位）',
   confirmPassword:'确认新密码', savePassword:'更新密码', cancel:'取消',
@@ -1285,14 +1285,14 @@ Object.assign(I18N.cn, {
   secPrefs:'偏好设置', language:'语言', theme:'主题', themeLight:'浅色', themeDark:'深色',
   currency:'货币', currencyNote:'仅更改显示的货币符号，金额不会换算。',
   dailyReminder:'每日提醒', reminderTime:'提醒时间', reminderBody:'今天记账了吗？',
-  reminderChannel:'每日提醒', reminderDenied:'通知权限已关闭，请在手机设置中为 We Save 开启通知。',
+  reminderChannel:'每日提醒', reminderDenied:'通知权限已关闭，请在手机设置中为储蓄管家开启通知。',
   reminderError:'无法设置提醒。',
   secData:'我的数据', exportCsv:'导出数据（CSV）', exportEmpty:'目前没有可导出的交易记录。',
   exportFailed:'导出失败：', exportUnavailable:'此版本暂不支持导出（缺少应用插件）。',
   clearTx:'清空所有交易记录', nothingToClear:'目前没有可清空的交易记录。',
   clearTxConfirm1:'确定要删除所有交易记录吗？账户和预算会保留，此操作无法撤销。',
   clearTxConfirm2:'最后确认：删除所有交易记录？', clearTxDone:'已清空所有交易记录。',
-  secSupport:'支持', sendFeedback:'发送反馈', rateApp:'给 We Save 评分',
+  secSupport:'支持', sendFeedback:'发送反馈', rateApp:'给储蓄管家评分',
   secAbout:'关于与条款', aboutText:'简单的收支与预算记账工具。',
   version:'版本', developer:'开发者', contact:'联系方式', terms:'使用条款'
 });
@@ -1303,6 +1303,8 @@ function applyLanguage(lang){
   document.documentElement.lang = currentLanguage === 'cn' ? 'zh-CN' : 'en';
   document.querySelectorAll('[data-i18n]').forEach(el=>el.textContent=tr(el.dataset.i18n));
   document.title=tr('appTitle');
+  const appleTitle=document.getElementById('appleAppTitle');
+  if(appleTitle) appleTitle.setAttribute('content',tr('appTitle'));
   const next=currentLanguage==='en'?'CN':'EN';
   document.getElementById('authLanguageBtn').textContent=next;
   const sBtn=document.getElementById('settingsBtn');
@@ -1545,7 +1547,7 @@ document.getElementById('deleteAccountBtn').addEventListener('click', async ()=>
   if(!user) return;
 
   const first = window.confirm(currentLanguage==='cn'
-    ? '确定要永久删除您的 We Save 账户吗？这将删除所有交易记录和预算，且无法恢复。'
+    ? '确定要永久删除您的储蓄管家账户吗？这将删除所有交易记录和预算，且无法恢复。'
     : 'Permanently delete your We Save account? This will remove all transactions and budgets and cannot be undone.');
   if(!first) return;
   const second = window.confirm(currentLanguage==='cn'
@@ -1739,7 +1741,7 @@ async function applyReminder(){
   }catch(e){}
   await LN.schedule({ notifications:[{
     id: REMINDER_ID,
-    title:'We Save',
+    title:tr('appTitle'),
     body: tr('reminderBody'),
     channelId:'wesave-daily-reminder',
     schedule:{ on:{ hour, minute }, allowWhileIdle:true },
@@ -1825,7 +1827,7 @@ document.getElementById('exportBtn').addEventListener('click', async ()=>{
       const FS = capPlugin('Filesystem'), SH = capPlugin('Share');
       if(!FS || !SH){ setSettingsStatus(tr('exportUnavailable'), true); return; }
       const res = await FS.writeFile({ path: fname, data: csv, directory:'CACHE', encoding:'utf8' });
-      await SH.share({ title:'We Save', dialogTitle: tr('exportCsv'), files:[res.uri] });
+      await SH.share({ title:tr('appTitle'), dialogTitle: tr('exportCsv'), files:[res.uri] });
     }else{
       const blob = new Blob([csv], { type:'text/csv;charset=utf-8' });
       const a = document.createElement('a');
@@ -1858,9 +1860,9 @@ document.getElementById('clearTxBtn').addEventListener('click', ()=>{
 // ---- Support ----
 document.getElementById('feedbackBtn').addEventListener('click', ()=>{
   if(!SUPPORT_EMAIL) return;
-  const body = '\n\n---\nWe Save v' + APP_VERSION + (isCapacitorNative() ? ' (Android)' : ' (Web)');
+  const body = '\n\n---\n' + tr('appTitle') + ' v' + APP_VERSION + (isCapacitorNative() ? ' (Android)' : ' (Web)');
   window.location.href = 'mailto:' + SUPPORT_EMAIL +
-    '?subject=' + encodeURIComponent('We Save feedback') +
+    '?subject=' + encodeURIComponent(tr('appTitle') + (currentLanguage==='cn' ? ' 反馈' : ' feedback')) +
     '&body=' + encodeURIComponent(body);
 });
 document.getElementById('rateBtn').addEventListener('click', ()=>{
@@ -1870,8 +1872,8 @@ document.getElementById('rateBtn').addEventListener('click', ()=>{
 });
 
 // ---- Legal pages (bundled with the app; "?from=app" shows a Back button on them) ----
-document.getElementById('privacyPolicyBtn').addEventListener('click', ()=>{ window.location.href = 'privacy-policy.html?from=app'; });
-document.getElementById('termsBtn').addEventListener('click', ()=>{ window.location.href = 'terms.html?from=app'; });
+document.getElementById('privacyPolicyBtn').addEventListener('click', ()=>{ window.location.href = 'privacy-policy.html?from=app&lang=' + encodeURIComponent(currentLanguage); });
+document.getElementById('termsBtn').addEventListener('click', ()=>{ window.location.href = 'terms.html?from=app&lang=' + encodeURIComponent(currentLanguage); });
 
 window.__settingsReady = true;
 syncSettingsUI();
