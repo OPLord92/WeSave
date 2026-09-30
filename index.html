@@ -805,114 +805,153 @@ body.dark .brand-text #todayLabel{color:#B8B8B8}
 /* Settings button (header) + settings dialog */
 .masthead{flex-wrap:wrap;row-gap:.6rem;}
 .settings-toggle{
-  height:30px;width:30px;padding:0;border-radius:7px;border:1px solid var(--line);
+  height:34px;width:34px;padding:0;border-radius:10px;border:1px solid var(--line);
   background:transparent;color:var(--ink);cursor:pointer;
   display:flex;align-items:center;justify-content:center;
+  transition:background .15s ease,border-color .15s ease,transform .15s ease, box-shadow .15s ease;
 }
 .settings-toggle svg{width:16px;height:16px;}
-.settings-toggle:hover{background:var(--line-soft);}
+.settings-toggle:hover{background:var(--line-soft);transform:translateY(-1px);}
 body:not(.dark) .main-controls .settings-toggle{background:rgba(0,0,0,.035);border-color:rgba(0,0,0,.10);color:#1B1B1B;}
 body.dark .main-controls .settings-toggle{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.14);color:#F3F3F3;}
 
 .settings-overlay{
-  position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.45);
+  position:fixed;inset:0;z-index:1000;background:rgba(15,23,42,.46);
+  backdrop-filter:blur(5px);
   display:flex;align-items:center;justify-content:center;
   padding:calc(1rem + env(safe-area-inset-top,0px)) 1rem calc(1rem + env(safe-area-inset-bottom,0px));
 }
 .settings-sheet{
-  width:100%;max-width:400px;max-height:100%;overflow-y:auto;overscroll-behavior:contain;
-  border-radius:14px;padding:1.1rem 1.1rem 1.25rem;
-  background:#fff;color:#1B1B1B;border:1px solid rgba(0,0,0,.07);
-  box-shadow:0 20px 60px rgba(0,0,0,.25);
+  width:min(920px,100%);max-height:min(92vh,920px);overflow-y:auto;overscroll-behavior:contain;
+  border-radius:22px;padding:0;
+  background:#F8FAFC;color:#102033;border:1px solid rgba(15,23,42,.08);
+  box-shadow:0 24px 80px rgba(2,8,23,.22);
 }
-body.dark .settings-sheet{background:#2D2D2D;color:#F3F3F3;border-color:rgba(255,255,255,.09);}
-.settings-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:.2rem;}
-.settings-title{font-family:'Source Serif 4',serif;font-weight:600;font-size:1.2rem;}
+body.dark .settings-sheet{background:#0F172A;color:#E5EDF8;border-color:rgba(255,255,255,.10);box-shadow:0 28px 90px rgba(0,0,0,.45);}
+.settings-head{
+  position:sticky;top:0;z-index:2;display:flex;align-items:center;justify-content:space-between;
+  padding:1.2rem 1.35rem;border-bottom:1px solid rgba(15,23,42,.08);
+  background:rgba(248,250,252,.94);backdrop-filter:blur(8px);
+}
+body.dark .settings-head{background:rgba(15,23,42,.94);border-bottom-color:rgba(255,255,255,.10);}
+.settings-title{font-family:'Source Serif 4',serif;font-weight:650;font-size:1.35rem;letter-spacing:.01em;}
 .settings-close{
-  background:none;border:none;color:inherit;font-size:1.6rem;line-height:1;
-  cursor:pointer;padding:0 .25rem;opacity:.7;
+  height:36px;width:36px;border-radius:999px;border:1px solid rgba(15,23,42,.10);
+  background:#fff;color:inherit;font-size:1.35rem;line-height:1;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;opacity:.9;
 }
-.settings-close:hover{opacity:1;}
-
-.settings-section{margin-top:1.15rem;}
+.settings-close:hover{opacity:1;background:#F1F5F9;}
+body.dark .settings-close{background:#111B31;border-color:rgba(255,255,255,.12);}
+body.dark .settings-close:hover{background:#17233B;}
+.settings-subtitle{padding:0 1.35rem .9rem;margin:0;font-size:.92rem;line-height:1.45;color:#536273;}
+body.dark .settings-subtitle{color:#A4B1C3;}
+.settings-grid{
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem;
+  padding:0 1.35rem 1.35rem;
+}
+.settings-section{
+  margin:0;padding:1rem 1rem 1.05rem;border-radius:18px;border:1px solid rgba(15,23,42,.08);
+  background:#FFFFFF;
+  box-shadow:0 10px 26px rgba(15,23,42,.06);
+}
+body.dark .settings-section{background:#111B31;border-color:rgba(255,255,255,.08);box-shadow:none;}
+.settings-section.wide{grid-column:1/-1;}
 .settings-section h3{
-  margin:0 0 .3rem;font-family:'Inter',sans-serif;font-size:.7rem;font-weight:600;
-  letter-spacing:.08em;text-transform:uppercase;color:#5D5D5D;
+  margin:0 0 .85rem;font-family:'Inter',sans-serif;font-size:.75rem;font-weight:700;
+  letter-spacing:.1em;text-transform:uppercase;color:#64748B;
 }
-body.dark .settings-section h3{color:#B8B8B8;}
+body.dark .settings-section h3{color:#94A3B8;}
 .settings-row{
-  display:flex;align-items:center;justify-content:space-between;gap:.75rem;
-  padding:.55rem 0;border-bottom:1px solid rgba(0,0,0,.07);min-height:44px;
+  display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;
+  padding:.82rem 0;border-bottom:1px solid rgba(15,23,42,.08);min-height:48px;
 }
-body.dark .settings-row{border-bottom-color:rgba(255,255,255,.09);}
-.settings-row .lbl{font-size:.9rem;}
-.settings-row .sub{font-size:.8rem;color:#5D5D5D;text-align:right;word-break:break-all;}
-body.dark .settings-row .sub{color:#B8B8B8;}
-.settings-hint{margin:.4rem 0 0;font-size:.75rem;line-height:1.4;color:#5D5D5D;}
-body.dark .settings-hint{color:#B8B8B8;}
-
-/* Segmented control (Language / Theme) */
-.seg{display:inline-flex;border:1px solid rgba(0,0,0,.18);border-radius:8px;overflow:hidden;flex:none;}
-body.dark .seg{border-color:rgba(255,255,255,.22);}
+.settings-row:last-of-type{border-bottom:none;}
+body.dark .settings-row{border-bottom-color:rgba(255,255,255,.08);}
+.settings-row .lbl{font-size:.95rem;font-weight:600;color:inherit;}
+.settings-row .sub{font-size:.9rem;color:#475569;text-align:right;word-break:break-word;max-width:58%;}
+body.dark .settings-row .sub{color:#B7C3D4;}
+.settings-hint{margin:.5rem 0 0;font-size:.8rem;line-height:1.45;color:#64748B;}
+body.dark .settings-hint{color:#94A3B8;}
+.seg{
+  display:inline-flex;border:1px solid rgba(15,23,42,.12);border-radius:12px;overflow:hidden;flex:none;
+  background:#F8FAFC;box-shadow:inset 0 1px 0 rgba(255,255,255,.75);
+}
+body.dark .seg{border-color:rgba(255,255,255,.18);background:#0B1222;box-shadow:none;}
 .seg button{
-  border:0;background:transparent;color:inherit;padding:.4rem .8rem;
-  font:inherit;font-size:.82rem;cursor:pointer;min-width:58px;
+  border:0;background:transparent;color:inherit;padding:.48rem .95rem;
+  font:inherit;font-size:.84rem;cursor:pointer;min-width:62px;font-weight:600;
 }
-.seg button.active{background:#0067C0;color:#fff;}
-body.dark .seg button.active{background:#3AA0F0;}
-.settings-select{max-width:170px;font:inherit;font-size:.85rem;}
-
-/* Switch */
-.switch{position:relative;display:inline-block;width:44px;height:26px;flex:none;}
+.seg button.active{background:#0067C0;color:#fff;box-shadow:0 6px 16px rgba(0,103,192,.22);}
+body.dark .seg button.active{background:#3AA0F0;box-shadow:none;}
+.settings-select,.settings-row input[type="time"]{
+  max-width:180px;font:inherit;font-size:.88rem;border-radius:10px;
+  border:1px solid rgba(15,23,42,.16);background:#fff;color:inherit;padding:.55rem .75rem;
+}
+body.dark .settings-select,body.dark .settings-row input[type="time"]{background:#0B1222;border-color:rgba(255,255,255,.14);color:#E5EDF8;}
+.switch{position:relative;display:inline-block;width:50px;height:28px;flex:none;}
 .switch input{opacity:0;width:0;height:0;position:absolute;}
 .switch .slider{
-  position:absolute;inset:0;border-radius:26px;background:rgba(0,0,0,.25);cursor:pointer;transition:background .15s;
+  position:absolute;inset:0;border-radius:999px;background:rgba(100,116,139,.35);cursor:pointer;transition:background .15s;
 }
 .switch .slider:before{
-  content:"";position:absolute;left:3px;top:3px;width:20px;height:20px;border-radius:50%;
-  background:#fff;transition:transform .15s;
+  content:"";position:absolute;left:4px;top:4px;width:20px;height:20px;border-radius:50%;
+  background:#fff;transition:transform .15s;box-shadow:0 2px 6px rgba(0,0,0,.15);
 }
 .switch input:checked + .slider{background:#0067C0;}
 body.dark .switch input:checked + .slider{background:#3AA0F0;}
-.switch input:checked + .slider:before{transform:translateX(18px);}
+.switch input:checked + .slider:before{transform:translateX(22px);}
 .switch input:focus-visible + .slider{outline:2px solid #3AA0F0;outline-offset:2px;}
-
-/* Buttons: Privacy Policy, Delete Account etc. share one style */
 .settings-action{
-  display:block;width:100%;margin-top:.6rem;padding:.7rem .8rem;
-  font:inherit;text-align:center;cursor:pointer;border-radius:10px;
-  background:transparent;color:inherit;border:1px solid rgba(0,0,0,.25);
+  display:block;width:100%;margin-top:.75rem;padding:.82rem .95rem;
+  font:inherit;font-weight:600;text-align:center;cursor:pointer;border-radius:12px;
+  background:#fff;color:inherit;border:1px solid rgba(15,23,42,.14);
+  transition:transform .15s ease, background .15s ease, border-color .15s ease, box-shadow .15s ease;
 }
-body.dark .settings-action{border-color:rgba(255,255,255,.28);}
-.settings-action.danger{border-color:#b42318;color:#b42318;}
-body.dark .settings-action.danger{border-color:#ff8a80;color:#ff8a80;}
-
-/* Change-password form */
-.pw-form{margin-top:.6rem;}
-.pw-form input{display:block;width:100%;margin-top:.5rem;padding:.6rem .7rem;font:inherit;border-radius:8px;}
-.pw-form .pw-buttons{display:flex;gap:.6rem;margin-top:.6rem;}
-.pw-form .pw-buttons button{flex:1;margin-top:0;}
+.settings-action:hover{transform:translateY(-1px);background:#F8FAFC;box-shadow:0 10px 22px rgba(15,23,42,.08);}
+body.dark .settings-action{background:#0B1222;border-color:rgba(255,255,255,.14);}
+body.dark .settings-action:hover{background:#111A2C;box-shadow:none;}
+.settings-action.danger{border-color:#f1b4b0;color:#b42318;background:#fff7f7;}
+.settings-action.danger:hover{background:#fff1f1;}
+body.dark .settings-action.danger{border-color:rgba(255,138,128,.35);color:#ff8a80;background:rgba(141,24,18,.12);}
+body.dark .settings-action.danger:hover{background:rgba(141,24,18,.18);}
 .settings-action.primary{background:#0067C0;border-color:#0067C0;color:#fff;}
-body.dark .settings-action.primary{background:#3AA0F0;border-color:#3AA0F0;}
-
-.about-box{margin-top:.4rem;font-size:.82rem;line-height:1.5;color:#5D5D5D;}
-body.dark .about-box{color:#B8B8B8;}
-.about-box .about-name{font-weight:600;color:inherit;}
-
-.account-note{margin-top:.65rem;font-size:.78rem;color:var(--ink-soft);line-height:1.45;}
-body.dark .account-note{color:#B8B8B8;}
-#accountStatus{margin-top:.6rem;font-size:.8rem;}
-
-/* Status line pinned to the bottom of the sheet */
+.settings-action.primary:hover{background:#0057A4;border-color:#0057A4;}
+body.dark .settings-action.primary{background:#3AA0F0;border-color:#3AA0F0;color:#07111F;}
+body.dark .settings-action.primary:hover{background:#63B5F6;border-color:#63B5F6;}
+.pw-form{margin-top:.7rem;padding-top:.15rem;}
+.pw-form input{display:block;width:100%;margin-top:.55rem;padding:.74rem .85rem;font:inherit;border-radius:10px;border:1px solid rgba(15,23,42,.16);background:#fff;color:inherit;}
+body.dark .pw-form input{background:#0B1222;border-color:rgba(255,255,255,.14);color:#E5EDF8;}
+.pw-form .pw-buttons{display:flex;gap:.65rem;margin-top:.7rem;}
+.pw-form .pw-buttons button{flex:1;margin-top:0;}
+.about-box{margin-top:.1rem;font-size:.88rem;line-height:1.6;color:#536273;}
+body.dark .about-box{color:#A4B1C3;}
+.about-box .about-name{font-size:1.02rem;font-weight:700;color:inherit;margin-bottom:.15rem;}
+.account-note{margin-top:.75rem;font-size:.82rem;color:var(--ink-soft);line-height:1.45;max-width:58ch;}
+body.dark .account-note{color:#A4B1C3;}
+#accountStatus{margin-top:.65rem;font-size:.85rem;}
 .settings-status{
-  position:sticky;bottom:-1.25rem;margin:1rem -1.1rem -1.25rem;padding:.7rem 1.1rem;
-  font-size:.82rem;line-height:1.4;background:#F3F7FB;border-top:1px solid rgba(0,0,0,.08);
-  border-radius:0 0 14px 14px;
+  position:sticky;bottom:0;z-index:1;margin:0;padding:.9rem 1.35rem;
+  font-size:.85rem;line-height:1.45;background:#EFF6FF;border-top:1px solid rgba(15,23,42,.08);
 }
-body.dark .settings-status{background:#383838;border-top-color:rgba(255,255,255,.1);}
+body.dark .settings-status{background:#0B1326;border-top-color:rgba(255,255,255,.10);}
 .settings-status:empty{display:none;}
 .settings-status.err{color:#b42318;}
 body.dark .settings-status.err{color:#ff8a80;}
+@media (max-width: 860px){
+  .settings-sheet{width:min(680px,100%);}
+  .settings-grid{grid-template-columns:1fr;}
+  .settings-section.wide{grid-column:auto;}
+}
+@media (max-width: 560px){
+  .settings-overlay{padding:.75rem;}
+  .settings-head{padding:1rem 1rem .95rem;}
+  .settings-subtitle{padding:0 1rem .75rem;}
+  .settings-grid{padding:0 1rem 1rem;gap:.85rem;}
+  .settings-section{padding:.9rem .9rem .95rem;border-radius:16px;}
+  .settings-row{align-items:center;gap:.75rem;}
+  .settings-row .sub{max-width:52%;font-size:.86rem;}
+  .settings-close{height:34px;width:34px;}
+}
 </style>
 
 </head>
@@ -1086,91 +1125,94 @@ body.dark .settings-status.err{color:#ff8a80;}
         <div class="settings-title" id="settingsTitle" data-i18n="settings">Settings</div>
         <button type="button" class="settings-close" id="settingsCloseBtn" aria-label="Close">&times;</button>
       </div>
+      <p class="settings-subtitle">Manage your account, preferences, and privacy settings.</p>
 
-      <!-- ACCOUNT -->
-      <div class="settings-section">
-        <h3 data-i18n="secAccount">Account</h3>
-        <div class="settings-row">
-          <div class="lbl" data-i18n="signedInAs">Signed in as</div>
-          <div class="sub" id="acctEmail">—</div>
-        </div>
-        <div class="settings-row">
-          <div class="lbl" data-i18n="signInMethod">Sign-in method</div>
-          <div class="sub" id="acctMethod">—</div>
-        </div>
-        <button type="button" class="settings-action hidden" id="changePwBtn" data-i18n="changePassword">Change password</button>
-        <div class="pw-form hidden" id="pwForm">
-          <input type="password" id="pwCurrent" autocomplete="current-password" data-i18n-ph="currentPassword" placeholder="Current password">
-          <input type="password" id="pwNew" autocomplete="new-password" data-i18n-ph="newPassword" placeholder="New password (min 6 characters)">
-          <input type="password" id="pwConfirm" autocomplete="new-password" data-i18n-ph="confirmPassword" placeholder="Confirm new password">
-          <div class="pw-buttons">
-            <button type="button" class="settings-action" id="pwCancelBtn" data-i18n="cancel">Cancel</button>
-            <button type="button" class="settings-action primary" id="pwSaveBtn" data-i18n="savePassword">Update password</button>
+      <div class="settings-grid">
+        <!-- ACCOUNT -->
+        <div class="settings-section">
+          <h3 data-i18n="secAccount">Account</h3>
+          <div class="settings-row">
+            <div class="lbl" data-i18n="signedInAs">Signed in as</div>
+            <div class="sub" id="acctEmail">—</div>
+          </div>
+          <div class="settings-row">
+            <div class="lbl" data-i18n="signInMethod">Sign-in method</div>
+            <div class="sub" id="acctMethod">—</div>
+          </div>
+          <button type="button" class="settings-action hidden" id="changePwBtn" data-i18n="changePassword">Change password</button>
+          <div class="pw-form hidden" id="pwForm">
+            <input type="password" id="pwCurrent" autocomplete="current-password" data-i18n-ph="currentPassword" placeholder="Current password">
+            <input type="password" id="pwNew" autocomplete="new-password" data-i18n-ph="newPassword" placeholder="New password (min 6 characters)">
+            <input type="password" id="pwConfirm" autocomplete="new-password" data-i18n-ph="confirmPassword" placeholder="Confirm new password">
+            <div class="pw-buttons">
+              <button type="button" class="settings-action" id="pwCancelBtn" data-i18n="cancel">Cancel</button>
+              <button type="button" class="settings-action primary" id="pwSaveBtn" data-i18n="savePassword">Update password</button>
+            </div>
           </div>
         </div>
-      </div>
 
-      <!-- PREFERENCES -->
-      <div class="settings-section">
-        <h3 data-i18n="secPrefs">Preferences</h3>
-        <div class="settings-row">
-          <div class="lbl" data-i18n="language">Language</div>
-          <div class="seg" id="langSeg">
-            <button type="button" data-lang="en">EN</button>
-            <button type="button" data-lang="cn">中文</button>
+        <!-- PREFERENCES -->
+        <div class="settings-section">
+          <h3 data-i18n="secPrefs">Preferences</h3>
+          <div class="settings-row">
+            <div class="lbl" data-i18n="language">Language</div>
+            <div class="seg" id="langSeg">
+              <button type="button" data-lang="en">EN</button>
+              <button type="button" data-lang="cn">中文</button>
+            </div>
+          </div>
+          <div class="settings-row">
+            <div class="lbl" data-i18n="theme">Theme</div>
+            <div class="seg" id="themeSeg">
+              <button type="button" data-theme="light" data-i18n="themeLight">Light</button>
+              <button type="button" data-theme="dark" data-i18n="themeDark">Dark</button>
+            </div>
+          </div>
+          <div class="settings-row">
+            <div class="lbl" data-i18n="currency">Currency</div>
+            <select id="currencySelect" class="settings-select"></select>
+          </div>
+          <div class="settings-hint" data-i18n="currencyNote">Only changes the symbol shown. Amounts are not converted.</div>
+          <div class="settings-row hidden" id="reminderRow">
+            <div class="lbl" data-i18n="dailyReminder">Daily reminder</div>
+            <label class="switch"><input type="checkbox" id="reminderToggle"><span class="slider"></span></label>
+          </div>
+          <div class="settings-row hidden" id="reminderTimeRow">
+            <div class="lbl" data-i18n="reminderTime">Reminder time</div>
+            <input type="time" id="reminderTime" value="20:00">
           </div>
         </div>
-        <div class="settings-row">
-          <div class="lbl" data-i18n="theme">Theme</div>
-          <div class="seg" id="themeSeg">
-            <button type="button" data-theme="light" data-i18n="themeLight">Light</button>
-            <button type="button" data-theme="dark" data-i18n="themeDark">Dark</button>
+
+        <!-- DATA -->
+        <div class="settings-section">
+          <h3 data-i18n="secData">Your data</h3>
+          <button type="button" class="settings-action" id="exportBtn" data-i18n="exportCsv">Export data (CSV)</button>
+          <button type="button" class="settings-action danger" id="clearTxBtn" data-i18n="clearTx">Clear all transactions</button>
+        </div>
+
+        <!-- SUPPORT -->
+        <div class="settings-section">
+          <h3 data-i18n="secSupport">Support</h3>
+          <button type="button" class="settings-action hidden" id="feedbackBtn" data-i18n="sendFeedback">Send feedback</button>
+          <button type="button" class="settings-action" id="rateBtn" data-i18n="rateApp">Rate We Save</button>
+        </div>
+
+        <!-- ABOUT & LEGAL -->
+        <div class="settings-section wide">
+          <h3 data-i18n="secAbout">About &amp; legal</h3>
+          <div class="about-box">
+            <div class="about-name">We Save</div>
+            <div data-i18n="aboutText">A simple ledger for your income, expenses and budgets.</div>
+            <div id="aboutVersion"></div>
+            <div id="aboutDev"></div>
+            <div id="aboutContact"></div>
           </div>
+          <button type="button" class="settings-action" id="privacyPolicyBtn" data-i18n="privacyPolicy">Privacy Policy</button>
+          <button type="button" class="settings-action" id="termsBtn" data-i18n="terms">Terms of Service</button>
+          <button type="button" class="settings-action danger" id="deleteAccountBtn" data-i18n="deleteAccount">Delete Account</button>
+          <div class="account-note" data-i18n="deleteNote">Deleting your account permanently removes your We Save account and its saved transactions and budgets.</div>
+          <div id="accountStatus"></div>
         </div>
-        <div class="settings-row">
-          <div class="lbl" data-i18n="currency">Currency</div>
-          <select id="currencySelect" class="settings-select"></select>
-        </div>
-        <div class="settings-hint" data-i18n="currencyNote">Only changes the symbol shown. Amounts are not converted.</div>
-        <div class="settings-row hidden" id="reminderRow">
-          <div class="lbl" data-i18n="dailyReminder">Daily reminder</div>
-          <label class="switch"><input type="checkbox" id="reminderToggle"><span class="slider"></span></label>
-        </div>
-        <div class="settings-row hidden" id="reminderTimeRow">
-          <div class="lbl" data-i18n="reminderTime">Reminder time</div>
-          <input type="time" id="reminderTime" value="20:00">
-        </div>
-      </div>
-
-      <!-- DATA -->
-      <div class="settings-section">
-        <h3 data-i18n="secData">Your data</h3>
-        <button type="button" class="settings-action" id="exportBtn" data-i18n="exportCsv">Export data (CSV)</button>
-        <button type="button" class="settings-action danger" id="clearTxBtn" data-i18n="clearTx">Clear all transactions</button>
-      </div>
-
-      <!-- SUPPORT -->
-      <div class="settings-section">
-        <h3 data-i18n="secSupport">Support</h3>
-        <button type="button" class="settings-action hidden" id="feedbackBtn" data-i18n="sendFeedback">Send feedback</button>
-        <button type="button" class="settings-action" id="rateBtn" data-i18n="rateApp">Rate We Save</button>
-      </div>
-
-      <!-- ABOUT & LEGAL -->
-      <div class="settings-section">
-        <h3 data-i18n="secAbout">About &amp; legal</h3>
-        <div class="about-box">
-          <div class="about-name">We Save</div>
-          <div data-i18n="aboutText">A simple ledger for your income, expenses and budgets.</div>
-          <div id="aboutVersion"></div>
-          <div id="aboutDev"></div>
-          <div id="aboutContact"></div>
-        </div>
-        <button type="button" class="settings-action" id="privacyPolicyBtn" data-i18n="privacyPolicy">Privacy Policy</button>
-        <button type="button" class="settings-action" id="termsBtn" data-i18n="terms">Terms of Service</button>
-        <button type="button" class="settings-action danger" id="deleteAccountBtn" data-i18n="deleteAccount">Delete Account</button>
-        <div class="account-note" data-i18n="deleteNote">Deleting your account permanently removes your We Save account and its saved transactions and budgets.</div>
-        <div id="accountStatus"></div>
       </div>
 
       <div class="settings-status" id="settingsStatus" role="status" aria-live="polite"></div>
