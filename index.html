@@ -3,6 +3,23 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+
+<!-- Prevent the login screen from flashing when returning from legal pages. -->
+<script>
+(function(){
+  try{
+    const p = new URLSearchParams(window.location.search);
+    if(p.get('settings') === 'about'){
+      const root = document.documentElement;
+      root.classList.add('returning-settings');
+      root.style.background = localStorage.getItem('wesaveTheme') === 'dark' ? '#0F172A' : '#F8FAFC';
+    }
+  }catch(_e){}
+})();
+</script>
+<style>
+html.returning-settings body{visibility:hidden !important;}
+</style>
 <title>We Save</title>
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#1E2A22">
@@ -1989,8 +2006,10 @@ auth.onAuthStateChanged(user=>{
     });
 
     // If the user returned from Privacy Policy / Terms, reopen Settings at About & legal.
+    // The page is kept invisible until this is ready, preventing a login-page flash.
     const returnParams = new URLSearchParams(window.location.search);
-    if(returnParams.get('settings') === 'about'){
+    const returningToAbout = returnParams.get('settings') === 'about';
+    if(returningToAbout){
       const returnLang = returnParams.get('lang');
       if(returnLang === 'en' || returnLang === 'cn') applyLanguage(returnLang);
       openSettings();
@@ -1999,10 +2018,19 @@ auth.onAuthStateChanged(user=>{
         const cleanUrl = window.location.pathname + window.location.hash;
         window.history.replaceState({}, document.title, cleanUrl);
       }catch(_e){}
+      requestAnimationFrame(()=>{
+        document.documentElement.classList.remove('returning-settings');
+        document.documentElement.style.background = '';
+      });
+    } else {
+      document.documentElement.classList.remove('returning-settings');
+      document.documentElement.style.background = '';
     }
   } else {
     closeSettings();
     appScreen.classList.add('hidden');
+    document.documentElement.classList.remove('returning-settings');
+    document.documentElement.style.background = '';
     authScreen.classList.remove('hidden');
     currentDocRef = null;
     transactions = [];
